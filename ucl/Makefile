@@ -1,0 +1,26 @@
+C_SRC       = alloc.c ast.c decl.c declchk.c emit.c \
+              error.c expr.c exprchk.c gen.c \
+              input.c lex.c output.c reg.c stmt.c \
+              stmtchk.c str.c symbol.c tranexpr.c transtmt.c  \
+              ucl.c vector.c x86.c x86linux.c
+OBJS        = $(C_SRC:.c=.o)
+CC          = gcc -m32
+CFLAGS      = -g -D_UCC
+UCC         = ../driver/ucc
+
+all: $(OBJS)
+	$(CC) -o ucl $(CFLAGS) $(OBJS)
+
+clean:
+	rm -f *.o ucl
+
+test: $(C_SRC)
+	$(UCC) -o ucl1 $(C_SRC)
+	mv $(UCCDIR)/ucl $(UCCDIR)/ucl.bak
+	cp ucl1 $(UCCDIR)/ucl
+	$(UCC) -o ucl2 $(C_SRC)
+	mv $(UCCDIR)/ucl.bak $(UCCDIR)/ucl
+	strip ucl1 ucl2
+	cmp -l ucl1 ucl2
+	rm ucl1 ucl2
+

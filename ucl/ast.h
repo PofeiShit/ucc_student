@@ -1,0 +1,39 @@
+#ifndef __AST_H_
+#define __AST_H_
+
+
+enum nodeKind 
+{ 
+	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_Function, NK_Declaration,
+	NK_FunctionDeclarator, NK_Expression, 
+    NK_NameDeclarator,
+	NK_ExpressionStatement, NK_CompoundStatement,
+};
+typedef struct astExpression *AstExpression;
+typedef struct astStatement *AstStatement;
+typedef struct astDeclaration *AstDeclaration;
+typedef struct astTranslationUnit *AstTranslationUnit;
+
+#define AST_NODE_COMMON   \
+    int kind;             \
+    struct astNode *next; 
+
+typedef struct astNode
+{
+	AST_NODE_COMMON
+} *AstNode;
+
+#define CREATE_AST_NODE(p, k) \
+    CALLOC(p);                \
+    p->kind = NK_##k;         
+
+#define NEXT_TOKEN  CurrentToken = GetNextToken();
+
+extern int CurFileLineNo;
+extern const char *CurFileName;
+void Do_Expect(int tok);
+#define Expect CurFileName = __FILE__, CurFileLineNo = __LINE__, Do_Expect
+
+extern int CurrentToken;
+
+#endif
