@@ -28,18 +28,8 @@ struct bblock
 	struct bblock *prev;
 	struct bblock *next;
 	Symbol sym;
-	// successors
-	CFGEdge succs;
-	// predecessors
-	CFGEdge preds;
 	struct irinst insth;
-	// number of instructions
 	int ninst;
-	// number of successors
-	int nsucc;
-	// number of predecessors
-	int npred;
-	int ref;
 };
 
 typedef struct ilarg

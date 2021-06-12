@@ -1,37 +1,6 @@
 #include "ucl.h"
 #include "ast.h"
 #include "decl.h"
-/**
- *  declaration-specifiers:
- *		storage-class-specifier [declaration-specifiers]
- *		type-specifier [declaration-specifiers]
- *		type-qualifier [declaration-specifiers]
- *
- *  storage-class-specifier:
- *		auto
- *		register
- *		static
- *		extern
- *		typedef
- *
- *  type-qualifier:
- *		const
- *		volatile
- *
- *  type-specifier:
- *		void
- *		char
- *		short
- *		int
- *		long
- *		float
- *		double
- *		signed
- *		unsigned
- *		struct-or-union-specifier
- *		enum-specifier
- *		typedef-name
- */
 static AstSpecifiers ParseDeclarationSpecifiers(void)
 {
 	AstSpecifiers specs;
