@@ -43,7 +43,7 @@ type struct astNode
 ```
 2. 语法就只保留函数相关的声明,语句,表达式
 
-![image](parse.jpg)
+![image](./img/parse.jpg)
 ```
 标注黄色颜色的就是例子语法分析后所在的节点，fsym成员在之后会使用，在这里AstFunction的成员fdec和dec指向同一个(感觉可以再抛弃一个)
 ```
@@ -51,7 +51,7 @@ type struct astNode
 1. 这部分代码主要是declchk.c，stmtchk.c，exprechk.c以及symbol.c
 2. 语义分析就是添加函数符号和字符串符合，其他的功能就都删除了
 函数符号结构体的成员变量在中间代码会被赋值，可以看中间代码节的图
-![image](semantic.jpg)
+![image](./img/semantic.jpg)
 
 3. 蓝色是语义分析的结果，可以看到之前语法分析的表达式叶子节点的val成员是指向具体的字符串，在语义分析阶段，val成员指向符号，该符号保存字符串,使用Strings字符串符号表保存符号(语法树和符号表都会指向符号)
 4. checkdeclarator把AstFunctionDeclarator的id成员赋值
@@ -82,7 +82,7 @@ AddressOf->TryAddValue->GenerateAssign(t:temp, op:ADDR, src1:hello world, src2:N
 ```
 之后再生成函数调用的中间代码GenerateFunctionCall(recv:NULL, faddr:puts, args:hello world);
 ```
-![image](translate.jpg)
+![image](./img/translate.jpg)
 ```
 红色为中间代码生成部分生成的,CFG部分直接抛弃，optimize也抛弃，相对于UCC这里就多了BB1的label。PS:CALL对应的IRinst的opds[2]应该指向t0符号，在汇编代码生成的图已经补充上
 IRinst双向链表用来保存每个BBlock的中间指令
@@ -189,7 +189,7 @@ static void EmitBBlock(BBlock bb)
     addl $4, %esp
 ```
 
-![image](emit.jpg)
+![image](./img/emit.jpg)
 
 
 
