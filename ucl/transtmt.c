@@ -27,10 +27,21 @@ static void TranslateCompoundStatement(AstStatement stmt)
 		p = p->next;
 	}
 }
+static void TranslateRetrunStatement(AstStatement stmt)
+{
+	AstReturnStatement retStmt = AsRet(stmt);
+
+	if (retStmt->expr) {
+		GenerateReturn(/*ty,*/TranslateExpression(retStmt->expr));
+	}
+	GenerateJump(FSYM->exitBB);
+	StartBBlock(CreateBBlock());
+}
 
 static void (* StmtTrans[])(AstStatement) = 
 {
 	TranslateExpressionStatement,
+	TranslateRetrunStatement,
 	TranslateCompoundStatement,
 };
 

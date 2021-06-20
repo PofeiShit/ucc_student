@@ -12,6 +12,12 @@ typedef struct astExpressionStatement
 	AstExpression expr;
 } *AstExpressionStatement;
 
+typedef struct astReturnStatement
+{
+	AST_STATEMENT_COMMON
+	AstExpression expr;
+} *AstReturnStatement;
+
 typedef struct astCompoundStatement
 {
 	AST_STATEMENT_COMMON
@@ -22,5 +28,6 @@ typedef struct astCompoundStatement
 } *AstCompoundStatement;
 #define AsExpr(stmt) ((AstExpressionStatement)stmt)
 #define AsComp(stmt) ((AstCompoundStatement)stmt)
+#define AsRet(stmt) ((AstReturnStatement)stmt)
 AstStatement CheckCompoundStatement(AstStatement stmt);
 #endif

@@ -8,6 +8,8 @@
  */
 static Symbol TranslatePrimaryExpression(AstExpression expr)
 {
+	if (expr->op == OP_CONST)
+		return AddConstant(expr->val);
 	/// if the expression is adjusted from an array or a function,
 	/// returns the address of the symbol for this identifier
 	if (expr->op == OP_STR){

@@ -84,6 +84,42 @@ static int ScanIdentifier(void)
 	}
 	return tok;
 }
+static int ScanIntLiteral(unsigned char *start, int len, int base)
+{
+	unsigned char *p = start;
+	unsigned char *end = start + len;
+	unsigned int i[2] = {0, 0};
+	int tok = TK_INTCONST;
+	int d = 0;
+
+	while (p != end) {
+		if (base == 16) {
+			// TODO: ADD hex scan
+			;
+		} else {
+			d = *p - '0';
+		}
+		i[0] += d;
+		p++;
+	}
+	TokenValue.i[1] = 0;
+	TokenValue.i[0] = i[0];
+	return tok;
+}
+static int ScanNumericLiteral(void)
+{
+	unsigned char *start = CURSOR;
+	int base = 10;
+	// now support decimal
+	CURSOR++;
+	while (IsDigit(*CURSOR))
+	{
+		CURSOR++;
+	}
+	if (base == 16 || (*CURSOR != '.' && *CURSOR != 'e' && *CURSOR != 'E')) {
+		return ScanIntLiteral(start, (int)(CURSOR - start), base);
+	}
+}
 static int ScanStringLiteral(void)	// "abc"  or L"abc"
 {
 	
@@ -136,6 +172,10 @@ void SetupLexer(void)
 		if (IsLetter(i)) {
 			Scanners[i] = ScanIdentifier;
 		}
+		else if (IsDigit(i)) {
+			Scanners[i] = ScanNumericLiteral;
+		}
+
 	}
 	Scanners[END_OF_FILE] = ScanEOF;
 	Scanners['"'] = ScanStringLiteral;

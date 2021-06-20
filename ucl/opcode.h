@@ -4,7 +4,8 @@
 /**
 	opcode here is used by UIL
  */
-
+ OPCODE(RET, 	"ret", 					Return)
+ OPCODE(JMP, 	"jmp",					Jump)
  OPCODE(CALL,    "call",                 Call)
  OPCODE(ADDR,    "&",                    Address)
  OPCODE(NOP, 	"NOP",					NOP)

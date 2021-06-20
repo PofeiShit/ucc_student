@@ -141,3 +141,22 @@ void GenerateFunctionCall(/*Type ty, */Symbol recv, Symbol faddr, Vector args)
 	AppendInst(inst);
 
 }
+void GenerateReturn(Symbol src)
+{
+	IRInst inst;
+	ALLOC(inst);
+	inst->opcode = RET;
+	inst->opds[0] = src;
+	inst->opds[1] = inst->opds[2] = NULL;
+	AppendInst(inst);
+}
+void GenerateJump(BBlock dstBB)
+{
+	IRInst inst;
+	ALLOC(inst);
+
+	inst->opcode = JMP;
+	inst->opds[0] = (Symbol)dstBB;
+	inst->opds[1] = inst->opds[2] = NULL;
+	AppendInst(inst);
+}

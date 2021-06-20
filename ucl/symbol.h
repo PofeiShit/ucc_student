@@ -3,7 +3,7 @@
 
 enum 
 { 
-	SK_Temp, SK_String, SK_Label, SK_Constant, SK_Function, SK_Register, SK_IRegister,
+	SK_Temp, SK_String, SK_Label, SK_Constant, SK_Variable, SK_Function, SK_Register, SK_IRegister,
 };
 
 
@@ -44,5 +44,6 @@ typedef struct functionSymbol
 } *FunctionSymbol;
 void InitSymbolTable(void);
 extern Symbol Strings;
+extern Symbol Globals;
 extern FunctionSymbol FSYM;
 #endif

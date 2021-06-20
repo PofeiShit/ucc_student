@@ -6,6 +6,9 @@
 static AstExpression CheckPrimaryExpression(AstExpression expr)
 {
 	Symbol p;
+	if (expr->op == OP_CONST) {
+		return expr;
+	}
 	if (expr->op == OP_STR) {
 		//expr->op = OP_ID;
 		expr->val.p = AddString(expr->val.p);
@@ -17,10 +20,9 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 {
 	if (expr->kids[0]->op == OP_ID) {
 		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p);
-		// fast show hello world
-		//expr->kids[0]->val.p = AddFunction("puts");
 	}
-	CheckExpression(expr->kids[1]);
+	if (expr->kids[1] != NULL)
+		CheckExpression(expr->kids[1]);
 	return expr;
 }
 

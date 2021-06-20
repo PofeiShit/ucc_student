@@ -13,9 +13,15 @@ static AstStatement CheckExpressionStatment(AstStatement stmt)
 	return stmt;
 }
 
+static AstStatement CheckReturnStatement(AstStatement stmt)
+{
+	return stmt;
+}
+
 static AstStatement (*Stmtcheckers[])(AstStatement) = 
 {
 	CheckExpressionStatment,
+	CheckReturnStatement
 };
 
 static AstStatement CheckStatement(AstStatement stmt)

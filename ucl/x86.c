@@ -20,10 +20,26 @@ enum ASMCode
 #include "x86linux.tpl"
 #undef TEMPLATE
 };
+static void Move(int code, Symbol dst, Symbol src)
+{
+	Symbol opds[2];
+	opds[0] = dst;
+	opds[1] = src;
+	PutASMCode(code, opds);
+}
+
 static void EmitNOP(IRInst inst)
 {
 	;
 }
+static void EmitJump(IRInst inst)
+{
+	BBlock p = (BBlock)DST;
+	DST = p->sym;
+	ClearRegs();
+	PutASMCode(X86_JMP, inst->opds);
+}
+
 static int GetListen(Symbol reg) 
 {
 	int len = 0;
@@ -89,10 +105,13 @@ static void EmitEpilogue(int stksize)
 	PutASMCode(X86_EPILOGUE, NULL);
 }
 
+static void EmitReturn(IRInst inst)
+{
+	Move(X86_MOVI4, X86Regs[EAX], DST);	
+}
 
 static void PushArgument(Symbol p)
 {
-
 	PutASMCode(X86_PUSH, &p);
 
 }
@@ -204,6 +223,7 @@ static void EmitBBlock(BBlock bb)
 	}
 	ClearRegs();
 }
+
 void EmitFunction(FunctionSymbol fsym)
 {
 	BBlock bb;
@@ -222,8 +242,8 @@ void EmitFunction(FunctionSymbol fsym)
 		subl $32, %esp
 	 */
 	EmitPrologue(stksize);
-
 	bb = fsym->entryBB;
+	
 	while (bb != NULL)
 	{	
 		// to show all basic blocks
@@ -231,6 +251,7 @@ void EmitFunction(FunctionSymbol fsym)
 		EmitBBlock(bb);
 		bb = bb->next;
 	}
+	
 	/**
 		movl %ebp, %esp
 		popl %edi

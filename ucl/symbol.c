@@ -3,13 +3,14 @@
 
 // number of strings
 static int StringNum;
-static Symbol *FunctionTail, *StringTail;
+static Symbol *FunctionTail, *StringTail, *GlobalTail;
 // number of temporaries
 int TempNum;
 
 int LabelNum;
 Symbol Strings;
 Symbol Functions;
+Symbol Globals;
 /**
 	Lookup a const first, 
 	if not existing, then add a new one.
@@ -20,10 +21,21 @@ Symbol Functions;
 
 void InitSymbolTable()
 {
-	Functions = Strings = NULL;
+	Globals = Functions = Strings = NULL;
 	FunctionTail = &Functions;
 	StringTail = &Strings;
+	GlobalTail = &Globals;
 	TempNum = LabelNum = StringNum = 0;	
+}
+Symbol AddVariable(char *name)
+{
+	VariableSymbol p;
+	CALLOC(p);
+	p->kind = SK_Variable;
+	p->name = name;
+	*GlobalTail = (Symbol)p;
+	GlobalTail = &p->next;
+	return (Symbol)p;
 }
 Symbol AddFunction(char *name)
 {

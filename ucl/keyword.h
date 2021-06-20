@@ -4,7 +4,12 @@ struct keyword
 	int len;
 	int tok;
 };
-
+static struct keyword keywordsR[]
+ =
+{
+	{"return", 6, TK_RETURN},
+	{NULL, 		0, TK_ID},
+};
 static struct keyword keywordsV[] = 
 {
 	{"void",     4, TK_VOID},
@@ -18,5 +23,6 @@ static struct keyword keywordsV[] =
  */
 static struct keyword *keywords[] =
 {
+	keywordsR,
     keywordsV
 };

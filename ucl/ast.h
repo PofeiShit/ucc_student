@@ -7,7 +7,7 @@ enum nodeKind
 	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_Function, NK_Declaration,
 	NK_FunctionDeclarator, NK_Expression, 
     NK_NameDeclarator,
-	NK_ExpressionStatement, NK_CompoundStatement,
+	NK_ExpressionStatement, NK_ReturnStatement, NK_CompoundStatement,
 };
 typedef struct astExpression *AstExpression;
 typedef struct astStatement *AstStatement;

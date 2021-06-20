@@ -6,6 +6,16 @@
 /**
  * Emit all the strings to assembly file
  */
+static void EmitGlobals(void)
+{
+	Symbol p = Globals;
+	while (p)
+	{
+		DefineCommData(p);
+		p = p->next;
+	}
+	PutString("\n");
+}
 static void EmitStrings(void)
 {
 	Symbol p = Strings;
@@ -65,7 +75,8 @@ void EmitTranslationUnit(AstTranslationUnit transUnit)
 		.str1:	.string	"a + b + c + d = %d.\012"
 	 */
 	EmitStrings();
-
+	
+	EmitGlobals();
 	// ".text\n\n"
 	Segment(CODE);
 

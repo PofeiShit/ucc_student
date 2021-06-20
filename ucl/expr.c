@@ -27,6 +27,13 @@ static AstExpression ParsePrimaryExpression(void)
 		NEXT_TOKEN;
 		return expr;
 
+	case TK_INTCONST:
+		CREATE_AST_NODE(expr, Expression);
+		expr->op = OP_CONST;
+		expr->val = TokenValue;
+		NEXT_TOKEN;
+		return expr;
+
 	case TK_STRING:			// "ABC"
 
 		CREATE_AST_NODE(expr, Expression);
@@ -48,7 +55,6 @@ static AstExpression ParsePostfixExpression(void)
 	AstExpression expr, p;
 
 	expr = ParsePrimaryExpression();
-
 	while (1)
 	{
 		switch (CurrentToken)

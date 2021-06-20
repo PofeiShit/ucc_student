@@ -4,11 +4,12 @@
 
 .str0:	.string	"hello world"
 
+
 .text
 
-.globl	main
+.globl	print_hw
 
-main:
+print_hw:
 	pushl %ebp
 	pushl %ebx
 	pushl %esi
@@ -21,6 +22,28 @@ main:
 	call puts
 	addl $4, %esp
 .BB1:
+	movl %ebp, %esp
+	popl %edi
+	popl %esi
+	popl %ebx
+	popl %ebp
+	ret
+
+.globl	main
+
+main:
+	pushl %ebp
+	pushl %ebx
+	pushl %esi
+	pushl %edi
+	movl %esp, %ebp
+	subl $4, %esp
+.BB2:
+	call print_hw
+	movl $1, %eax
+	jmp .BB4
+.BB3:
+.BB4:
 	movl %ebp, %esp
 	popl %edi
 	popl %esi

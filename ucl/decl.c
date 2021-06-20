@@ -10,6 +10,7 @@ static AstSpecifiers ParseDeclarationSpecifiers(void)
     tok->token = CurrentToken;
     specs->tySpecs = (AstNode)tok;
     NEXT_TOKEN;
+	return specs;
 }
 
 /**
@@ -29,7 +30,7 @@ static AstDeclarator ParseDirectDeclarator()
 	if (CurrentToken == TK_ID)
 	{
 		dec->id = TokenValue.p;
-		// PRINT_DEBUG_INFO(("dec->id :%s ",dec->id));
+		//printf("dec->id :%s ",dec->id);
 		NEXT_TOKEN;
 	}
 	return dec;
@@ -38,14 +39,20 @@ static AstDeclarator ParseDirectDeclarator()
 static AstDeclarator ParsePostfixDeclarator()
 {
 	AstDeclarator dec = ParseDirectDeclarator();
-    AstFunctionDeclarator funcDec;
-    CREATE_AST_NODE(funcDec, FunctionDeclarator);
-    funcDec->dec = dec;
-    NEXT_TOKEN;
-    dec = (AstDeclarator)funcDec;
-    Expect(TK_RPAREN);
-	//printf("%s\n", dec->dec->id);
-	return dec;
+	while (1) {
+		if (CurrentToken == TK_LPAREN) {
+			AstFunctionDeclarator funcDec;
+			CREATE_AST_NODE(funcDec, FunctionDeclarator);
+			funcDec->dec = dec;
+			NEXT_TOKEN;
+			dec = (AstDeclarator)funcDec;
+			Expect(TK_RPAREN);
+		}
+		else
+		{
+			return dec;
+		}
+	}
 }
 static AstDeclarator ParseDeclarator()
 {
@@ -65,6 +72,17 @@ static AstDeclaration ParseCommonHeader(void)
 	return decl;
 }
 
+static AstFunctionDeclarator GetFunctionDeclarator(AstDeclarator dec)
+{
+	while (dec) {
+		if (dec->kind == NK_FunctionDeclarator &&
+				dec->dec && dec->dec->kind == NK_NameDeclarator) {
+			break;
+		}
+		dec = dec->dec;
+	}
+	return (AstFunctionDeclarator)dec;
+}
 
 /**
  *  external-declaration:
@@ -85,14 +103,17 @@ static AstNode ParseExternalDeclaration(void)
 {
 	AstDeclaration decl = NULL;
 	// AstInitDeclarator initDec = NULL;
+	AstDeclarator dec = NULL;
 	AstFunctionDeclarator fdec;
 
 	decl = ParseCommonHeader();
 
 	// initDec = (AstInitDeclarator)decl->dec;
-    fdec = (AstFunctionDeclarator)decl->dec;
+	dec = (AstDeclarator)decl->dec;
+    //fdec = (AstFunctionDeclarator)decl->dec;
 	//printf("%d,%d\n", fdec->kind, fdec->dec->kind);
-	// fdec = GetFunctionDeclarator(initDec);
+	fdec = GetFunctionDeclarator(dec);
+	//printf("???fdec:%d,%d\n", fdec, CurrentToken);
 	if (fdec != NULL)
 	{
 		AstFunction func;
@@ -112,6 +133,7 @@ static AstNode ParseExternalDeclaration(void)
 		func->stmt = ParseCompoundStatement();
 		return (AstNode)func;
 	}
+	Expect(TK_SEMICOLON);
 	return (AstNode)decl;
 }
 
@@ -141,6 +163,10 @@ AstTranslationUnit ParseTranslationUnit(char *filename)
 	
 	while (CurrentToken != TK_END)
 	{
+		if (CurrentToken == TK_SEMICOLON) {
+			NEXT_TOKEN;
+			continue;
+		}
 		*tail = ParseExternalDeclaration();
 		tail = &(*tail)->next;
 	}

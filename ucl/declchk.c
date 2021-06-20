@@ -26,6 +26,7 @@ void CheckDeclarator(AstDeclarator dec)
 			;
 	}
 }
+
 void CheckFunction(AstFunction func)
 {
 	Symbol sym;
@@ -38,6 +39,13 @@ void CheckFunction(AstFunction func)
 	// Referencing an undefined label is considered as an error.
 }
 
+static void CheckGlobalDeclaraion(AstDeclaration decl)
+{
+	Symbol sym;
+	AstDeclarator dec = (AstDeclarator)decl->dec;
+	CheckDeclarator(dec);
+	sym = AddVariable(dec->id);
+}
 
 void CheckTranslationUnit(AstTranslationUnit transUnit)
 {
@@ -55,6 +63,11 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 		if (p->kind == NK_Function)
 		{
 			CheckFunction((AstFunction)p);
+		}
+		else
+		{
+			//assert(p->kind == NK_Declaration);
+			CheckGlobalDeclaraion((AstDeclaration)p);
 		}
 		p = p->next;
 	}

@@ -2,10 +2,14 @@
 #error "You must define TOKEN macro before include this file"
 #endif
 //TOKEN(TK_STATIC, 	"static")
+TOKEN(TK_INT, 		"int")
 TOKEN(TK_VOID,      "void")
+TOKEN(TK_RETURN, 	"return")
 //identifier
 TOKEN(TK_ID,        "ID")
 
+//constant
+TOKEN(TK_INTCONST, "int")
 //operators
 TOKEN(TK_LPAREN,        "(")
 TOKEN(TK_RPAREN,        ")")

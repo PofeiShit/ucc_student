@@ -27,7 +27,7 @@ static char* GetAccessName(Symbol p)
 		// .str0:	.string	"%d \012"		
 		p->aname = FormatName(".%s", p->name);
 		break;
-
+	case SK_Variable:	
 	case SK_Function:
 		/**
 			.globl	f
@@ -197,6 +197,12 @@ void PutASMCode(int code, Symbol opds[])
 void DefineLabel(Symbol p)
 {
 	Print("%s:\n", GetAccessName(p));
+}
+void DefineCommData(Symbol p)
+{
+	GetAccessName(p);
+	// TODO:Type System replace hard code
+	Print(".comm\t%s,%d\n", p->aname, 4);
 }
 void EndProgram(void)
 {

@@ -13,13 +13,32 @@ static AstStatement ParseExpressionStatement(void)
 		exprStmt->expr = ParseExpression();
 	}
 	Expect(TK_SEMICOLON);
-
+	
 	return (AstStatement)exprStmt;
 }
+static AstStatement ParseReturnStatement(void)
+{
+	AstReturnStatement retStmt;
 
+	CREATE_AST_NODE(retStmt, ReturnStatement);
+
+	NEXT_TOKEN;
+	if (CurrentToken != TK_SEMICOLON) {
+		retStmt->expr = ParseExpression();
+	}
+	Expect(TK_SEMICOLON);
+
+	return (AstStatement)retStmt;
+}
 static AstStatement ParseStatement(void)
 {
-	return ParseExpressionStatement();
+	switch (CurrentToken)
+	{
+	case TK_RETURN:
+		return ParseReturnStatement();
+	default:
+		return ParseExpressionStatement();
+	}
 }
 
 AstStatement ParseCompoundStatement(void)

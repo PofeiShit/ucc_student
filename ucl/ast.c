@@ -11,5 +11,5 @@ void Do_Expect(int tok)
 		NEXT_TOKEN;
 		return ;
 	}
-	fprintf(stderr, "(%s %d):", CurFileName, CurFileLineNo);
+	fprintf(stderr, "Do_Expect(%s %d,%d):", CurFileName, CurFileLineNo, tok);
 }

@@ -12,5 +12,6 @@
 
 OPINFO(OP_CALL,          15,   "call",   Postfix,        NOP)
 OPINFO(OP_ID,            16,   "id",     Primary,        NOP)
+OPINFO(OP_CONST,         16,   "const",  Primary,        NOP)
 OPINFO(OP_STR,           16,   "str",    Primary,        NOP)
 
