@@ -17,14 +17,14 @@ void AppendInst(IRInst inst)
 
 	CurrentBB->ninst++;
 }
-void GenerateAssign(/*Type ty,*/ Symbol dst, int opcode, Symbol src1, Symbol src2)
+void GenerateAssign(Type ty, Symbol dst, int opcode, Symbol src1, Symbol src2)
 {
 	IRInst inst;
 
 	//assert(dst->kind == SK_Temp);
 
 	ALLOC(inst);
-	//inst->ty = ty;
+	inst->ty = ty;
 	inst->opcode = opcode;
 	inst->opds[0] = dst;
 	inst->opds[1] = src1;
@@ -32,13 +32,13 @@ void GenerateAssign(/*Type ty,*/ Symbol dst, int opcode, Symbol src1, Symbol src
 	AppendInst(inst);
 }
 
-Symbol TryAddValue(/*Type ty, */int op, Symbol src1, Symbol src2)
+Symbol TryAddValue(Type ty, int op, Symbol src1, Symbol src2)
 {
 	Symbol t;
 
 	t = CreateTemp();
 
-	GenerateAssign(t, op, src1, src2);
+	GenerateAssign(ty, t, op, src1, src2);
 	return t;
 }
 
@@ -46,7 +46,7 @@ Symbol AddressOf(Symbol p)
 {
 	//assert(p->kind != SK_Temp);
 	// p->addressed = 1;
-	return TryAddValue(/*T(POINTER), */ADDR, p, NULL); 
+	return TryAddValue(T(POINTER), ADDR, p, NULL); 
 }
 /**
 	(1)
@@ -127,13 +127,13 @@ void StartBBlock(BBlock bb)
 	t0 = f(a, 5);
 	b = t0;	
  */
-void GenerateFunctionCall(/*Type ty, */Symbol recv, Symbol faddr, Vector args)
+void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, Vector args)
 {
 	ILArg p;
 	IRInst inst;
 
 	ALLOC(inst);
-	//inst->ty = ty;
+	inst->ty = ty;
 	inst->opcode = CALL;
 	inst->opds[0] = recv;
 	inst->opds[1] = faddr;
@@ -141,10 +141,11 @@ void GenerateFunctionCall(/*Type ty, */Symbol recv, Symbol faddr, Vector args)
 	AppendInst(inst);
 
 }
-void GenerateReturn(Symbol src)
+void GenerateReturn(Type ty, Symbol src)
 {
 	IRInst inst;
 	ALLOC(inst);
+	inst->ty = ty;
 	inst->opcode = RET;
 	inst->opds[0] = src;
 	inst->opds[1] = inst->opds[2] = NULL;

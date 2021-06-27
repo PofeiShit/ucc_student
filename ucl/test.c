@@ -1,6 +1,7 @@
-void print_hw()
+char print_hw()
 {
-	puts("hello world");
+	puts("Hw");
+	return '0';
 }
 int main()
 {

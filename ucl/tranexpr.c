@@ -9,7 +9,7 @@
 static Symbol TranslatePrimaryExpression(AstExpression expr)
 {
 	if (expr->op == OP_CONST)
-		return AddConstant(expr->val);
+		return AddConstant(expr->ty, expr->val);
 	/// if the expression is adjusted from an array or a function,
 	/// returns the address of the symbol for this identifier
 	if (expr->op == OP_STR){
@@ -42,26 +42,28 @@ static Symbol TranslateFunctionCall(AstExpression expr)
 	 */
 	// expr->kids[0]->isfunc = 0;
 	faddr = TranslateExpression(expr->kids[0]);
+
 	arg = expr->kids[1];
+	
 	while (arg)
 	{
 		ALLOC(ilarg);
 		// After TranslateExpression(arg), sym->ty may be different from art->ty.
 		// See AddressOf() and the following comments for detail.
 		ilarg->sym = TranslateExpression(arg);
-		//ilarg->ty = arg->ty;
+		ilarg->ty = arg->ty;
 				
 		INSERT_ITEM(args, ilarg);
 		arg = (AstExpression)arg->next;
 	}
-
+	
 	recv = NULL;
-	// if (expr->ty->categ != VOID)
-	// {
-	// 	recv = CreateTemp(expr->ty);		
-	// }
-	GenerateFunctionCall(recv, faddr, args);
-
+		
+	if (expr->ty->categ != VOID)
+	{
+		recv = CreateTemp(expr->ty);		
+	}
+	GenerateFunctionCall(expr->ty, recv, faddr, args);
 	return recv;
 }
 static Symbol TranslatePostfixExpression(AstExpression expr)

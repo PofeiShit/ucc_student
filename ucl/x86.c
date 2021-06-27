@@ -107,13 +107,23 @@ static void EmitEpilogue(int stksize)
 
 static void EmitReturn(IRInst inst)
 {
-	Move(X86_MOVI4, X86Regs[EAX], DST);	
+	Type ty = inst->ty;
+	switch (ty->size) 
+	{
+	case 1:
+		Move(X86_MOVI1, X86ByteRegs[EAX], DST);
+		break;
+	case 4:
+		Move(X86_MOVI4, X86Regs[EAX], DST);	
+		break;
+	default:
+		;
+	}
 }
 
-static void PushArgument(Symbol p)
+static void PushArgument(Symbol p, Type ty)
 {
 	PutASMCode(X86_PUSH, &p);
-
 }
 /**
 	DST:
@@ -127,17 +137,18 @@ static void EmitCall(IRInst inst)
 {
 	Vector args;
 	ILArg arg;
+	Type rty;
 	int i, stksize;
 
 	args = (Vector)SRC2;
 	stksize = 0;
+	rty = inst->ty;
 
 	for (i = LEN(args) - 1; i >= 0; --i)
 	{
 		arg = GET_ITEM(args, i);
-		PushArgument(arg->sym);
-		//stksize += ALIGN(arg->ty->size, STACK_ALIGN_SIZE);
-		stksize += 4;
+		PushArgument(arg->sym, arg->ty);
+		stksize += ALIGN(arg->ty->size, STACK_ALIGN_SIZE);
 	}
 	/**
 		 We don't have to call ClearRegs() in EmitCall(),
@@ -160,6 +171,18 @@ static void EmitCall(IRInst inst)
 			We have set X87Top to NULL in EmitReturn()
 		 */
 		return;
+	}
+	switch (rty->size) {
+	case 1:
+		Move(X86_MOVI1, DST, X86ByteRegs[EAX]);
+		break;
+	case 4:
+		AllocateReg(inst, 0);
+		if (DST->reg != X86Regs[EAX])
+			Move(X86_MOVI4, DST, X86Regs[EAX]);
+		break;
+	default:
+		;
 	}
 }
 /**
@@ -223,15 +246,26 @@ static void EmitBBlock(BBlock bb)
 	}
 	ClearRegs();
 }
+static int LayoutFrame(FunctionSymbol fsym, int fstPramPos)
+{
+	// TODO: add function params
+	
+	return 4;
+}
 
 void EmitFunction(FunctionSymbol fsym)
 {
 	BBlock bb;
+	Type rty;
 	int stksize;
+
 	FSYM = fsym;
 	Export((Symbol)fsym);	
+
 	DefineLabel((Symbol)fsym);
-	stksize = 4;
+
+	rty = fsym->ty->bty;
+	stksize = LayoutFrame(fsym, PRESERVE_REGS + 1);
 	/**
 		main:
 		pushl %ebp

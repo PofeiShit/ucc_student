@@ -63,6 +63,8 @@ void DefineString(String str, int size)
 	{		
 		PutString(".string\t\"");
 		size--;
+	} else {
+		PutString(".ascii\t\"");
 	}
 
 	while (i < size)
@@ -141,6 +143,11 @@ void SetupRegisters(void)
 	X86Regs[EDX] = CreateReg("%edx", "(%edx)", EDX);
 	X86Regs[ESI] = CreateReg("%esi", "(%esi)", ESI);
 	X86Regs[EDI] = CreateReg("%edi", "(%edi)", EDI);
+
+	X86ByteRegs[EAX] = CreateReg("%al", "NULL", EAX);
+	X86ByteRegs[EBX] = CreateReg("%bl", "NULL", EBX);
+	X86ByteRegs[ECX] = CreateReg("%cl", "NULL", ECX);
+	X86ByteRegs[EDX] = CreateReg("%dl", "NULL", EDX);
 }
 void PutASMCode(int code, Symbol opds[])
 {
@@ -201,8 +208,7 @@ void DefineLabel(Symbol p)
 void DefineCommData(Symbol p)
 {
 	GetAccessName(p);
-	// TODO:Type System replace hard code
-	Print(".comm\t%s,%d\n", p->aname, 4);
+	Print(".comm\t%s,%d\n", p->aname, p->ty->size);
 }
 void EndProgram(void)
 {

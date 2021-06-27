@@ -11,18 +11,23 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 	}
 	if (expr->op == OP_STR) {
 		//expr->op = OP_ID;
-		expr->val.p = AddString(expr->val.p);
+		expr->val.p = AddString(expr->ty, expr->val.p);
 		return expr;
 	}
 }
 
 static AstExpression CheckFunctionCall(AstExpression expr)
 {
+	Type ty;
 	if (expr->kids[0]->op == OP_ID) {
+		expr->kids[0]->ty = DefaultFunctionType;
 		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p);
 	}
+	ty = expr->kids[0]->ty;
+
 	if (expr->kids[1] != NULL)
 		CheckExpression(expr->kids[1]);
+	expr->ty = ty->bty;
 	return expr;
 }
 

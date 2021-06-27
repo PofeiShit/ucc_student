@@ -7,12 +7,13 @@ enum
 };
 
 
-#define SYMBOL_COMMON     \
-    int kind;             \
-    char *name;           \
-    char *aname;           \
-    union value val;      \
-    struct symbol *reg; \
+#define SYMBOL_COMMON    \
+    int kind;            \
+    char *name;          \
+    char *aname;         \
+	Type ty;			 \
+    union value val;     \
+    struct symbol *reg;  \
     struct symbol *link; \
     struct symbol *next; \
 

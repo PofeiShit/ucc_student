@@ -42,6 +42,7 @@ SINGLE_CHAR_SCANNER(RBRACE)
 SINGLE_CHAR_SCANNER(LPAREN)
 SINGLE_CHAR_SCANNER(RPAREN)
 SINGLE_CHAR_SCANNER(SEMICOLON)
+SINGLE_CHAR_SCANNER(COMMA)
 
 static int ScanEOF(void)
 {
@@ -54,7 +55,9 @@ static int FindKeyword(char *str, int len)
 	struct keyword *p = NULL;
 	//index is 0 when "__int64", see keyword.h	static struct keyword keywords_[]
 	int index = 0;
-
+	
+	if (*str != '_')
+		index = ToUpper(*str) - 'A';
 	p = keywords[index];
 	while (p->name)
 	{
@@ -63,6 +66,18 @@ static int FindKeyword(char *str, int len)
 		p++;
 	}	
 	return p->tok;
+}
+
+static int ScanCharLiteral(void)
+{
+	char ch = 0;
+	CURSOR++;
+	ch = *CURSOR;
+	CURSOR++;
+	CURSOR++;
+	TokenValue.i[0] = ch;
+	TokenValue.i[1] = 0;
+	return TK_INTCONST;
 }
 
 // parse string starting with char
@@ -120,6 +135,7 @@ static int ScanNumericLiteral(void)
 		return ScanIntLiteral(start, (int)(CURSOR - start), base);
 	}
 }
+
 static int ScanStringLiteral(void)	// "abc"  or L"abc"
 {
 	
@@ -178,11 +194,13 @@ void SetupLexer(void)
 
 	}
 	Scanners[END_OF_FILE] = ScanEOF;
+	Scanners['\''] = ScanCharLiteral;
 	Scanners['"'] = ScanStringLiteral;
 	Scanners['{'] = ScanLBRACE;
 	Scanners['}'] = ScanRBRACE;
 	Scanners['('] = ScanLPAREN;
 	Scanners[')'] = ScanRPAREN;
 	Scanners[';'] = ScanSEMICOLON;
+	Scanners[','] = ScanCOMMA;
 
 }

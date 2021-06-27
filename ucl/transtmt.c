@@ -11,7 +11,7 @@ static void TranslateStatement(AstStatement stmt);
 static void TranslateExpressionStatement(AstStatement stmt)
 {
 	AstExpressionStatement exprStmt = AsExpr(stmt);
-
+	
 	if (exprStmt->expr != NULL)
 	{
 		TranslateExpression(exprStmt->expr);
@@ -30,9 +30,8 @@ static void TranslateCompoundStatement(AstStatement stmt)
 static void TranslateRetrunStatement(AstStatement stmt)
 {
 	AstReturnStatement retStmt = AsRet(stmt);
-
 	if (retStmt->expr) {
-		GenerateReturn(/*ty,*/TranslateExpression(retStmt->expr));
+		GenerateReturn(retStmt->expr->ty, TranslateExpression(retStmt->expr));
 	}
 	GenerateJump(FSYM->exitBB);
 	StartBBlock(CreateBBlock());
@@ -56,10 +55,9 @@ static void TranslateFunction(AstFunction func)
 	BBlock bb;
 
 	FSYM = func->fsym;
-
 	FSYM->entryBB = CreateBBlock();
 	FSYM->exitBB = CreateBBlock();
-
+	
 	CurrentBB = FSYM->entryBB;
 	/**
 		When translating statments in entry basic block,
@@ -69,6 +67,7 @@ static void TranslateFunction(AstFunction func)
 		However, the exit block is created and translated
 		explicitely here.
 	 */
+	
 	TranslateStatement(func->stmt);
 	// 
 	StartBBlock(FSYM->exitBB);

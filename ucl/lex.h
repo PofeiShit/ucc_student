@@ -20,7 +20,7 @@ union value
 #define IsDigit(c)         (c >= '0' && c <= '9')
 #define IsLetter(c)        ((c >= 'a' && c <= 'z') || (c == '_') || (c >= 'A' && c <= 'Z'))
 #define IsLetterOrDigit(c) (IsLetter(c) || IsDigit(c))
-
+#define ToUpper(c) 		   (c & ~0x20)
 int  GetNextToken(void);
 
 extern union value TokenValue;

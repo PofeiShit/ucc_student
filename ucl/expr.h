@@ -10,7 +10,7 @@ enum OP
 struct astExpression
 {
 	AST_NODE_COMMON
-	// Type ty;
+	Type ty;
 	int op : 16;
 	// int isarray : 1;
 	// int isfunc  : 1;

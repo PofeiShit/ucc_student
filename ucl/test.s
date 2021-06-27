@@ -2,7 +2,7 @@
 
 .data
 
-.str0:	.string	"hello world"
+.str0:	.string	"Hw"
 
 
 .text
@@ -21,7 +21,10 @@ print_hw:
 	pushl %eax
 	call puts
 	addl $4, %esp
+	movl $48, %eax
+	jmp .BB2
 .BB1:
+.BB2:
 	movl %ebp, %esp
 	popl %edi
 	popl %esi
@@ -38,12 +41,12 @@ main:
 	pushl %edi
 	movl %esp, %ebp
 	subl $4, %esp
-.BB2:
+.BB3:
 	call print_hw
 	movl $1, %eax
-	jmp .BB4
-.BB3:
+	jmp .BB5
 .BB4:
+.BB5:
 	movl %ebp, %esp
 	popl %edi
 	popl %esi

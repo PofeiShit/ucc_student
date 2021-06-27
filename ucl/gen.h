@@ -11,7 +11,7 @@ typedef struct irinst
 {
 	struct irinst *prev;
 	struct irinst *next;
-	//Type ty;
+	Type ty;
 	int opcode;
 	Symbol opds[3];
 } *IRInst;
@@ -35,7 +35,7 @@ struct bblock
 typedef struct ilarg
 {
 	Symbol sym;
-	//Type ty;
+	Type ty;
 } *ILArg;
 
 BBlock CreateBBlock(void);

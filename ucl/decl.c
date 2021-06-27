@@ -6,11 +6,21 @@ static AstSpecifiers ParseDeclarationSpecifiers(void)
 	AstSpecifiers specs;
 	AstToken tok;
 	CREATE_AST_NODE(specs, Specifiers);
-    CREATE_AST_NODE(tok, Token);
-    tok->token = CurrentToken;
-    specs->tySpecs = (AstNode)tok;
-    NEXT_TOKEN;
-	return specs;
+
+next_specifiers:
+	switch(CurrentToken) {
+	case TK_VOID:
+	case TK_CHAR:
+	case TK_INT:
+		CREATE_AST_NODE(tok, Token);
+		tok->token = CurrentToken;
+		specs->tySpecs = (AstNode)tok;
+		NEXT_TOKEN;
+		break;
+	default:
+		return specs;
+	}
+	goto next_specifiers;
 }
 
 /**
@@ -30,7 +40,6 @@ static AstDeclarator ParseDirectDeclarator()
 	if (CurrentToken == TK_ID)
 	{
 		dec->id = TokenValue.p;
-		//printf("dec->id :%s ",dec->id);
 		NEXT_TOKEN;
 	}
 	return dec;
@@ -62,18 +71,28 @@ static AstDeclarator ParseDeclarator()
 static AstDeclaration ParseCommonHeader(void)
 {
 	AstDeclaration decl;
-	// AstNode *tail;
+	AstNode *tail;
 
 	CREATE_AST_NODE(decl, Declaration);
 	// declaration-specifiers
 	decl->specs = ParseDeclarationSpecifiers();
 		// f(int a, int b);		
-    decl->dec = ParseDeclarator();
+	if (CurrentToken != TK_SEMICOLON) {
+		decl->dec = ParseDeclarator();
+		tail = &decl->dec->next;
+		while (CurrentToken == TK_COMMA) {
+			NEXT_TOKEN;
+			*tail = (AstNode)ParseDeclarator();
+			tail = &(*tail)->next;
+		}
+	}
 	return decl;
 }
 
 static AstFunctionDeclarator GetFunctionDeclarator(AstDeclarator dec)
 {
+	if (dec == NULL || dec->next != NULL)
+		return NULL;
 	while (dec) {
 		if (dec->kind == NK_FunctionDeclarator &&
 				dec->dec && dec->dec->kind == NK_NameDeclarator) {
@@ -110,10 +129,10 @@ static AstNode ParseExternalDeclaration(void)
 
 	// initDec = (AstInitDeclarator)decl->dec;
 	dec = (AstDeclarator)decl->dec;
-    //fdec = (AstFunctionDeclarator)decl->dec;
 	//printf("%d,%d\n", fdec->kind, fdec->dec->kind);
 	fdec = GetFunctionDeclarator(dec);
-	//printf("???fdec:%d,%d\n", fdec, CurrentToken);
+
+	//printf("???fdec:%d,%d\n", fdec, dec);
 	if (fdec != NULL)
 	{
 		AstFunction func;
@@ -171,6 +190,5 @@ AstTranslationUnit ParseTranslationUnit(char *filename)
 		tail = &(*tail)->next;
 	}
 	CloseSourceFile();
-
 	return transUnit;
 }

@@ -8,6 +8,7 @@
 #include "input.h"
 
 Symbol X86Regs[EDI + 1];
+Symbol X86ByteRegs[EDI + 1];
 /**
 	#define	b(i)	(b[i]+b[i+1])
 	 int main(){

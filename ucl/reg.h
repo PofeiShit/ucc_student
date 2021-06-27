@@ -5,4 +5,5 @@ void StoreVar(Symbol reg, Symbol v);
 void SpillReg(Symbol reg);
 
 extern Symbol X86Regs[];
+extern Symbol X86ByteRegs[];
 #endif

@@ -11,7 +11,7 @@
 #include "vector.h"
 #include "str.h"
 #include "lex.h"
-
+#include "type.h"
 #include "symbol.h"
 #define ALIGN(size, align) ((align == 0) ? size: ((size + align - 1) & (~(align - 1))))
 

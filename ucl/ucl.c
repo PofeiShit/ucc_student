@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
 	i = ParseCommandLine(argc, argv);
 	SetupRegisters();
 	SetupLexer();
+	SetupTypeSystem();
 	// SetupTypeSystem();
 	/**
 	(1)	All the heap space are allocated from ProgramHeap before

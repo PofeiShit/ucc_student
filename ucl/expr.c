@@ -29,6 +29,7 @@ static AstExpression ParsePrimaryExpression(void)
 
 	case TK_INTCONST:
 		CREATE_AST_NODE(expr, Expression);
+		expr->ty = T(INT + CurrentToken - TK_INTCONST);
 		expr->op = OP_CONST;
 		expr->val = TokenValue;
 		NEXT_TOKEN;
@@ -37,11 +38,10 @@ static AstExpression ParsePrimaryExpression(void)
 	case TK_STRING:			// "ABC"
 
 		CREATE_AST_NODE(expr, Expression);
-		// expr->ty = ArrayOf(((String)TokenValue.p)->len + 1, CurrentToken == TK_STRING ? T(CHAR) : WCharType);
+		expr->ty = ArrayOf(((String)TokenValue.p)->len + 1, T(CHAR));
 		expr->op = OP_STR;
 		expr->val = TokenValue;
 		NEXT_TOKEN;
-
 		return expr;
 
 

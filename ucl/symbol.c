@@ -27,29 +27,31 @@ void InitSymbolTable()
 	GlobalTail = &Globals;
 	TempNum = LabelNum = StringNum = 0;	
 }
-Symbol AddVariable(char *name)
+Symbol AddVariable(char *name, Type ty)
 {
 	VariableSymbol p;
 	CALLOC(p);
 	p->kind = SK_Variable;
 	p->name = name;
+	p->ty = ty;
 	*GlobalTail = (Symbol)p;
 	GlobalTail = &p->next;
 	return (Symbol)p;
 }
-Symbol AddFunction(char *name)
+Symbol AddFunction(char *name, Type ty)
 {
 	FunctionSymbol p;
 	CALLOC(p);
 	p->kind = SK_Function;
 	p->name = name;
+	p->ty = ty;
 	*FunctionTail = (Symbol)p;
 	FunctionTail = &p->next;
 
 	return (Symbol)p;
 }
 
-Symbol AddConstant(union value val)
+Symbol AddConstant(Type ty, union value val)
 {
 	// unsigned h = (unsigned)val.i[0] & SYM_HASH_MASK;
 	Symbol p;
@@ -58,8 +60,14 @@ Symbol AddConstant(union value val)
 	CALLOC(p);
 
 	p->kind = SK_Constant;
-	p->name = FormatName("%d", val.i[0]);
-
+	switch(ty->categ) {
+	case INT:
+		p->name = FormatName("%d", val.i[0]);
+		break;
+	default:
+		;
+	}
+	p->ty = ty;
 	// p->pcoord = FSYM->pcoord;
 
 	// p->ty = ty;
@@ -79,15 +87,16 @@ Symbol IntConstant(int i)
 	val.i[0] = i;
 	val.i[1] = 0;
 
-	return AddConstant(val);
+	return AddConstant(T(INT), val);
 }
-Symbol AddString(String str)
+Symbol AddString(Type ty, String str)
 {
 	Symbol p;
 	CALLOC(p);
 	p->kind = SK_String;
 	p->name = FormatName("str%d", StringNum++);
 	p->val.p = str;
+	p->ty = ty;	
 	
 	*StringTail = p;
 	StringTail = &p->next;
@@ -96,7 +105,7 @@ Symbol AddString(String str)
 /**
 	the temporay variable's name in a function is  t1,t2,....
  */
-Symbol CreateTemp()
+Symbol CreateTemp(Type ty)
 {
 	VariableSymbol p;
 
@@ -104,7 +113,8 @@ Symbol CreateTemp()
 
 	p->kind = SK_Temp;
 	p->name = FormatName("t%d", TempNum++);
-
+	p->ty = ty;
+	
 	// p->pcoord = FSYM->pcoord;
 	//*FSYM->lastv = (Symbol)p;
 	//FSYM->lastv = &p->next;

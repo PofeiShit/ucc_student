@@ -1,13 +1,21 @@
 #ifndef __DECL_H_
 #define __DECL_H_
 
-
+enum { FUNCTION_RETURN };
 #define AST_DECLARATOR_COMMON   \
     AST_NODE_COMMON             \
     struct astDeclarator *dec;  \
     char *id;                   \
+	TypeDerivList tyDrvList;
 
 typedef struct astSpecifiers *AstSpecifiers;
+
+typedef struct typeDerivList
+{
+	int ctor;
+	int len;
+	struct typeDerivList *next;
+} *TypeDerivList;
 
 typedef struct astDeclarator
 {
@@ -24,6 +32,7 @@ struct astSpecifiers
 {
 	AST_NODE_COMMON
 	AstNode tySpecs;	
+	Type ty;
 };
 
 struct astTranslationUnit
@@ -51,6 +60,7 @@ typedef struct astFunction
 	// compound-statement
 	AstStatement stmt;
 	FunctionSymbol fsym;
+	int hasReturn;
 } *AstFunction;
 
 struct astDeclaration
@@ -61,4 +71,5 @@ struct astDeclaration
 	AstNode dec;
 };
 
+extern AstFunction CURRENTF;
 #endif
