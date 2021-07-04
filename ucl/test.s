@@ -2,26 +2,27 @@
 
 .data
 
-.str0:	.string	"Hw"
+.str0:	.string	"hello world"
 
+.comm	a,4
+.comm	b,4
 
 .text
 
-.globl	print_hw
+.globl	printf_hw
 
-print_hw:
+printf_hw:
 	pushl %ebp
 	pushl %ebx
 	pushl %esi
 	pushl %edi
 	movl %esp, %ebp
-	subl $4, %esp
+	subl $8, %esp
 .BB0:
 	leal .str0, %eax
 	pushl %eax
 	call puts
 	addl $4, %esp
-	movl $48, %eax
 	jmp .BB2
 .BB1:
 .BB2:
@@ -42,7 +43,10 @@ main:
 	movl %esp, %ebp
 	subl $4, %esp
 .BB3:
-	call print_hw
+	pushl $2
+	pushl $1
+	call printf_hw
+	addl $8, %esp
 	movl $1, %eax
 	jmp .BB5
 .BB4:

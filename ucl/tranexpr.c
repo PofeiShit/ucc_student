@@ -52,7 +52,6 @@ static Symbol TranslateFunctionCall(AstExpression expr)
 		// See AddressOf() and the following comments for detail.
 		ilarg->sym = TranslateExpression(arg);
 		ilarg->ty = arg->ty;
-				
 		INSERT_ITEM(args, ilarg);
 		arg = (AstExpression)arg->next;
 	}

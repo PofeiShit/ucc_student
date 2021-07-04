@@ -67,7 +67,6 @@ static void TranslateFunction(AstFunction func)
 		However, the exit block is created and translated
 		explicitely here.
 	 */
-	
 	TranslateStatement(func->stmt);
 	// 
 	StartBBlock(FSYM->exitBB);

@@ -36,6 +36,9 @@ Symbol AddVariable(char *name, Type ty)
 	p->ty = ty;
 	*GlobalTail = (Symbol)p;
 	GlobalTail = &p->next;
+
+	*FSYM->lastv = (Symbol)p;
+	FSYM->lastv = &p->next;
 	return (Symbol)p;
 }
 Symbol AddFunction(char *name, Type ty)
@@ -45,6 +48,7 @@ Symbol AddFunction(char *name, Type ty)
 	p->kind = SK_Function;
 	p->name = name;
 	p->ty = ty;
+	p->lastv = &p->params;
 	*FunctionTail = (Symbol)p;
 	FunctionTail = &p->next;
 
@@ -114,10 +118,9 @@ Symbol CreateTemp(Type ty)
 	p->kind = SK_Temp;
 	p->name = FormatName("t%d", TempNum++);
 	p->ty = ty;
-	
 	// p->pcoord = FSYM->pcoord;
-	//*FSYM->lastv = (Symbol)p;
-	//FSYM->lastv = &p->next;
+	*FSYM->lastv = (Symbol)p;
+	FSYM->lastv = &p->next;
 	return (Symbol)p;
 }
 // mainly create basic block's label name.

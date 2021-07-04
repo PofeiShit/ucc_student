@@ -123,6 +123,7 @@ static void EmitReturn(IRInst inst)
 
 static void PushArgument(Symbol p, Type ty)
 {
+	int tcode = TypeCode(ty);
 	PutASMCode(X86_PUSH, &p);
 }
 /**
@@ -159,6 +160,7 @@ static void EmitCall(IRInst inst)
 	SpillReg(X86Regs[EDX]);
 
 	PutASMCode(X86_CALL, inst->opds);
+
 	if(stksize != 0){
 		Symbol p;
 		p = IntConstant(stksize);
@@ -246,11 +248,36 @@ static void EmitBBlock(BBlock bb)
 	}
 	ClearRegs();
 }
-static int LayoutFrame(FunctionSymbol fsym, int fstPramPos)
+
+static int LayoutFrame(FunctionSymbol fsym, int fstParamPos)
 {
-	// TODO: add function params
-	
-	return 4;
+	Symbol p;
+	int offset;
+	offset = fstParamPos * STACK_ALIGN_SIZE;
+	p = fsym->params;
+	while (p) 
+	{
+		AsVar(p)->offset = offset;
+		if (p->ty->size == 0)
+			offset += ALIGN(EMPTY_OBJECT_SIZE, STACK_ALIGN_SIZE);
+		else
+			offset += ALIGN(p->ty->size, STACK_ALIGN_SIZE);
+		p = p->next;
+	}
+	offset = 0;	
+	p = fsym->locals;
+	while (p) 
+	{
+		if (p->ty->size == 0) 
+			offset += ALIGN(EMPTY_OBJECT_SIZE, STACK_ALIGN_SIZE);
+		else
+			offset += ALIGN(p->ty->size, STACK_ALIGN_SIZE);
+		AsVar(p)->offset = -offset;
+
+		p = p->next;
+	}
+
+	return offset;
 }
 
 void EmitFunction(FunctionSymbol fsym)

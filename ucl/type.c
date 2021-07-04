@@ -5,6 +5,23 @@
 struct type Types[VOID - CHAR + 1];
 Type DefaultFunctionType;
 
+int TypeCode(Type ty)
+{
+	static int optypes[] = {I1, I4};
+	return optypes[ty->categ];
+}
+
+Type PointerTo(Type ty)
+{
+	Type pty;
+	ALLOC(pty);
+
+	pty->categ = POINTER;
+	pty->size = T(POINTER)->size;
+	pty->bty = ty;
+	return pty;
+}
+
 Type ArrayOf(int len, Type ty)
 {
 	ArrayType aty;
@@ -14,13 +31,14 @@ Type ArrayOf(int len, Type ty)
 	aty->bty = ty;
 	return (Type)aty;
 }
-Type FunctionReturn(Type ty)
+Type FunctionReturn(Type ty, Signature sig)
 {
 	FunctionType fty;
 	ALLOC(fty);
 
 	fty->categ = FUNCTION;
 	fty->size = T(POINTER)->size;
+	fty->sig = sig;
 	fty->bty = ty;
 	return (Type)fty;
 }
@@ -38,10 +56,28 @@ void SetupTypeSystem(void)
 	{
 		T(i)->categ = i;
 	}
+
 	ALLOC(fty);
 	fty->categ = FUNCTION;
 	fty->size = T(POINTER)->size;
 	fty->bty = T(INT);
+
+	ALLOC(fty->sig);
+	CALLOC(fty->sig->params);
+	fty->sig->hasProto = 0;
+	fty->sig->hasEllipsis = 0;
+
 	DefaultFunctionType = (Type)fty;
 }
 
+Type AdjustParameter(Type ty)
+{
+	if (ty->categ == FUNCTION)
+		return PointerTo(ty);
+	return ty;
+}
+
+Type Promote(Type ty)
+{
+	return ty->categ < INT ? T(INT) : ty;
+}

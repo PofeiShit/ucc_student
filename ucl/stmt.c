@@ -13,7 +13,6 @@ static AstStatement ParseExpressionStatement(void)
 		exprStmt->expr = ParseExpression();
 	}
 	Expect(TK_SEMICOLON);
-	
 	return (AstStatement)exprStmt;
 }
 static AstStatement ParseReturnStatement(void)

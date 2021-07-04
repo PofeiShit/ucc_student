@@ -17,6 +17,7 @@
 
 #include "gen.h"
 
+#define EMPTY_OBJECT_SIZE 1
 extern Heap CurrentHeap;
 extern FILE *ASMFile;
 extern char *ExtName;

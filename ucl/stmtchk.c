@@ -16,7 +16,7 @@ static AstStatement CheckExpressionStatment(AstStatement stmt)
 static AstStatement CheckReturnStatement(AstStatement stmt)
 {
 	AstReturnStatement retStmt = AsRet(stmt);
-	//Type rty = FSYM->ty->bty;
+	Type rty = FSYM->ty->bty;
 
 	CURRENTF->hasReturn = 1;
 

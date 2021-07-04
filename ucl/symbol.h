@@ -30,19 +30,23 @@ typedef struct variableSymbol
 	// InitData idata;
 	// ValueDef def;
 	// ValueUse uses;
-	// int offset;
+	int offset;
 } *VariableSymbol;
 
 typedef struct functionSymbol
 {
 	SYMBOL_COMMON
-	//Symbol params;
-	//Symbol locals;
-	//Symbol *lastv;
+	Symbol params;
+	Symbol locals;
+	Symbol *lastv;
 	//int nbblock;
 	BBlock entryBB;
 	BBlock exitBB;
 } *FunctionSymbol;
+
+#define AsVar(sym) ((VariableSymbol)sym)
+#define AsFunc(sym) ((FunctionSymbol)sym)
+
 void InitSymbolTable(void);
 extern Symbol Strings;
 extern Symbol Globals;

@@ -22,6 +22,6 @@ TOKEN(TK_STRING, 	"STR")
 TOKEN(TK_LBRACE,        "{")
 TOKEN(TK_RBRACE,        "}")
 TOKEN(TK_SEMICOLON,     ";")
-
+TOKEN(TK_ELLIPSIS, 		"...")
 TOKEN(TK_NEWLINE,       "\n")
 TOKEN(TK_END,           "EOF")

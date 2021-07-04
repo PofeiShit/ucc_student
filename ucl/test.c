@@ -1,10 +1,11 @@
-char print_hw()
+int printf_hw(int a, int b)
 {
-	puts("Hw");
-	return '0';
+	puts("hello world");
+	return ;
 }
+
 int main()
 {
-	print_hw();
+	printf_hw(1, 2);
 	return 1;
 }

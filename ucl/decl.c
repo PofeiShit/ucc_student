@@ -1,6 +1,9 @@
 #include "ucl.h"
 #include "ast.h"
 #include "decl.h"
+
+static AstDeclarator ParseDeclarator();
+
 static AstSpecifiers ParseDeclarationSpecifiers(void)
 {
 	AstSpecifiers specs;
@@ -45,17 +48,56 @@ static AstDeclarator ParseDirectDeclarator()
 	return dec;
 }
 
+int IsTypeName(int tok)
+{
+	return tok >= TK_CHAR && tok <= TK_VOID;
+}
+
+static AstParameterDeclaration ParseParameterDeclaration(void)
+{
+	AstParameterDeclaration paramDecl;
+	CREATE_AST_NODE(paramDecl, ParameterDeclaration);
+	paramDecl->specs = ParseDeclarationSpecifiers();
+	paramDecl->dec = ParseDeclarator();
+	return paramDecl;
+}
+
+AstParameterTypeList ParseParameterTypeList(void)
+{
+	AstParameterTypeList paramTyList;
+	AstNode *tail;
+	CREATE_AST_NODE(paramTyList, ParameterTypeList);
+
+	paramTyList->paramDecls = (AstNode)ParseParameterDeclaration();
+	tail = &paramTyList->paramDecls->next;
+	while (CurrentToken == TK_COMMA) {
+		NEXT_TOKEN
+		if (CurrentToken == TK_ELLIPSIS) {
+			paramTyList->ellipsis = 1;
+			NEXT_TOKEN
+			break;
+		}
+		*tail = (AstNode)ParseParameterDeclaration();
+		tail = &(*tail)->next;
+	}
+	return paramTyList;
+}
+
 static AstDeclarator ParsePostfixDeclarator()
 {
 	AstDeclarator dec = ParseDirectDeclarator();
 	while (1) {
 		if (CurrentToken == TK_LPAREN) {
 			AstFunctionDeclarator funcDec;
+
 			CREATE_AST_NODE(funcDec, FunctionDeclarator);
 			funcDec->dec = dec;
 			NEXT_TOKEN;
-			dec = (AstDeclarator)funcDec;
+			if (IsTypeName(CurrentToken)) {
+				funcDec->paramTyList = ParseParameterTypeList();
+			}
 			Expect(TK_RPAREN);
+			dec = (AstDeclarator)funcDec;
 		}
 		else
 		{
@@ -86,6 +128,7 @@ static AstDeclaration ParseCommonHeader(void)
 			tail = &(*tail)->next;
 		}
 	}
+	
 	return decl;
 }
 
@@ -148,7 +191,15 @@ static AstNode ParseExternalDeclaration(void)
 		func->dec = decl->dec;
 		//printf("%s\n", decl->dec->dec->kind);
 		func->fdec = fdec;
-		
+
+		if (func->fdec->paramTyList) {
+			AstNode p = func->fdec->paramTyList->paramDecls;
+			while (p)
+			{
+				p = p->next;
+			}
+
+		}
 		func->stmt = ParseCompoundStatement();
 		return (AstNode)func;
 	}

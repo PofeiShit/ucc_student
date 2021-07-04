@@ -12,9 +12,13 @@ typedef struct astSpecifiers *AstSpecifiers;
 
 typedef struct typeDerivList
 {
-	int ctor;
-	int len;
+	int ctor; // type construct 
+	union 
+	{
+		Signature sig; // function signature
+	};
 	struct typeDerivList *next;
+
 } *TypeDerivList;
 
 typedef struct astDeclarator
@@ -44,9 +48,25 @@ struct astTranslationUnit
 	AstNode extDecls;
 };
 
+typedef struct astParameterDeclaration
+{
+	AST_NODE_COMMON
+	AstSpecifiers specs;
+	AstDeclarator dec;
+} *AstParameterDeclaration;
+
+typedef struct astParameterTypeList
+{
+	AST_NODE_COMMON
+	AstNode paramDecls;
+	int ellipsis;
+} *AstParameterTypeList;
+
 typedef struct astFunctionDeclarator
 {
 	AST_DECLARATOR_COMMON
+	AstParameterTypeList paramTyList;
+	Signature sig;
 } *AstFunctionDeclarator;
 
 typedef struct astFunction

@@ -36,7 +36,7 @@ Symbol TryAddValue(Type ty, int op, Symbol src1, Symbol src2)
 {
 	Symbol t;
 
-	t = CreateTemp();
+	t = CreateTemp(ty);
 
 	GenerateAssign(ty, t, op, src1, src2);
 	return t;
