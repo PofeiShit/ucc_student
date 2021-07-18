@@ -28,6 +28,12 @@ static char* GetAccessName(Symbol p)
 		p->aname = FormatName(".%s", p->name);
 		break;
 	case SK_Variable:	
+	case SK_Temp:
+		if (p->sclass == TK_EXTERN) 
+			p->aname = p->name;
+		else
+			p->aname = FormatName("%d(%%ebp)", AsVar(p)->offset);
+		break;
 	case SK_Function:
 		/**
 			.globl	f
@@ -39,7 +45,6 @@ static char* GetAccessName(Symbol p)
 	default:
 		;
 	}
-
 	return p->aname;
 }
 
@@ -180,7 +185,6 @@ void PutASMCode(int code, Symbol opds[])
 			else
 			{
 				i = *fmt - '0';
-			
 				if (opds[i]->reg != NULL)
 				{
 					PutString(opds[i]->reg->name);

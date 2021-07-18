@@ -42,7 +42,6 @@ static void EmitFunctions(AstTranslationUnit transUnit)
 {
 	AstNode p;
 	FunctionSymbol fsym;
-
 	p = transUnit->extDecls;
 	while (p != NULL)
 	{

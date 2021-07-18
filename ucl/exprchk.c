@@ -22,7 +22,13 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 		//expr->op = OP_ID;
 		expr->val.p = AddString(expr->ty, expr->val.p);
 		return expr;
+	} 
+	p = LookupID(expr->val.p);
+	{
+		expr->ty = p->ty;
+		expr->val.p = p;
 	}
+	return expr;
 }
 
 static AstExpression PromoteArgument(AstExpression arg)
@@ -45,15 +51,15 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 	Parameter param;
 
 	int parLen = LEN(fty->sig->params);
-
 	arg = Adjust(CheckExpression(arg), 1);
-
+	
+	// f(void) 
 	if (fty->sig->hasProto && parLen == 0)
 	{
 		*argFull = 1;
 		return arg;
 	}
-
+	// f(int, int, int)  and check the last one parameter			
 	if (argNo == parLen && ! fty->sig->hasEllipsis)
 		*argFull = 1;
 
@@ -61,6 +67,14 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 	{
 		arg = PromoteArgument(arg);
 		*argFull = 0;
+		return arg;
+	} else if (argNo <= parLen) {
+		param = GET_ITEM(fty->sig->params, argNo - 1);
+		// 
+		if (param->ty->categ < INT)
+			arg = Cast(T(INT), arg);
+		else
+			arg = Cast(param->ty, arg);
 		return arg;
 	}
 }
@@ -71,13 +85,18 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	Type ty;
 	AstNode *tail;
 	int argNo, argFull;
-	if (expr->kids[0]->op == OP_ID) {
+	if (expr->kids[0]->op == OP_ID && LookupID(expr->kids[0]->val.p) == NULL) {
 		expr->kids[0]->ty = DefaultFunctionType;
 		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p, DefaultFunctionType);
+	} else {
+		expr->kids[0] = CheckExpression(expr->kids[0]);
 	}
 	expr->kids[0] = Adjust(expr->kids[0], 1);
-	ty = expr->kids[0]->ty;
-	ty = ty->bty;	
+	ty = expr->kids[0]->ty; // ty is PointerType
+	if (!(IsPtrType(ty) && IsFunctionType(ty->bty))) {
+		printf("ty is ptr and base ty is not function\n");
+	}
+	ty = ty->bty; // ty is FunctionType
 
 	tail = (AstNode *)&expr->kids[1];
 	arg = expr->kids[1];

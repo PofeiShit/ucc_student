@@ -12,6 +12,7 @@ enum
     char *name;          \
     char *aname;         \
 	Type ty;			 \
+	int sclass;			 \
     union value val;     \
     struct symbol *reg;  \
     struct symbol *link; \

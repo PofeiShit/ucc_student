@@ -17,9 +17,18 @@ static AstStatement CheckReturnStatement(AstStatement stmt)
 {
 	AstReturnStatement retStmt = AsRet(stmt);
 	Type rty = FSYM->ty->bty;
-
+		
 	CURRENTF->hasReturn = 1;
+	if (retStmt->expr)
+	{
+		retStmt->expr = Adjust(CheckExpression(retStmt->expr), 1);
+		printf("cast before:%d\n", retStmt->expr->ty->categ);
+		retStmt->expr = Cast(rty, retStmt->expr);
+		printf("after:%d\n", retStmt->expr->ty->categ);
 
+		return stmt;
+	}
+		
 	return stmt;
 }
 

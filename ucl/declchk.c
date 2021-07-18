@@ -131,10 +131,13 @@ void CheckFunction(AstFunction func)
 {
 	Symbol sym;
 	Type ty;
+	int sclass;
 	AstNode p;
 	Vector params;
 	Parameter param;
 	CheckDeclarationSpecifiers(func->specs);
+
+	sclass = TK_EXTERN;
 
 	CheckDeclarator(func->dec);
 	
@@ -145,7 +148,7 @@ void CheckFunction(AstFunction func)
 	ENDFOR
 	ty = DeriveType(func->dec->tyDrvList, func->specs->ty);
 
-	func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty);
+	func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, TK_EXTERN);
 
 	CURRENTF = func;
 	FSYM = func->fsym;
@@ -153,10 +156,11 @@ void CheckFunction(AstFunction func)
 		Vector v = ((FunctionType)ty)->sig->params;
 
 		FOR_EACH_ITEM(Parameter, param, v)
-			AddVariable(param->id, param->ty);
+			AddVariable(param->id, param->ty, TK_AUTO);
 		ENDFOR
 		FSYM->locals = NULL;
 		FSYM->lastv = &FSYM->locals;
+		printf("%s\t%d\n", FSYM->name, FSYM->lastv);
 	}
 	CheckCompoundStatement(func->stmt);
 	// Referencing an undefined label is considered as an error.

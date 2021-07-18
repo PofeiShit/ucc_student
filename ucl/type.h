@@ -3,7 +3,7 @@
 
 enum 
 {
-	CHAR, INT, POINTER, VOID, ARRAY, FUNCTION
+	CHAR, INT, ENUM, POINTER, VOID, ARRAY, FUNCTION
 };
 enum {I1, I4};
 
@@ -44,6 +44,10 @@ typedef struct functionType
 } *FunctionType;
 
 #define T(categ) (Types + categ)
+
+#define IsIntegType(ty) (ty->categ <= ENUM)
+#define IsPtrType(ty) (ty->categ == POINTER)
+#define IsFunctionType(ty) (ty->categ == FUNCTION)
 extern int TypeCode(Type ty);
 extern struct type Types[VOID - CHAR + 1];
 extern Type DefaultFunctionType;

@@ -42,7 +42,6 @@ static Symbol TranslateFunctionCall(AstExpression expr)
 	 */
 	// expr->kids[0]->isfunc = 0;
 	faddr = TranslateExpression(expr->kids[0]);
-
 	arg = expr->kids[1];
 	
 	while (arg)
@@ -57,7 +56,7 @@ static Symbol TranslateFunctionCall(AstExpression expr)
 	}
 	
 	recv = NULL;
-		
+			
 	if (expr->ty->categ != VOID)
 	{
 		recv = CreateTemp(expr->ty);		

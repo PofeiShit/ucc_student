@@ -11,6 +11,19 @@ int LabelNum;
 Symbol Strings;
 Symbol Functions;
 Symbol Globals;
+
+Symbol LookupID(char *name)
+{	
+	Symbol head = Functions;
+	while (head) {
+		if (strcmp(head->name, name) == 0) {
+			break;
+		}
+		head = head->next;
+		
+	}
+	return head;
+}
 /**
 	Lookup a const first, 
 	if not existing, then add a new one.
@@ -27,27 +40,31 @@ void InitSymbolTable()
 	GlobalTail = &Globals;
 	TempNum = LabelNum = StringNum = 0;	
 }
-Symbol AddVariable(char *name, Type ty)
+Symbol AddVariable(char *name, Type ty, int sclass)
 {
 	VariableSymbol p;
 	CALLOC(p);
 	p->kind = SK_Variable;
 	p->name = name;
 	p->ty = ty;
-	*GlobalTail = (Symbol)p;
-	GlobalTail = &p->next;
-
-	*FSYM->lastv = (Symbol)p;
-	FSYM->lastv = &p->next;
+	p->sclass = sclass;
+	if (sclass != TK_EXTERN) {
+		*FSYM->lastv = (Symbol)p;
+		FSYM->lastv = &p->next;
+	} else {
+		*GlobalTail = (Symbol)p;
+		GlobalTail = &p->next;
+	}
 	return (Symbol)p;
 }
-Symbol AddFunction(char *name, Type ty)
+Symbol AddFunction(char *name, Type ty, int sclass)
 {
 	FunctionSymbol p;
 	CALLOC(p);
 	p->kind = SK_Function;
 	p->name = name;
 	p->ty = ty;
+	p->sclass = sclass;
 	p->lastv = &p->params;
 	*FunctionTail = (Symbol)p;
 	FunctionTail = &p->next;
@@ -59,22 +76,25 @@ Symbol AddConstant(Type ty, union value val)
 {
 	// unsigned h = (unsigned)val.i[0] & SYM_HASH_MASK;
 	Symbol p;
-
+	
+	if (IsIntegType(ty)) {
+		ty = T(INT);
+	}
 	// If not existing, we will create a new one.
 	CALLOC(p);
 
 	p->kind = SK_Constant;
-	switch(ty->categ) {
-	case INT:
-		p->name = FormatName("%d", val.i[0]);
-		break;
-	default:
-		;
+	switch(ty->categ) 
+	{
+		case INT:
+			p->name = FormatName("%d", val.i[0]);
+			break;
+		default:
+			;
 	}
-	p->ty = ty;
 	// p->pcoord = FSYM->pcoord;
 
-	// p->ty = ty;
+	p->ty = ty;
 	//p->sclass = TK_STATIC;
 	p->val = val;
 	// insert the new const into hashtable bucket.
@@ -121,6 +141,7 @@ Symbol CreateTemp(Type ty)
 	// p->pcoord = FSYM->pcoord;
 	*FSYM->lastv = (Symbol)p;
 	FSYM->lastv = &p->next;
+	printf("temp %s %s %d %d\n", FSYM->name, p->name, p, ty->size);
 	return (Symbol)p;
 }
 // mainly create basic block's label name.
@@ -135,3 +156,4 @@ Symbol CreateLabel(void)
 	
 	return p;
 }
+

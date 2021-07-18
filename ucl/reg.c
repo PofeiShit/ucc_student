@@ -44,7 +44,7 @@ Symbol CreateReg(char *name, char *iname, int no)
 	CALLOC(reg);
 
 	reg->kind = SK_Register;
-	reg->name = name;
+	reg->name = reg->aname = name;
 	reg->val.i[0] = no;
 	reg->reg = reg;
 	
