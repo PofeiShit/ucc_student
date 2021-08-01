@@ -22,10 +22,8 @@ static AstStatement CheckReturnStatement(AstStatement stmt)
 	if (retStmt->expr)
 	{
 		retStmt->expr = Adjust(CheckExpression(retStmt->expr), 1);
-		printf("cast before:%d\n", retStmt->expr->ty->categ);
+		// cast to real type
 		retStmt->expr = Cast(rty, retStmt->expr);
-		printf("after:%d\n", retStmt->expr->ty->categ);
-
 		return stmt;
 	}
 		

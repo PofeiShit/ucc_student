@@ -159,8 +159,7 @@ void CheckFunction(AstFunction func)
 			AddVariable(param->id, param->ty, TK_AUTO);
 		ENDFOR
 		FSYM->locals = NULL;
-		FSYM->lastv = &FSYM->locals;
-		printf("%s\t%d\n", FSYM->name, FSYM->lastv);
+		FSYM->lastv = &FSYM->locals;		
 	}
 	CheckCompoundStatement(func->stmt);
 	// Referencing an undefined label is considered as an error.

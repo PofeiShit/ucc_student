@@ -63,9 +63,10 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 	if (argNo == parLen && ! fty->sig->hasEllipsis)
 		*argFull = 1;
 
+	// TODO:delete old style
 	if (!fty->sig->hasProto) 
 	{
-		arg = PromoteArgument(arg);
+		// arg = PromoteArgument(arg);
 		*argFull = 0;
 		return arg;
 	} else if (argNo <= parLen) {
@@ -85,6 +86,7 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	Type ty;
 	AstNode *tail;
 	int argNo, argFull;
+	
 	if (expr->kids[0]->op == OP_ID && LookupID(expr->kids[0]->val.p) == NULL) {
 		expr->kids[0]->ty = DefaultFunctionType;
 		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p, DefaultFunctionType);

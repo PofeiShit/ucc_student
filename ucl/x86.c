@@ -69,7 +69,7 @@ static void AllocateReg(IRInst inst, int index)
 	Symbol p;
 
 	p = inst->opds[index];
-	printf("%d,%d\n", p->kind, SK_Temp);
+
 	// In x86, UCC only allocates register for temporary
 	if (p->kind != SK_Temp)
 		return;
@@ -96,7 +96,7 @@ static void EmitPrologue(int stksize)
 	if (stksize != 0)
 	{
 		Symbol sym = IntConstant(stksize);
-		// TEMPLATE(X86_EXPANDF,  "subl %0, %%esp")
+		// TEMPLATE(X86_EXPANDF,  "subl %0, %%esp")E
 		PutASMCode(X86_EXPANDF, &sym);
 	}
 }
@@ -109,7 +109,6 @@ static void EmitEpilogue(int stksize)
 static void EmitReturn(IRInst inst)
 {
 	Type ty = inst->ty;
-	printf("ret:%d\n", ty->size);
 	switch (ty->size) 
 	{
 	case 1:
@@ -168,7 +167,7 @@ static void EmitCall(IRInst inst)
 		p = IntConstant(stksize);
 		PutASMCode(X86_REDUCEF, &p);
 	}
-	printf("%s\n", FSYM->name);	
+
 	if(DST == NULL){
 		/**
 			We have set X87Top to NULL in EmitReturn()
@@ -177,12 +176,10 @@ static void EmitCall(IRInst inst)
 	}
 	switch (rty->size) {
 	case 1:
-		printf("%s\n", DST->name);
 		Move(X86_MOVI1, DST, X86ByteRegs[EAX]);
 		break;
 	case 4:
 		AllocateReg(inst, 0);
-		printf("%d,%d\n", DST->reg, X86Regs[EAX]);
 		if (DST->reg != X86Regs[EAX]) {
 			Move(X86_MOVI4, DST, X86Regs[EAX]);
 		}
@@ -262,7 +259,6 @@ static int LayoutFrame(FunctionSymbol fsym, int fstParamPos)
 	while (p) 
 	{
 		AsVar(p)->offset = offset;
-		printf("%s\t%d\n", AsVar(p)->name, AsVar(p)->offset);
 		if (p->ty->size == 0)
 			offset += ALIGN(EMPTY_OBJECT_SIZE, STACK_ALIGN_SIZE);
 		else
