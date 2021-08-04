@@ -1,9 +1,9 @@
 #ifndef TOKEN
 #error "You must define TOKEN macro before include this file"
 #endif
-//TOKEN(TK_STATIC, 	"static")
 TOKEN(TK_AUTO,		"auto")
 TOKEN(TK_EXTERN, 	"extern")
+TOKEN(TK_STATIC, 	"static")
 TOKEN(TK_CHAR, 		"char")
 TOKEN(TK_SHORT,		"short")
 TOKEN(TK_INT, 		"int")

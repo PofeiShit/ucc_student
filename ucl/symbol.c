@@ -1,9 +1,50 @@
 #include "ucl.h"
 #include "output.h"
 
+typedef struct  bucketLinker{
+	struct bucketLinker * link;
+	Symbol sym;
+} * BucketLinker;
+
 // number of strings
 static int StringNum;
+// normal identifiers in global scope
+static struct table GlobalIDs;
+// all the constants
+static struct table Constants;
+// normal identifiers in current scope
+static Table Identifiers;
+static int inParameterList = 0;
+static Table savedIdentifiers;
+
+int IsInParameterList(void){
+	return inParameterList;
+}
+
+void EnterParameterList(void){
+	inParameterList = 1;
+	EnterScope();	
+}
+void LeaveParemeterList(void){
+	inParameterList = 0;
+	ExitScope();
+}
+void SaveParameterListTable(void){
+	savedIdentifiers = Identifiers;
+}
+void RestoreParameterListTable(void){
+	Level++;
+	savedIdentifiers->outer = Identifiers;
+	savedIdentifiers->level = Level;
+	Identifiers = savedIdentifiers;
+
+}
+
+
 static Symbol *FunctionTail, *StringTail, *GlobalTail;
+/// Scope level, file scope will be 0, when entering each nesting level,
+/// Level increment; exiting each nesting level, Level decrement
+int Level;
 // number of temporaries
 int TempNum;
 
@@ -11,19 +52,89 @@ int LabelNum;
 Symbol Strings;
 Symbol Functions;
 Symbol Globals;
+#define	SEARCH_OUTER_TABLE	1
+
+static Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter){
+	Symbol p;
+	/**
+		h is used as key to search the hashtable.
+	 */
+	unsigned h = (unsigned long)name & SYM_HASH_MASK;
+	BucketLinker linker;
+	do{
+		if (tbl->buckets != NULL){
+			for (linker =(BucketLinker) tbl->buckets[h]; linker; linker = linker->link)	{
+				if (linker->sym->name == name){
+					linker->sym->level = tbl->level;
+					return  linker->sym;
+				}
+			}
+		}
+	} while ((tbl = tbl->outer) != NULL && searchOuter);
+	return NULL;	
+}
+
+static Symbol LookupSymbol(Table tbl, char *name)
+{
+	return DoLookupSymbol(tbl, name, SEARCH_OUTER_TABLE);
+}
+
+/**
+ * Add a symbol sym to symbol table tbl
+ */
+static Symbol AddSymbol(Table tbl, Symbol sym)
+{
+	unsigned int h = (unsigned long)sym->name & SYM_HASH_MASK;
+	BucketLinker  linker;
+	CALLOC(linker);
+	if (tbl->buckets == NULL)
+	{
+		int size = sizeof(Symbol) * (SYM_HASH_MASK + 1);
+
+		tbl->buckets = HeapAllocate(CurrentHeap, size);
+		memset(tbl->buckets, 0, size);
+	}
+	// add the new symbol into the first positon of bucket[h] list.
+	linker->link = (BucketLinker) tbl->buckets[h];
+	linker->sym = sym;
+	sym->level = tbl->level;
+	tbl->buckets[h] = (Symbol) linker;;
+	return sym;
+}
+
+/**
+ * Enter a nesting scope. Increment the nesting level and 
+ * create two new symbol table for normal identifiers and tags.
+ */
+void EnterScope(void)
+{
+	Table t;
+
+	Level++;
+
+	ALLOC(t);
+	t->level = Level;
+	t->outer = Identifiers;
+	t->buckets = NULL;
+	Identifiers = t;
+
+}
+
+/**
+ * Exit a nesting scope. Decrement the nesting level and 
+ * up to the enclosing normal identifiers and tags
+ */
+void ExitScope(void)
+{
+	Level--;
+	Identifiers = Identifiers->outer;
+}
 
 Symbol LookupID(char *name)
-{	
-	Symbol head = Functions;
-	while (head) {
-		if (strcmp(head->name, name) == 0) {
-			break;
-		}
-		head = head->next;
-		
-	}
-	return head;
+{
+	return LookupSymbol(Identifiers, name);
 }
+
 /**
 	Lookup a const first, 
 	if not existing, then add a new one.
@@ -34,10 +145,16 @@ Symbol LookupID(char *name)
 
 void InitSymbolTable()
 {
+	Level = 0;
+	//	Hashtable	data-structure
+	GlobalIDs.buckets = NULL;
+	GlobalIDs.outer = NULL;
+	GlobalIDs.level = 0;
 	Globals = Functions = Strings = NULL;
 	FunctionTail = &Functions;
 	StringTail = &Strings;
 	GlobalTail = &Globals;
+	Identifiers = &GlobalIDs;
 	TempNum = LabelNum = StringNum = 0;	
 }
 Symbol AddVariable(char *name, Type ty, int sclass)
@@ -48,15 +165,22 @@ Symbol AddVariable(char *name, Type ty, int sclass)
 	p->name = name;
 	p->ty = ty;
 	p->sclass = sclass;
-	if (sclass != TK_EXTERN) {
-		*FSYM->lastv = (Symbol)p;
-		FSYM->lastv = &p->next;
-	} else {
+	if (Level == 0 || sclass == TK_STATIC)
+	{
 		*GlobalTail = (Symbol)p;
 		GlobalTail = &p->next;
 	}
-	return (Symbol)p;
+	else if (sclass != TK_EXTERN)
+	{
+		*FSYM->lastv = (Symbol)p;
+		FSYM->lastv = &p->next;
+	}
+	if(sclass == TK_EXTERN  && Identifiers  != &GlobalIDs){
+		AddSymbol(&GlobalIDs, (Symbol)p);		
+	}
+	return AddSymbol(Identifiers, (Symbol)p);
 }
+
 Symbol AddFunction(char *name, Type ty, int sclass)
 {
 	FunctionSymbol p;
@@ -68,8 +192,13 @@ Symbol AddFunction(char *name, Type ty, int sclass)
 	p->lastv = &p->params;
 	*FunctionTail = (Symbol)p;
 	FunctionTail = &p->next;
+	if(Identifiers  != &GlobalIDs){
+		AddSymbol(Identifiers, (Symbol)p);		
+	}
 
-	return (Symbol)p;
+	return AddSymbol(&GlobalIDs, (Symbol)p);
+
+
 }
 
 Symbol AddConstant(Type ty, union value val)

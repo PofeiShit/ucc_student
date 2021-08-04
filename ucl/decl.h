@@ -35,7 +35,10 @@ typedef struct astToken
 struct astSpecifiers
 {
 	AST_NODE_COMMON
-	AstNode tySpecs;	
+	AstNode tySpecs;
+	AstNode stgClasses;
+	// After semantics check ,we know the storage-class
+	int sclass;	
 	Type ty;
 };
 

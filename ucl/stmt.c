@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "stmt.h"
 
+static AstStatement ParseStatement(void);
 static AstStatement ParseExpressionStatement(void)
 {
 	AstExpressionStatement exprStmt;
@@ -28,21 +29,14 @@ static AstStatement ParseReturnStatement(void)
 	Expect(TK_SEMICOLON);
 	return (AstStatement)retStmt;
 }
-static AstStatement ParseStatement(void)
-{
-	switch (CurrentToken)
-	{
-	case TK_RETURN:
-		return ParseReturnStatement();
-	default:
-		return ParseExpressionStatement();
-	}
-}
+
 
 AstStatement ParseCompoundStatement(void)
 {
 	AstCompoundStatement compStmt;
 	AstNode *tail;
+
+	Level++;
 	CREATE_AST_NODE(compStmt, CompoundStatement);
 	NEXT_TOKEN;
 	tail = &compStmt->stmts;
@@ -54,5 +48,19 @@ AstStatement ParseCompoundStatement(void)
 			break;
 	}
 	Expect(TK_RBRACE);
+	Level--;
+		
 	return (AstStatement)compStmt;
+}
+static AstStatement ParseStatement(void)
+{
+	switch (CurrentToken)
+	{
+	case TK_RETURN:
+		return ParseReturnStatement();
+	case TK_LBRACE:
+		return ParseCompoundStatement();
+	default:
+		return ParseExpressionStatement();
+	}
 }

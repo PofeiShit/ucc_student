@@ -29,10 +29,28 @@ static char* GetAccessName(Symbol p)
 		break;
 	case SK_Variable:	
 	case SK_Temp:
-		if (p->sclass == TK_EXTERN) 
+		if (p->level == 0 || p->sclass == TK_EXTERN){
 			p->aname = p->name;
-		else
+		}
+		else if (p->sclass == TK_STATIC)
+		{
+			/**
+				int main(){	
+					static int c = 5;
+					...
+				}
+				c.0:	.long	5	
+
+				Because it is illegal to declare a global var in C language as following:
+					int c.0;	
+				So there is no conflict to generate a name 'c.0' for static variable in 
+				assembly output.
+			 */
+			p->aname = FormatName("%s.%d", p->name, TempNum++);
+		}
+		else {
 			p->aname = FormatName("%d(%%ebp)", AsVar(p)->offset);
+		}
 		break;
 	case SK_Function:
 		/**
@@ -212,7 +230,19 @@ void DefineLabel(Symbol p)
 void DefineCommData(Symbol p)
 {
 	GetAccessName(p);
-	Print(".comm\t%s,%d\n", p->aname, p->ty->size);
+	if (p->sclass == TK_STATIC)
+	{
+		/**
+			#include <stdio.h>
+			int a = 3;
+			static int b;
+		 */
+		Print(".lcomm\t%s,%d\n", p->aname, p->ty->size);
+	}
+	else
+	{
+		Print(".comm\t%s,%d\n", p->aname, p->ty->size);
+	}
 }
 void EndProgram(void)
 {

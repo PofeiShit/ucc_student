@@ -70,7 +70,7 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 	AstFunctionDeclarator funcDec = (AstFunctionDeclarator)dec;
 
 	CheckDeclarator(funcDec->dec);
-
+	EnterParameterList();
 	ALLOC(funcDec->sig);
 	funcDec->sig->hasProto = funcDec->paramTyList != NULL;
 	funcDec->sig->hasEllipsis = 0;
@@ -85,6 +85,8 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 	funcDec->tyDrvList->sig = funcDec->sig;
 	funcDec->tyDrvList->next = funcDec->dec->tyDrvList;
 	funcDec->id = funcDec->dec->id;
+	SaveParameterListTable();	
+	LeaveParemeterList();
 }
 
 static void CheckDeclarator(AstDeclarator dec)
@@ -106,6 +108,11 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	AstNode p;
 	Type ty;
 	int tyCnt = 0;
+	//storage-class-specifier:		extern	, auto,	static, register, ... 
+	tok = (AstToken)specs->stgClasses;
+	if (tok) {
+		specs->sclass = tok->token;
+	}
 	p = specs->tySpecs;
 	while (p) {
 		tok = (AstToken)p;
@@ -136,9 +143,11 @@ void CheckFunction(AstFunction func)
 	Vector params;
 	Parameter param;
 	CheckDeclarationSpecifiers(func->specs);
-
-	sclass = TK_EXTERN;
-
+	//The default storage-class of function definition is extern.
+	if ((sclass = func->specs->sclass) == 0)
+	{
+		sclass = TK_EXTERN;
+	}
 	CheckDeclarator(func->dec);
 	
 	params = func->fdec->sig->params;
@@ -148,10 +157,11 @@ void CheckFunction(AstFunction func)
 	ENDFOR
 	ty = DeriveType(func->dec->tyDrvList, func->specs->ty);
 
-	func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, TK_EXTERN);
+	func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, sclass);
 
 	CURRENTF = func;
 	FSYM = func->fsym;
+	RestoreParameterListTable();	
 	{
 		Vector v = ((FunctionType)ty)->sig->params;
 
@@ -162,19 +172,37 @@ void CheckFunction(AstFunction func)
 		FSYM->lastv = &FSYM->locals;		
 	}
 	CheckCompoundStatement(func->stmt);
+	ExitScope();	
 	// Referencing an undefined label is considered as an error.
 }
 
-static void CheckGlobalDeclaraion(AstDeclaration decl)
+static void CheckGlobalDeclaration(AstDeclaration decl)
 {
 	Symbol sym;
 	Type ty;
+	int sclass;	
 	CheckDeclarationSpecifiers(decl->specs);
 	ty = decl->specs->ty;
+	sclass = decl->specs->sclass;
+	// check declarator
 	AstDeclarator dec = (AstDeclarator)decl->dec;
 	while (dec) {
 		CheckDeclarator(dec);
-		sym = AddVariable(dec->id, ty);
+
+		ty = DeriveType(dec->tyDrvList, decl->specs->ty);	
+		if (ty == NULL)
+		{
+			// Error(&initDec->coord, "Illegal type");
+			ty = T(INT);
+		}				
+		if ((sym = LookupID(dec->id)) == NULL)
+		{
+			sym = AddVariable(dec->id, ty, sclass);
+		}
+		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
+		// if (sym->sclass == TK_EXTERN){
+		// 	sym->sclass = sclass;			
+		// }			
 	}
 }
 
@@ -198,7 +226,7 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 		else
 		{
 			//assert(p->kind == NK_Declaration);
-			CheckGlobalDeclaraion((AstDeclaration)p);
+			CheckGlobalDeclaration((AstDeclaration)p);
 		}
 		p = p->next;
 	}

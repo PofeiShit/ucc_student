@@ -1,3 +1,5 @@
+static int g_a;
+char g_ch;
 char printf_hw(int a, int b)
 {
 	puts("hello world");
@@ -6,6 +8,6 @@ char printf_hw(int a, int b)
 
 int main()
 {
-	printf_hw('1', 2);
+	printf_hw(3, 4);
 	return 1;
 }

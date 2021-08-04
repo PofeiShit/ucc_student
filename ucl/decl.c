@@ -8,10 +8,22 @@ static AstSpecifiers ParseDeclarationSpecifiers(void)
 {
 	AstSpecifiers specs;
 	AstToken tok;
-	CREATE_AST_NODE(specs, Specifiers);
+	AstNode *scTail;
 
+	CREATE_AST_NODE(specs, Specifiers);
+	scTail = &specs->stgClasses;
 next_specifiers:
-	switch(CurrentToken) {
+	switch(CurrentToken) 
+	{
+	case TK_EXTERN:
+	case TK_STATIC:
+		CREATE_AST_NODE(tok, Token);
+		tok->token = CurrentToken;
+		*scTail = (AstNode)tok;
+		scTail = &tok->next;		
+		NEXT_TOKEN;
+		break;
+
 	case TK_VOID:
 	case TK_CHAR:
 	case TK_INT:

@@ -81,6 +81,7 @@ static struct keyword keywordsR[] =
 };
 static struct keyword keywordsS[] =
 {
+	{"static", 6, TK_STATIC},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsT[] =
