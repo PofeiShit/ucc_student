@@ -202,7 +202,8 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
 		// if (sym->sclass == TK_EXTERN){
 		// 	sym->sclass = sclass;			
-		// }			
+		// }		
+		dec = dec->next;	
 	}
 }
 

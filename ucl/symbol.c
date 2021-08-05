@@ -267,6 +267,7 @@ Symbol CreateTemp(Type ty)
 	p->kind = SK_Temp;
 	p->name = FormatName("t%d", TempNum++);
 	p->ty = ty;
+	p->level = 1;
 	// p->pcoord = FSYM->pcoord;
 	*FSYM->lastv = (Symbol)p;
 	FSYM->lastv = &p->next;

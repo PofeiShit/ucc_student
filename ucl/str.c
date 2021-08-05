@@ -1,4 +1,27 @@
 #include "ucl.h"
+
+static NameBucket NameBuckets[NAME_HASH_MASK + 1];
+/**
+	The hash function for calculating hash value.
+ */
+static unsigned int ELFHash(char *str, int len)
+{
+	unsigned int h = 0;
+	unsigned int x = 0;
+	int i;
+
+	for (i = 0; i < len; ++i)
+	{
+		h = (h << 4) + *str++;
+		if ((x = h & 0xF0000000) != 0)
+		{
+			h ^= x >> 24;
+			h &= ~x;
+		}
+	}
+
+	return h;
+}
 /**
  * Different with identifier, ucc doesn't maintain a string pool for string literal. i.e.
  * Even two string literals' character sequence is identical, there are seperate copy for
@@ -39,11 +62,31 @@ void AppendSTR(String str, char *tmp, int len, int wide)
 	}
 
 }
-char *InternName(char *id, int len)
+char* InternName(char *id, int len)
 {
-	// TODO
-	char *p = HeapAllocate(&StringHeap, len + 1);
-	for (int i = 0; i < len; i++)
-		p[i] = id[i];
-	return p;
+	int i;
+	int h;
+	NameBucket p;
+	// try to find the id in the hash buckets.
+	h = ELFHash(id, len) & NAME_HASH_MASK;
+	for (p = NameBuckets[h]; p != NULL; p = p->link)
+	{
+		if (len == p->len && strncmp(id, p->name, len) == 0)
+			return p->name;
+	}
+	// allocate memory for struct nameBucket object
+	p = HeapAllocate(&StringHeap, sizeof(*p));
+	// allocate memory for string
+	p->name = HeapAllocate(&StringHeap, len + 1);
+	for (i = 0; i < len; ++i)
+	{
+		p->name[i] = id[i];
+	}
+	p->name[len] = 0;
+	p->len = len;
+	// append the new nameBucket object at the end of the corresponding list in Hash table.
+	p->link = NameBuckets[h];
+	NameBuckets[h] = p;
+
+	return p->name;
 }
