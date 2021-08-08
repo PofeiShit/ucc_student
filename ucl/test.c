@@ -8,6 +8,7 @@ char printf_hw(int a, int b)
 
 int main()
 {
+	int a;
 	printf_hw(3, 4);
 	return 1;
 }

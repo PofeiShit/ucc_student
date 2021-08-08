@@ -21,10 +21,10 @@ typedef struct astReturnStatement
 typedef struct astCompoundStatement
 {
 	AST_STATEMENT_COMMON
-	// AstNode decls;
+	AstNode decls;
 	AstNode stmts;
 	//	local variables that has initializer-list.
-	// Vector ilocals;
+	Vector ilocals;
 } *AstCompoundStatement;
 #define AsExpr(stmt) ((AstExpressionStatement)stmt)
 #define AsComp(stmt) ((AstCompoundStatement)stmt)

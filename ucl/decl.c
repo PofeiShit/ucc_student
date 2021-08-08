@@ -1,6 +1,9 @@
 #include "ucl.h"
+#include "grammer.h"
 #include "ast.h"
 #include "decl.h"
+
+int FIRST_Declaration[] = { FIRST_DECLARATION, 0};
 
 static AstDeclarator ParseDeclarator();
 
@@ -157,7 +160,19 @@ static AstFunctionDeclarator GetFunctionDeclarator(AstDeclarator dec)
 	}
 	return (AstFunctionDeclarator)dec;
 }
+/**
+declaration
+	declaration-specifiers [init-declarator-list]
+ */
+AstDeclaration ParseDeclaration(void)
+{
+	AstDeclaration decl;
 
+	decl = ParseCommonHeader();
+	Expect(TK_SEMICOLON);
+
+	return decl;
+}
 /**
  *  external-declaration:
  *		function-definition

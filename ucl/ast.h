@@ -37,5 +37,6 @@ void Do_Expect(int tok);
 #define Expect CurFileName = __FILE__, CurFileLineNo = __LINE__, Do_Expect
 
 extern int CurrentToken;
-
+int  CurrentTokenIn(int toks[]);
+extern int FIRST_Declaration[];
 #endif

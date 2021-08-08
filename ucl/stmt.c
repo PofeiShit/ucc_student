@@ -1,4 +1,5 @@
 #include "ucl.h"
+#include "grammer.h"
 #include "ast.h"
 #include "stmt.h"
 
@@ -39,6 +40,15 @@ AstStatement ParseCompoundStatement(void)
 	Level++;
 	CREATE_AST_NODE(compStmt, CompoundStatement);
 	NEXT_TOKEN;
+	tail = &compStmt->decls;
+	while (CurrentTokenIn(FIRST_Declaration))
+	{
+		// for example, 	"f(20,30);",  f is an id;  but f(20,30) is a statement, not declaration.
+		if (CurrentToken == TK_ID)
+			break;
+		*tail = (AstNode)ParseDeclaration();
+		tail = &(*tail)->next;
+	}
 	tail = &compStmt->stmts;
 	while (CurrentToken != TK_RBRACE && CurrentToken != TK_END)
 	{

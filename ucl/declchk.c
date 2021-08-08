@@ -176,6 +176,42 @@ void CheckFunction(AstFunction func)
 	// Referencing an undefined label is considered as an error.
 }
 
+void CheckLocalDeclaration(AstDeclaration decl, Vector v)
+{
+	Symbol sym;
+	Type ty;
+	int sclass;	
+	CheckDeclarationSpecifiers(decl->specs);
+	ty = decl->specs->ty;
+	sclass = decl->specs->sclass;
+	if (sclass == 0)
+	{
+		sclass = TK_AUTO;
+	}	
+	// check declarator
+	AstDeclarator dec = (AstDeclarator)decl->dec;
+	while (dec) {
+		CheckDeclarator(dec);
+
+		ty = DeriveType(dec->tyDrvList, decl->specs->ty);	
+		if (ty == NULL)
+		{
+			// Error(&initDec->coord, "Illegal type");
+			ty = T(INT);
+		}				
+		if ((sym = LookupID(dec->id)) == NULL || sym->level < Level)
+		{
+			VariableSymbol vsym;
+			vsym = (VariableSymbol)AddVariable(dec->id, ty, sclass);
+		}
+		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
+		// if (sym->sclass == TK_EXTERN){
+		// 	sym->sclass = sclass;			
+		// }		
+		dec = dec->next;	
+	}
+}
+
 static void CheckGlobalDeclaration(AstDeclaration decl)
 {
 	Symbol sym;

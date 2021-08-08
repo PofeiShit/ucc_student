@@ -93,6 +93,6 @@ struct astDeclaration
 	AstSpecifiers specs;
 	AstNode dec;
 };
-
+void CheckLocalDeclaration(AstDeclaration decl, Vector v);
 extern AstFunction CURRENTF;
 #endif
