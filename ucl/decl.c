@@ -6,15 +6,97 @@
 int FIRST_Declaration[] = { FIRST_DECLARATION, 0};
 
 static AstDeclarator ParseDeclarator();
+static AstSpecifiers ParseDeclarationSpecifiers(void);
 
+static AstStructDeclaration ParseStructDeclaration(void)
+{
+	AstStructDeclaration stDecl;
+	AstNode *tail;
+	CREATE_AST_NODE(stDecl, StructDeclaration);
+	// to support 	struct {	;	},	empty struct/union declaration	
+	if (CurrentToken == TK_SEMICOLON){		
+		NEXT_TOKEN;
+		return NULL;
+	}	
+	stDecl->specs = ParseDeclarationSpecifiers();	
+	if (stDecl->specs->stgClasses != NULL)
+	{
+		//Error(&stDecl->coord, "Struct/union member should not have storage class");
+		stDecl->specs->stgClasses = NULL;
+	}	
+	// if (stDecl->specs->tyQuals == NULL && stDecl->specs->tySpecs == NULL)
+	// {
+		//Error(&stDecl->coord, "Expect type specifier or qualifier");
+	// }	
+	// an extension to C89, supports anonymous struct/union member in struct/union
+	// struct {
+	//		int;
+	// }
+	if (CurrentToken == TK_SEMICOLON)
+	{	
+		NEXT_TOKEN;
+		return stDecl;		
+	}	
+	stDecl->stDecs = (AstNode)ParseDeclarator();	
+	tail = &stDecl->stDecs->next;	
+	while (CurrentToken == TK_COMMA)
+	{
+		NEXT_TOKEN;
+		// TODO: support a:4
+		*tail = (AstNode)ParseDeclarator();
+		tail = &(*tail)->next;
+	}
+	// printf("CurrentToken:%d\t%d\n", CurrentToken, TK_SEMICOLON);
+	Expect(TK_SEMICOLON);
+	
+	return stDecl;	
+}
+static AstStructSpecifier ParseStructOrUnionSpecifier(void)
+{
+	AstStructSpecifier stSpec;
+	AstNode *tail;
+	CREATE_AST_NODE(stSpec, StructSpecifier);	
+	NEXT_TOKEN;
+	switch (CurrentToken) 
+	{
+		case TK_ID:
+			stSpec->id = TokenValue.p;			
+			NEXT_TOKEN;
+			if (CurrentToken == TK_LBRACE) 
+				goto lbrace;			
+			return stSpec;
+	
+		case TK_LBRACE:
+lbrace:
+			NEXT_TOKEN;
+			stSpec->hasLbrace = 1;
+
+			if (CurrentToken == TK_RBRACE) {
+				NEXT_TOKEN;
+				return stSpec;
+			}
+			tail = &stSpec->stDecls;
+			while (CurrentTokenIn(FIRST_Declaration)) {				
+				*tail = (AstNode)ParseStructDeclaration();
+				if (*tail != NULL) 
+					tail = &(*tail)->next;
+			}
+			Expect(TK_RBRACE);	
+			return stSpec;
+
+		default:
+			return stSpec;
+	}
+}
 static AstSpecifiers ParseDeclarationSpecifiers(void)
 {
 	AstSpecifiers specs;
 	AstToken tok;
-	AstNode *scTail;
+	AstNode *scTail, *tsTail;
 
 	CREATE_AST_NODE(specs, Specifiers);
 	scTail = &specs->stgClasses;
+	tsTail = &specs->tySpecs;	
 next_specifiers:
 	switch(CurrentToken) 
 	{
@@ -35,12 +117,16 @@ next_specifiers:
 		specs->tySpecs = (AstNode)tok;
 		NEXT_TOKEN;
 		break;
+	case TK_STRUCT:
+		*tsTail = (AstNode)ParseStructOrUnionSpecifier();
+		tsTail = &(*tsTail)->next;		
+		break;
+
 	default:
 		return specs;
 	}
 	goto next_specifiers;
 }
-
 /**
  *  direct-declarator:
  *		ID
@@ -268,5 +354,6 @@ AstTranslationUnit ParseTranslationUnit(char *filename)
 		tail = &(*tail)->next;
 	}
 	CloseSourceFile();
+	printf("Parse Done!\n");
 	return transUnit;
 }

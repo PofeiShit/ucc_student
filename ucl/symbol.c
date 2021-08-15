@@ -8,14 +8,18 @@ typedef struct  bucketLinker{
 
 // number of strings
 static int StringNum;
+// tags in global scope, tag means struct/union, enumeration name
+static struct table GlobalTags;
 // normal identifiers in global scope
 static struct table GlobalIDs;
 // all the constants
 static struct table Constants;
+// tags in current scope
+static Table Tags;
 // normal identifiers in current scope
 static Table Identifiers;
 static int inParameterList = 0;
-static Table savedIdentifiers;
+static Table savedIdentifiers, savedTags;
 
 int IsInParameterList(void){
 	return inParameterList;
@@ -31,6 +35,7 @@ void LeaveParemeterList(void){
 }
 void SaveParameterListTable(void){
 	savedIdentifiers = Identifiers;
+	savedTags = Tags;
 }
 void RestoreParameterListTable(void){
 	Level++;
@@ -38,6 +43,9 @@ void RestoreParameterListTable(void){
 	savedIdentifiers->level = Level;
 	Identifiers = savedIdentifiers;
 
+	savedTags->outer = Tags;
+	savedTags->level = Level;
+	Tags = savedTags;
 }
 
 
@@ -118,6 +126,11 @@ void EnterScope(void)
 	t->buckets = NULL;
 	Identifiers = t;
 
+	ALLOC(t);
+	t->level = Level;
+	t->outer = Tags;
+	t->buckets = NULL;
+	Tags = t;
 }
 
 /**
@@ -128,6 +141,7 @@ void ExitScope(void)
 {
 	Level--;
 	Identifiers = Identifiers->outer;
+	Tags = Tags->outer;
 }
 
 Symbol LookupID(char *name)
@@ -135,6 +149,10 @@ Symbol LookupID(char *name)
 	return LookupSymbol(Identifiers, name);
 }
 
+Symbol LookupTag(char *name)
+{
+	return LookupSymbol(Tags, name);
+}
 /**
 	Lookup a const first, 
 	if not existing, then add a new one.
@@ -142,18 +160,30 @@ Symbol LookupID(char *name)
 	Constant:
 			int, pointer, float,double
  */
+Symbol AddTag(char *name, Type ty)
+{
+	Symbol p;
+	ALLOC(p);
+	p->kind = SK_Tag;
+	p->name = name;
+	p->ty = ty;
+	
+	return AddSymbol(Tags, p);
+}
 
 void InitSymbolTable()
 {
 	Level = 0;
 	//	Hashtable	data-structure
-	GlobalIDs.buckets = NULL;
-	GlobalIDs.outer = NULL;
-	GlobalIDs.level = 0;
+	GlobalTags.buckets = GlobalIDs.buckets = NULL;
+	GlobalTags.outer = GlobalIDs.outer = NULL;
+	GlobalTags.level = GlobalIDs.level = 0;
 	Globals = Functions = Strings = NULL;
 	FunctionTail = &Functions;
 	StringTail = &Strings;
 	GlobalTail = &Globals;
+
+	Tags = &GlobalTags;
 	Identifiers = &GlobalIDs;
 	TempNum = LabelNum = StringNum = 0;	
 }

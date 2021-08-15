@@ -3,7 +3,7 @@
 
 enum 
 { 
-	SK_Temp, SK_String, SK_Label, SK_Constant, SK_Variable, SK_Function, SK_Register, SK_IRegister,
+	SK_Tag, SK_Temp, SK_String, SK_Label, SK_Constant, SK_Variable, SK_Function, SK_Register, SK_IRegister,
 };
 
 #define SYM_HASH_MASK 127
