@@ -18,6 +18,7 @@ TOKEN(TK_ID,        "ID")
 TOKEN(TK_INTCONST, "int")
 //operators
 TOKEN(TK_COMMA,			",")
+TOKEN(TK_ASSIGN,        "=")
 TOKEN(TK_LPAREN,        "(")
 TOKEN(TK_RPAREN,        ")")
 TOKEN(TK_STRING, 	"STR")

@@ -106,6 +106,7 @@ static int ScanIntLiteral(unsigned char *start, int len, int base)
 	unsigned int i[2] = {0, 0};
 	int tok = TK_INTCONST;
 	int d = 0;
+	int carry0 = 0, carry1 = 0;
 
 	while (p != end) {
 		if (base == 16) {
@@ -114,6 +115,22 @@ static int ScanIntLiteral(unsigned char *start, int len, int base)
 		} else {
 			d = *p - '0';
 		}
+		switch(base) 
+		{
+			case 10:
+			{
+				unsigned int t1, t2;
+				// number * 10 = number * 8 + number * 2 = (number << 3) + (number << 1)				
+				t1 = i[0] << 3;
+				t2 = i[0] << 1;
+				i[0] = t1 + t2;															
+			}
+			break;
+		}
+		if (i[0] > UINT_MAX - d)	// for decimal, i[0] + d maybe greater than UINT_MAX
+		{
+			carry0 += i[0] - (UINT_MAX - d);
+		}		
 		i[0] += d;
 		p++;
 	}
@@ -181,6 +198,11 @@ int GetNextToken(void)
 	tok = (*Scanners[*CURSOR])();
 	return tok;
 }
+static int ScanEqual(void)
+{
+	CURSOR++;
+	return TK_ASSIGN;
+}
 void SetupLexer(void)
 {
 	int i;
@@ -202,5 +224,7 @@ void SetupLexer(void)
 	Scanners[')'] = ScanRPAREN;
 	Scanners[';'] = ScanSEMICOLON;
 	Scanners[','] = ScanCOMMA;
+	Scanners['='] = ScanEqual;	
 
 }
+

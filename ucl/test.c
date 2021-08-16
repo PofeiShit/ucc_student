@@ -15,6 +15,7 @@ int main()
 {
 	int a;
 	struct g_s s;
+	a = 100;
 	printf_hw(3, 4);
 	return 1;
 }

@@ -4,6 +4,7 @@
 /**
 	opcode here is used by UIL
  */
+ OPCODE(MOV,     "=",                    Move)
  OPCODE(RET, 	"ret", 					Return)
  OPCODE(JMP, 	"jmp",					Jump)
  OPCODE(CALL,    "call",                 Call)

@@ -17,6 +17,19 @@ void AppendInst(IRInst inst)
 
 	CurrentBB->ninst++;
 }
+void GenerateMove(Type ty, Symbol dst, Symbol src)
+{
+	IRInst inst;
+	ALLOC(inst);
+	// dst->ref++;
+	// src->ref++;
+	inst->ty = ty;
+	inst->opcode = MOV;
+	inst->opds[0] = dst;
+	inst->opds[1] = src;
+	inst->opds[2] = NULL;
+	AppendInst(inst);
+}
 void GenerateAssign(Type ty, Symbol dst, int opcode, Symbol src1, Symbol src2)
 {
 	IRInst inst;

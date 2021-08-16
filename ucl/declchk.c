@@ -207,7 +207,6 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	while (p) {
 		if (p->kind == NK_StructSpecifier)
 		{
-			printf("Start CheckStructOrUnionSpecifers\n");
 			ty = CheckStructOrUnionSpecifier((AstStructSpecifier)p);
 			tyCnt++;
 		} else {
@@ -315,7 +314,6 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 	Type ty;
 	int sclass;	
 	CheckDeclarationSpecifiers(decl->specs);
-	printf("Check Declaration Specifiers Done!\n");
 	ty = decl->specs->ty;
 	sclass = decl->specs->sclass;
 	// check declarator
@@ -339,7 +337,6 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 		// }		
 		dec = dec->next;	
 	}
-	printf("Parse Global Declaration Done\n");
 }
 
 void CheckTranslationUnit(AstTranslationUnit transUnit)
@@ -361,7 +358,6 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 		}
 		else
 		{
-			printf("HELLO\n");
 			//assert(p->kind == NK_Declaration);
 			CheckGlobalDeclaration((AstDeclaration)p);
 		}

@@ -300,8 +300,7 @@ Symbol CreateTemp(Type ty)
 	p->level = 1;
 	// p->pcoord = FSYM->pcoord;
 	*FSYM->lastv = (Symbol)p;
-	FSYM->lastv = &p->next;
-	printf("temp %s %s %d %d\n", FSYM->name, p->name, p, ty->size);
+	FSYM->lastv = &p->next;	
 	return (Symbol)p;
 }
 // mainly create basic block's label name.

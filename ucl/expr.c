@@ -18,8 +18,7 @@ static AstExpression ParsePrimaryExpression(void)
 
 	switch (CurrentToken)
 	{
-	case TK_ID:
-
+	case TK_ID:	
 		CREATE_AST_NODE(expr, Expression);
 
 		expr->op = OP_ID;
@@ -53,8 +52,8 @@ static AstExpression ParsePrimaryExpression(void)
 static AstExpression ParsePostfixExpression(void)
 {
 	AstExpression expr, p;
-
 	expr = ParsePrimaryExpression();
+
 	while (1)
 	{
 		switch (CurrentToken)
@@ -88,7 +87,31 @@ static AstExpression ParsePostfixExpression(void)
 		}
 	}
 }
+/**
+ *  assignment-expression:
+ *      conditional-expression
+ *      unary-expression assignment-operator assignment-expression
+ *  assignment-operator:
+ *      = *= /= %= += -= <<= >>= &= ^= |=
+ *  There is a little twist here: the parser always treats the first nonterminal
+ *  as a conditional expression.
+ */
+AstExpression ParseAssignmentExpression(void)
+{
+	AstExpression expr;	 
 
+	expr = ParsePostfixExpression();
+		
+	if (CurrentToken == TK_ASSIGN) {
+		AstExpression asgnExpr;
+		asgnExpr->op = OP_ASSIGN;
+		asgnExpr->kids[0] = expr;
+		NEXT_TOKEN;		 
+		asgnExpr->kids[1] = ParsePostfixExpression();
+		expr = asgnExpr;
+	}
+	return expr;
+}
 /**
  *  expression:
  *      assignment-expression
@@ -96,7 +119,17 @@ static AstExpression ParsePostfixExpression(void)
  */
 AstExpression ParseExpression(void)
 {
-	AstExpression expr;
-	expr = ParsePostfixExpression();
+	AstExpression expr, comaExpr;
+
+	expr = ParseAssignmentExpression();
+
+	while (CurrentToken == TK_COMMA) {
+		CREATE_AST_NODE(comaExpr, Expression);
+		comaExpr->op = OP_COMMA;
+		comaExpr->kids[0] = expr;
+		NEXT_TOKEN;		
+		comaExpr->kids[1] = ParseAssignmentExpression();
+		expr = comaExpr;		
+	}
 	return expr;
 }

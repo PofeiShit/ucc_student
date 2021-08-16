@@ -24,8 +24,7 @@ static void Move(int code, Symbol dst, Symbol src)
 {
 	Symbol opds[2];
 	opds[0] = dst;
-	opds[1] = src;
-	printf("%s\t%s\n", src->name, dst->name);
+	opds[1] = src;	
 	PutASMCode(code, opds);
 }
 
@@ -223,6 +222,27 @@ static void EmitAddress(IRInst inst)
 	AllocateReg(inst, 0);
 	PutASMCode(X86_ADDR, inst->opds);
 	//ModifyVar(DST);
+}
+/**
+ * Emit assembly code for move
+ */
+static void EmitMove(IRInst inst)
+{
+int tcode = TypeCode(inst->ty);
+	Symbol reg;
+	switch (tcode)
+	{
+		case I1:
+			if (SRC1->kind == SK_Constant)
+				Move(X86_MOVI1, DST, SRC1);
+			break;
+		case I4:
+			if (SRC1->kind == SK_Constant)
+				Move(X86_MOVI4, DST, SRC1);
+			break;
+		default:
+			;
+	}
 }
 static void (* Emitter[])(IRInst inst) = 
 {
