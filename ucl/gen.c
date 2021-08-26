@@ -6,6 +6,13 @@
 #include "input.h"
 
 BBlock CurrentBB;
+
+int OPMap[] = 
+{
+#define OPINFO(op, prec, name, func, opcode) opcode,
+#include "opinfo.h"
+#undef OPINFO
+};
 void AppendInst(IRInst inst)
 {
 	//assert(CurrentBB != NULL);

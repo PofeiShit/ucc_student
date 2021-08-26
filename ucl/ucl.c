@@ -27,14 +27,14 @@ static void Compile(char *file)
     // parse preprocessed C file, generate an abstract syntax tree
 	transUnit = ParseTranslationUnit(file);
 
-	CheckTranslationUnit(transUnit);
+	// CheckTranslationUnit(transUnit);
 	// translate the abstract synatx tree into intermediate code
-	Translate(transUnit);
+	// Translate(transUnit);
 
 	// emit assembly code from intermediate code.
 	// The kernel function is EmitIRInst(inst).
 	// for example, see function EmitAssign(IRInst inst) 
-	EmitTranslationUnit(transUnit);
+	// EmitTranslationUnit(transUnit);
 	Finalize();
 }
 

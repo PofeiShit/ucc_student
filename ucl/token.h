@@ -19,14 +19,22 @@ TOKEN(TK_INTCONST, "int")
 //operators
 TOKEN(TK_COMMA,			",")
 TOKEN(TK_ASSIGN,        "=")
+TOKEN(TK_EQUAL,         "==")
+TOKEN(TK_UNEQUAL,       "!=")
+
+TOKEN(TK_GREAT,         ">")
+TOKEN(TK_LESS,          "<")
+TOKEN(TK_GREAT_EQ,      ">=")
+TOKEN(TK_LESS_EQ,       "<=")
 TOKEN(TK_LPAREN,        "(")
+
 TOKEN(TK_RPAREN,        ")")
 TOKEN(TK_STRING, 	"STR")
-
 //punctuators
 TOKEN(TK_LBRACE,        "{")
 TOKEN(TK_RBRACE,        "}")
 TOKEN(TK_SEMICOLON,     ";")
+
 TOKEN(TK_ELLIPSIS, 		"...")
 TOKEN(TK_NEWLINE,       "\n")
 TOKEN(TK_END,           "EOF")

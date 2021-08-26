@@ -31,6 +31,190 @@ static void SkipWhiteSpace(void)
 	}
 }
 
+
+static int ScanBar(void)
+{
+	CURSOR++;
+	if (*CURSOR == '|')		// ||
+	{
+		CURSOR++;
+		return -1;
+	}
+	else if (*CURSOR == '=')	// |=
+	{
+		CURSOR++;
+		return TK_BITOR_ASSIGN;
+	}
+	else	// |
+	{
+		return -1;
+	}
+}
+
+static int ScanAmpersand(void)
+{
+	CURSOR++;
+	if (*CURSOR == '&')		// &&
+	{
+		CURSOR++;
+		return -1;
+	}
+	else if (*CURSOR == '=')	// &=
+	{
+		CURSOR++;
+		return TK_BITAND_ASSIGN;
+	}
+	else		// &
+	{
+		return -1;
+	}
+}
+
+static int ScanCaret(void)	// ^	exclusive or
+{
+	CURSOR++;
+	if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return TK_BITXOR_ASSIGN;
+	}
+	else
+	{
+		return -1;
+	}
+}
+static int ScanLess(void)
+{
+	CURSOR++;
+	if (*CURSOR == '<')
+	{
+		CURSOR++;
+		if (*CURSOR == '=')
+		{
+			CURSOR++;
+			return TK_LSHIFT_ASSIGN;		// <<=
+		}
+		return -1;		// <<
+	}
+	else if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return -1;		// <=
+	}
+	else
+	{
+		return -1;			// <
+	}
+}
+
+static int ScanGreat(void)
+{
+	CURSOR++;
+	if (*CURSOR == '>')
+	{
+		CURSOR++;
+		if (*CURSOR == '=')		// >>=
+		{
+			CURSOR++;
+			return TK_RSHIFT_ASSIGN;
+		}
+		return -1;		// >>
+	}
+	else if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return -1;			// >=
+	}
+	else
+	{
+		return -1;		// >
+	}
+}
+static int ScanPlus(void)
+{
+	CURSOR++;
+	if (*CURSOR == '+')
+	{
+		CURSOR++;
+		return -1;			// ++
+	}
+	else if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return TK_ADD_ASSIGN;	// +=
+	}
+	else
+	{
+		return -1;			// +
+	}
+}
+
+static int ScanMinus(void)
+{
+	CURSOR++;
+	if (*CURSOR == '-')
+	{
+		CURSOR++;
+		return -1;			// --
+	}
+	else if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return TK_SUB_ASSIGN;	// -=
+	}
+	else if (*CURSOR == '>')
+	{
+		CURSOR++;
+		return -1;		// ->
+	}
+	else
+	{
+		return -1;			// -
+	}
+}
+
+static int ScanStar(void)
+{
+	CURSOR++;
+	if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return TK_MUL_ASSIGN;		// *=
+	}
+	else
+	{
+		return -1;				// *
+	}
+}
+
+static int ScanSlash(void)
+{
+	CURSOR++;
+	if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return TK_DIV_ASSIGN;		//	 /=
+	}
+	else
+	{
+		return -1;				// 		/
+	}
+}
+
+static int ScanPercent(void)
+{
+	CURSOR++;
+	if (*CURSOR == '=')
+	{
+		CURSOR++;
+		return TK_MOD_ASSIGN;		// %=
+	}
+	else
+	{
+		return -1;				// %
+	}
+}
+
 #define SINGLE_CHAR_SCANNER(t) \
 static int Scan##t(void)       \
 {                              \

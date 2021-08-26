@@ -3,6 +3,12 @@
 #include "expr.h"
 #include "decl.h"
 
+#define PERFORM_ARITH_CONVERSION(expr)                                 \
+    expr->ty = CommonRealType(expr->kids[0]->ty, expr->kids[1]->ty);   \
+    expr->kids[0] = Cast(expr->ty, expr->kids[0]);                     \
+    expr->kids[1] = Cast(expr->ty, expr->kids[1]);
+
+
 AstExpression Cast(Type ty, AstExpression expr)
 {
 	int scode = TypeCode(expr->ty);
@@ -130,6 +136,118 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 	}
 }
 /**
+ Syntax 
+		   AND-expression:
+				   equality-expression
+				   AND-expression &  equality-expression 
+				   
+          exclusive-OR-expression:
+                  AND-expression
+                  exclusive-OR-expression ^  AND-expression		
+
+          inclusive-OR-expression:
+                  exclusive-OR-expression
+                  inclusive-OR-expression |  exclusive-OR-expression                  
+ Constraints 
+	Each of the operands shall have integral type.	
+ */
+static AstExpression CheckBitwiseOP(AstExpression expr)
+{
+	if (BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
+	{
+		PERFORM_ARITH_CONVERSION(expr);
+		return FoldConstant(expr);
+	}
+
+	// REPORT_OP_ERROR;
+}
+/**
+ Syntax
+ 
+		   equality-expression:
+				   relational-expression
+				   equality-expression ==  relational-expression
+				   equality-expression !=  relational-expression 
+
+ */
+/**
+ Syntax 
+		   shift-expression:
+				   additive-expression
+				   shift-expression <<	additive-expression
+				   shift-expression >>	additive-expression
+ 
+ Constraints
+ 
+	Each of the operands shall have integral type.
+	The integral promotions are performed on each of the operands.  The
+type of the result is that of the promoted left operand.
+ */
+static AstExpression CheckShiftOP(AstExpression expr)
+{
+	return expr;
+	// if (BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
+	// {
+	// 	expr->kids[0] = DoIntegerPromotion(expr->kids[0]);
+	// 	expr->kids[1] = DoIntegerPromotion(expr->kids[1]);
+	// 	expr->ty = expr->kids[0]->ty;
+
+	// 	return FoldConstant(expr);
+	// }
+
+	// REPORT_OP_ERROR;
+}
+/**
+ Syntax
+		   multiplicative-expression:
+				   cast-expression
+				   multiplicative-expression *	cast-expression
+				   multiplicative-expression /	cast-expression
+				   multiplicative-expression %	cast-expression 
+ Constraints
+ 
+	Each of the operands shall have arithmetic type.  The operands of
+ the % operator shall have integral type.
+
+ */
+static AstExpression CheckMultiplicativeOP(AstExpression expr)
+{
+	return expr;
+// 	if (expr->op != OP_MOD && BothArithType(expr->kids[0]->ty, expr->kids[1]->ty))
+// 		goto ok;
+
+// 	if (expr->op == OP_MOD && BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
+// 		goto ok;
+
+// 	REPORT_OP_ERROR;
+
+// ok:
+// 	PERFORM_ARITH_CONVERSION(expr);
+// 	return FoldConstant(expr);
+}
+static AstExpression CheckAddOP(AstExpression expr)
+{
+	return expr;
+}
+static AstExpression CheckSubOP(AstExpression expr)
+{
+	return expr;
+}
+
+static AstExpression (* BinaryOPCheckers[])(AstExpression) = 
+{
+	CheckBitwiseOP,	// |
+	CheckBitwiseOP, // ^
+	CheckBitwiseOP,	// &
+	CheckShiftOP,		//	<<
+	CheckShiftOP,		// >>
+	CheckAddOP,			// +
+	CheckSubOP,			// -
+	CheckMultiplicativeOP,	// *
+	CheckMultiplicativeOP,	//  /
+	CheckMultiplicativeOP	// %	
+};
+/**
  Syntax
  
 		   assignment-expression:
@@ -153,10 +271,25 @@ OPINFO(OP_MOD_ASSIGN,    2,    "%=",     Assignment,     NOP)
 */
 static AstExpression CheckAssignmentExpression(AstExpression expr)
 {
+	int ops[] = 
+	{ 
+		OP_BITOR, OP_BITXOR, OP_BITAND, OP_LSHIFT, OP_RSHIFT, 
+		OP_ADD,	  OP_SUB,    OP_MUL,    OP_DIV,    OP_MOD 
+	};	
 	Type ty;
 	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 0);
 	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
 
+	if (expr->op != OP_ADD_ASSIGN) {
+		AstExpression lopr;
+		CREATE_AST_NODE(lopr, Expression);
+		lopr->op = ops[expr->op - OP_BITOR_ASSIGN];
+		lopr->kids[0] = expr->kids[0];
+		lopr->kids[1] = expr->kids[1];
+
+		exrp->kids[1] = (*BinaryOPCheckers[lopr->op - OP_BITOR])(lopr);
+
+	}
 	// we have use CanModify() to test whether left operand is modifiable.
 	ty = expr->kids[0]->ty;
 	expr->kids[1] = Cast(ty, expr->kids[1]);	
@@ -171,6 +304,12 @@ static AstExpression CheckCommaExpression(AstExpression expr)
 	expr->ty = expr->kids[1]->ty;
 	return expr;
 }
+
+static AstExpression CheckErrorExpression(AstExpression expr)
+{
+	return NULL;
+}
+
 static AstExpression (*ExprCheckers[])(AstExpression) = 
 {
 #define OPINFO(op, prec, name, func, opcode) Check##func##Expression,

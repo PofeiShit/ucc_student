@@ -20,6 +20,8 @@ enum ASMCode
 #include "x86linux.tpl"
 #undef TEMPLATE
 };
+
+#define ASM_CODE(opcode, tcode) ((opcode << 2) + tcode - I4)
 static void Move(int code, Symbol dst, Symbol src)
 {
 	Symbol opds[2];
@@ -228,7 +230,7 @@ static void EmitAddress(IRInst inst)
  */
 static void EmitMove(IRInst inst)
 {
-int tcode = TypeCode(inst->ty);
+	int tcode = TypeCode(inst->ty);
 	Symbol reg;
 	switch (tcode)
 	{
@@ -242,6 +244,27 @@ int tcode = TypeCode(inst->ty);
 			break;
 		default:
 			;
+	}
+}
+static void EmitAssign(IRInst inst)
+{
+	int code;
+	int tcode = TypeCode(inst->ty);
+
+	code = ASM_CODE(inst->opcode, tcode);
+	switch(code)
+	{
+	default:
+		AllocateReg(inst, 1);
+		AllocateReg(inst, 2);
+put_code:
+		AllocateReg(inst, 0);
+		if (DST->reg != SRC1->reg)
+		{
+			Move(X86_MOVI4, DST, SRC1);
+		}
+		PutASMCode(code, inst->opds);
+		break;
 	}
 }
 static void (* Emitter[])(IRInst inst) = 

@@ -41,4 +41,5 @@ typedef struct ilarg
 BBlock CreateBBlock(void);
 void   StartBBlock(BBlock bb);
 extern BBlock CurrentBB;
+extern int OPMap[];
 #endif

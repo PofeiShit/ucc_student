@@ -11,7 +11,7 @@ static AstStatement ParseExpressionStatement(void)
 	CREATE_AST_NODE(exprStmt, ExpressionStatement);
 
 	if (CurrentToken != TK_SEMICOLON)
-	{
+	{		
 		exprStmt->expr = ParseExpression();
 	}
 	Expect(TK_SEMICOLON);
@@ -54,7 +54,7 @@ AstStatement ParseCompoundStatement(void)
 
 	tail = &compStmt->stmts;
 	while (CurrentToken != TK_RBRACE && CurrentToken != TK_END)
-	{
+	{		
 		*tail = (AstNode)ParseStatement();
 		tail = &(*tail)->next;
 		if (CurrentToken == TK_RBRACE)

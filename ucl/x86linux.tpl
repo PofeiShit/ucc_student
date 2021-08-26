@@ -3,6 +3,57 @@
 #endif
 
 
+
+TEMPLATE(X86_BORI4,     "orl %2, %0")
+TEMPLATE(X86_BORU4,     "orl %2, %0")
+TEMPLATE(X86_BORF4,     NULL)
+TEMPLATE(X86_BORF8,     NULL)
+
+TEMPLATE(X86_BXORI4,    "xorl %2, %0")
+TEMPLATE(X86_BXORU4,    "xorl %2, %0")
+TEMPLATE(X86_BXORF4,    NULL)
+TEMPLATE(X86_BXORF8,    NULL)
+
+TEMPLATE(X86_BANDI4,    "andl %2, %0")
+TEMPLATE(X86_BANDU4,    "andl %2, %0")
+TEMPLATE(X86_BANDF4,    NULL)
+TEMPLATE(X86_BANDF8,    NULL)
+
+TEMPLATE(X86_LSHI4,    "shll %2, %0")
+TEMPLATE(X86_LSHU4,    "shll %2, %0")
+TEMPLATE(X86_LSHF4,    NULL)
+TEMPLATE(X86_LSHF8,    NULL)
+
+TEMPLATE(X86_RSHI4,    "sarl %2, %0")
+TEMPLATE(X86_RSHU4,    "shrl %2, %0")
+TEMPLATE(X86_RSHF4,    NULL)
+TEMPLATE(X86_RSHF8,    NULL)
+
+TEMPLATE(X86_ADDI4,    "addl %2, %0")
+TEMPLATE(X86_ADDU4,    "addl %2, %0")
+TEMPLATE(X86_ADDF4,    "fadds %2")
+TEMPLATE(X86_ADDF8,    "faddl %2")
+
+TEMPLATE(X86_SUBI4,    "subl %2, %0")
+TEMPLATE(X86_SUBU4,    "subl %2, %0")
+TEMPLATE(X86_SUBF4,    "fsubs %2")
+TEMPLATE(X86_SUBF8,    "fsubl %2")
+
+TEMPLATE(X86_MULI4,    "imull %2, %0")
+TEMPLATE(X86_MULU4,    "mull %2")
+TEMPLATE(X86_MULF4,    "fmuls %2")
+TEMPLATE(X86_MULF8,    "fmull %2")
+
+TEMPLATE(X86_DIVI4,    "cdq;idivl %2")
+TEMPLATE(X86_DIVU4,    "movl $0, %%edx;divl %2")
+TEMPLATE(X86_DIVF4,    "fdivs %2")
+TEMPLATE(X86_DIVF8,    "fdivl %2")
+
+TEMPLATE(X86_MODI4,    "cdq;idivl %2")
+TEMPLATE(X86_MODU4,    "movl $0, %%edx; divl %2")
+TEMPLATE(X86_MODF4,    NULL)
+TEMPLATE(X86_MODF8,    NULL)
+
 TEMPLATE(X86_ADDR,     "leal %1, %0")
 
 TEMPLATE(X86_PROLOGUE, "pushl %%ebp;pushl %%ebx;pushl %%esi;pushl %%edi;movl %%esp, %%ebp")
