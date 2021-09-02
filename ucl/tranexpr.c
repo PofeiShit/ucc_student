@@ -76,6 +76,20 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 		return NULL;
 	}
 }
+static Symbol TranslateAssignmentExpression(AstExpression expr)
+{
+	Symbol dst, src;
+	dst = TranslateExpression(expr->kids[0]);
+	src = TranslateExpression(expr->kids[1]);
+
+	GenerateMove(expr->ty, dst, src);
+	return dst;
+}
+static Symbol TranslateCommaExpression(AstExpression expr)
+{
+	TranslateExpression(expr->kids[0]);
+	return TranslateExpression(expr->kids[1]);
+}
 static Symbol (* ExprTrans[])(AstExpression) = 
 {
 #define OPINFO(op, prec, name, func, opcode) Translate##func##Expression,

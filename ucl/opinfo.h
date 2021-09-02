@@ -5,7 +5,8 @@
 	opinfo here is used by AST
  */
 
-
+OPINFO(OP_COMMA,         1,    ",",      Comma,          NOP)
+OPINFO(OP_ASSIGN,        2,    "=",      Assignment,     NOP)
 //
 
 // 

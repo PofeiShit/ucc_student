@@ -45,7 +45,15 @@ AstStatement CheckCompoundStatement(AstStatement stmt)
 {
 	AstCompoundStatement compStmt = AsComp(stmt);
 
-	AstNode p = compStmt->stmts;
+	AstNode p;
+	compStmt->ilocals = CreateVector(1);
+	p = compStmt->decls;
+	while (p)
+	{
+		CheckLocalDeclaration((AstDeclaration)p, compStmt->ilocals);
+		p = p->next;
+	}
+	p = compStmt->stmts;
 	while(p) 
 	{
 		CheckStatement((AstStatement)p);

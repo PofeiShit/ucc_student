@@ -41,6 +41,29 @@ struct astSpecifiers
 	int sclass;	
 	Type ty;
 };
+typedef struct astStructSpecifier
+{
+	AST_NODE_COMMON
+	char *id;
+	// struct-declaration-list,
+	// see function ParseStructOrUnionSpecifier()
+	AstNode stDecls;
+	int hasLbrace;
+} *AstStructSpecifier;
+
+typedef struct astStructDeclarator
+{
+	AST_NODE_COMMON
+	AstDeclarator dec;
+	AstExpression expr;
+} *AstStructDeclarator;
+
+typedef struct astStructDeclaration
+{
+	AST_NODE_COMMON
+	AstSpecifiers specs;
+	AstNode stDecs;
+} *AstStructDeclaration;
 
 struct astTranslationUnit
 {
@@ -93,6 +116,6 @@ struct astDeclaration
 	AstSpecifiers specs;
 	AstNode dec;
 };
-
+void CheckLocalDeclaration(AstDeclaration decl, Vector v);
 extern AstFunction CURRENTF;
 #endif

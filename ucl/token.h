@@ -6,20 +6,23 @@ TOKEN(TK_EXTERN, 	"extern")
 TOKEN(TK_STATIC, 	"static")
 TOKEN(TK_CHAR, 		"char")
 TOKEN(TK_SHORT,		"short")
+
 TOKEN(TK_INT, 		"int")
 TOKEN(TK_VOID,      "void")
+TOKEN(TK_STRUCT,    "struct")
 TOKEN(TK_RETURN, 	"return")
-
 //identifier
 TOKEN(TK_ID,        "ID")
+
 //constant
 TOKEN(TK_INTCONST, "int")
 //operators
 TOKEN(TK_COMMA,			",")
+TOKEN(TK_ASSIGN,        "=")
 TOKEN(TK_LPAREN,        "(")
 TOKEN(TK_RPAREN,        ")")
-
 TOKEN(TK_STRING, 	"STR")
+
 //punctuators
 TOKEN(TK_LBRACE,        "{")
 TOKEN(TK_RBRACE,        "}")

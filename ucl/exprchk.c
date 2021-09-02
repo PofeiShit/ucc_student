@@ -129,7 +129,48 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 			;
 	}
 }
+/**
+ Syntax
+ 
+		   assignment-expression:
+				   conditional-expression
+				   unary-expression assignment-operator assignment-expression
+ 
+		   assignment-operator: one of
+				   =  *=  /=  %=  +=  -=  <<=  >>=	&=	^=	|=s
 
+OPINFO(OP_ASSIGN,        2,    "=",      Assignment,     NOP)
+OPINFO(OP_BITOR_ASSIGN,  2,    "|=",     Assignment,     NOP)
+OPINFO(OP_BITXOR_ASSIGN, 2,    "^=",     Assignment,     NOP)
+OPINFO(OP_BITAND_ASSIGN, 2,    "&=",     Assignment,     NOP)
+OPINFO(OP_LSHIFT_ASSIGN, 2,    "<<=",    Assignment,     NOP)
+OPINFO(OP_RSHIFT_ASSIGN, 2,    ">>=",    Assignment,     NOP)
+OPINFO(OP_ADD_ASSIGN,    2,    "+=",     Assignment,     NOP)
+OPINFO(OP_SUB_ASSIGN,    2,    "-=",     Assignment,     NOP)
+OPINFO(OP_MUL_ASSIGN,    2,    "*=",     Assignment,     NOP)
+OPINFO(OP_DIV_ASSIGN,    2,    "/=",     Assignment,     NOP)
+OPINFO(OP_MOD_ASSIGN,    2,    "%=",     Assignment,     NOP)				   
+*/
+static AstExpression CheckAssignmentExpression(AstExpression expr)
+{
+	Type ty;
+	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 0);
+	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
+
+	// we have use CanModify() to test whether left operand is modifiable.
+	ty = expr->kids[0]->ty;
+	expr->kids[1] = Cast(ty, expr->kids[1]);	
+	expr->ty = ty;	
+	return expr;
+}
+static AstExpression CheckCommaExpression(AstExpression expr)
+{
+	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+	expr->kids[0] = Adjust(CheckExpression(expr->kids[1]), 1);
+
+	expr->ty = expr->kids[1]->ty;
+	return expr;
+}
 static AstExpression (*ExprCheckers[])(AstExpression) = 
 {
 #define OPINFO(op, prec, name, func, opcode) Check##func##Expression,

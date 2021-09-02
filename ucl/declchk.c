@@ -101,6 +101,96 @@ static void CheckDeclarator(AstDeclarator dec)
 			;
 	}
 }
+static void CheckStructDeclarator(Type rty, AstDeclarator stDec, Type fty)
+{
+	char *id = NULL;
+	if (stDec != NULL)
+	{
+		CheckDeclarator(stDec);
+		id = stDec->id;		
+		fty = DeriveType(stDec->tyDrvList, fty);
+	}
+	AddField(rty, id, fty);	
+}
+static void CheckStructDeclaration(AstStructDeclaration stDecl, Type rty)
+{
+	AstDeclarator stDec;
+	CheckDeclarationSpecifiers(stDecl->specs);
+	stDec = (AstStructDeclarator)stDecl->stDecs;	
+	/**
+		struct Data{
+			int;		----->		anonymous struct-declaration	
+			......
+		}
+	 */	
+	if (stDec == NULL) {
+		;
+	}
+	/**
+		struct Data{
+			int c, d;			
+		}
+	*/
+	while (stDec)
+	{
+		CheckStructDeclarator(rty, stDec, stDecl->specs->ty);
+		stDec = (AstStructDeclarator)stDec->next;
+	}  
+
+}
+static Type CheckStructOrUnionSpecifier(AstStructSpecifier stSpec)
+{
+	int categ = STRUCT;
+	Symbol tag;
+	Type ty;
+	AstStructDeclaration stDecl;
+
+	if (stSpec->id != NULL && !stSpec->hasLbrace) {
+		// struct-or-union id		
+		tag = LookupTag(stSpec->id);
+		if (tag == NULL) {
+			ty = StartRecord(stSpec->id, categ);
+			tag = AddTag(stSpec->id, ty);
+		} 
+		else if (tag->ty->categ != categ)
+		{
+			//Error(&stSpec->coord, "Inconsistent tag declaration.");
+			;
+		}
+		return tag->ty;
+	}
+	else if (stSpec->id == NULL && stSpec->hasLbrace) {
+		// struct-or-union	{struct-declaration-list}
+		ty = StartRecord(NULL, categ);
+		goto chk_decls;
+	}
+	else if (stSpec->id != NULL && stSpec->hasLbrace) {
+		// struct-or-union	id	{struct-declaration-list}
+		tag = LookupTag(stSpec->id);
+		if (tag == NULL || tag->level < Level) {
+			// If it has not been declared yet, or has but in outer-scope.
+			ty = StartRecord(stSpec->id, categ);	
+			AddTag(stSpec->id, ty);		
+		}
+		goto chk_decls;		
+	}
+	else {
+		// struct-or-union;		illegal & already alarmed during syntax parsing	
+		ty = StartRecord(NULL, categ);
+		EndRecord(ty);
+		return ty;		
+	}
+chk_decls:
+	stDecl = (AstStructDeclaration)stSpec->stDecls;
+	while (stDecl)
+	{
+		CheckStructDeclaration(stDecl, ty);
+		stDecl = (AstStructDeclaration)stDecl->next;
+	}
+	// calculate the size of the struct and other type-informations.
+	EndRecord(ty);
+	return ty;	
+}
 
 static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
@@ -115,16 +205,22 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	}
 	p = specs->tySpecs;
 	while (p) {
-		tok = (AstToken)p;
-		switch(tok->token) {
-			case TK_CHAR:
-				ty = T(CHAR);
-				tyCnt++;
-				break;
-			case TK_INT:
-				ty = T(INT);
-				tyCnt++;
-				break;
+		if (p->kind == NK_StructSpecifier)
+		{
+			ty = CheckStructOrUnionSpecifier((AstStructSpecifier)p);
+			tyCnt++;
+		} else {
+			tok = (AstToken)p;
+			switch(tok->token) {
+				case TK_CHAR:
+					ty = T(CHAR);
+					tyCnt++;
+					break;
+				case TK_INT:
+					ty = T(INT);
+					tyCnt++;
+					break;
+			}
 		}
 		p = p->next;
 	}
@@ -176,8 +272,44 @@ void CheckFunction(AstFunction func)
 	// Referencing an undefined label is considered as an error.
 }
 
-static void CheckGlobalDeclaration(AstDeclaration decl)
+void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 {
+	Symbol sym;
+	Type ty;
+	int sclass;	
+	CheckDeclarationSpecifiers(decl->specs);
+	ty = decl->specs->ty;
+	sclass = decl->specs->sclass;
+	if (sclass == 0)
+	{
+		sclass = TK_AUTO;
+	}	
+	// check declarator
+	AstDeclarator dec = (AstDeclarator)decl->dec;
+	while (dec) {
+		CheckDeclarator(dec);
+
+		ty = DeriveType(dec->tyDrvList, decl->specs->ty);	
+		if (ty == NULL)
+		{
+			// Error(&initDec->coord, "Illegal type");
+			ty = T(INT);
+		}				
+		if ((sym = LookupID(dec->id)) == NULL || sym->level < Level)
+		{
+			VariableSymbol vsym;
+			vsym = (VariableSymbol)AddVariable(dec->id, ty, sclass);
+		}
+		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
+		// if (sym->sclass == TK_EXTERN){
+		// 	sym->sclass = sclass;			
+		// }		
+		dec = dec->next;	
+	}
+}
+
+static void CheckGlobalDeclaration(AstDeclaration decl)
+{	
 	Symbol sym;
 	Type ty;
 	int sclass;	

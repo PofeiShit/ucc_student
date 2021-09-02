@@ -21,6 +21,8 @@ union value
 #define IsLetter(c)        ((c >= 'a' && c <= 'z') || (c == '_') || (c >= 'A' && c <= 'Z'))
 #define IsLetterOrDigit(c) (IsLetter(c) || IsDigit(c))
 #define ToUpper(c) 		   (c & ~0x20)
+#define HIGH_3BIT(v)       ((v) >> (8 * sizeof(int) - 3) & 0x07)
+#define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
 int  GetNextToken(void);
 
 extern union value TokenValue;

@@ -4,7 +4,8 @@
 
 enum nodeKind 
 { 
-	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_Function, NK_Declaration,
+	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_StructSpecifier, NK_StructDeclaration, NK_StructDeclarator, 
+	NK_Function, NK_Declaration,
 	NK_FunctionDeclarator, NK_ParameterTypeList, NK_ParameterDeclaration, NK_NameDeclarator,
 
 	NK_Expression, 
@@ -37,5 +38,6 @@ void Do_Expect(int tok);
 #define Expect CurFileName = __FILE__, CurFileLineNo = __LINE__, Do_Expect
 
 extern int CurrentToken;
-
+int  CurrentTokenIn(int toks[]);
+extern int FIRST_Declaration[];
 #endif

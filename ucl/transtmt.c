@@ -67,8 +67,7 @@ static void TranslateFunction(AstFunction func)
 		basic blocks .
 		However, the exit block is created and translated
 		explicitely here.
-	 */
-	printf("--%s\t%d\n", FSYM->name, FSYM->lastv);
+	 */	
 	TranslateStatement(func->stmt);
 	// 
 	StartBBlock(FSYM->exitBB);
