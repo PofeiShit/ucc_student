@@ -14,7 +14,7 @@ union value
 	int i[2];
 	float f;
 	double d;
-	void *p
+	void *p;
 };
 
 #define IsDigit(c)         (c >= '0' && c <= '9')
