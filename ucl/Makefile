@@ -1,6 +1,6 @@
 C_SRC       = alloc.c ast.c decl.c declchk.c emit.c \
               error.c expr.c exprchk.c fold.c gen.c \
-              input.c lex.c output.c reg.c stmt.c \
+              input.c lex.c output.c reg.c simp.c stmt.c \
               stmtchk.c str.c symbol.c tranexpr.c transtmt.c type.c \
               ucl.c vector.c x86.c x86linux.c
 OBJS        = $(C_SRC:.c=.o)

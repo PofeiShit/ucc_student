@@ -59,6 +59,17 @@ void ExitScope(void);
 #define AsVar(sym) ((VariableSymbol)sym)
 #define AsFunc(sym) ((FunctionSymbol)sym)
 
+Symbol AddConstant(Type ty, union value val);
+Symbol AddVariable(char *id, Type ty, int sclass);
+Symbol AddFunction(char *id, Type ty, int sclass);
+Symbol AddTag(char *id, Type ty);
+Symbol IntConstant(int i);
+Symbol CreateTemp(Type ty);
+Symbol CreateLabel(void);
+Symbol AddString(Type ty, String str);
+
+Symbol LookupID(char *id);
+Symbol LookupTag(char *id);
 void InitSymbolTable(void);
 void EnterParameterList(void);
 void LeaveParemeterList(void);

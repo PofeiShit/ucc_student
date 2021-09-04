@@ -241,6 +241,29 @@ static void EmitMove(IRInst inst)
 		case I4:
 			if (SRC1->kind == SK_Constant)
 				Move(X86_MOVI4, DST, SRC1);
+			else {
+				/**
+					we try to reuse the temporary value in register.
+				*/			
+				AllocateReg(inst, 1);
+				AllocateReg(inst, 0);
+				if (SRC1->reg == NULL && DST->reg == NULL)
+				{
+					;
+					/**
+						On X86, we can't move from mem1 to mem2.
+						So we have to move from mem1 to register , and 
+						then from register to mem2.
+					**/
+					// reg = GetReg();
+					// Move(X86_MOVI4, reg, SRC1);
+					// Move(X86_MOVI4, DST, reg);
+				}
+				else
+				{
+					Move(X86_MOVI4, DST, SRC1);
+				}
+			}
 			break;
 		default:
 			;

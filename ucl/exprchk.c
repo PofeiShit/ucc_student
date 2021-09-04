@@ -95,7 +95,7 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	
 	if (expr->kids[0]->op == OP_ID && LookupID(expr->kids[0]->val.p) == NULL) {
 		expr->kids[0]->ty = DefaultFunctionType;
-		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p, DefaultFunctionType);
+		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p, DefaultFunctionType, TK_EXTERN);
 	} else {
 		expr->kids[0] = CheckExpression(expr->kids[0]);
 	}
@@ -247,6 +247,13 @@ static AstExpression (* BinaryOPCheckers[])(AstExpression) =
 	CheckMultiplicativeOP,	//  /
 	CheckMultiplicativeOP	// %	
 };
+static AstExpression CheckBinaryExpression(AstExpression expr)
+{
+
+	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);;
+	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
+	return (* BinaryOPCheckers[expr->op - OP_BITOR])(expr);
+}
 /**
  Syntax
  
@@ -287,7 +294,7 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 		lopr->kids[0] = expr->kids[0];
 		lopr->kids[1] = expr->kids[1];
 
-		exrp->kids[1] = (*BinaryOPCheckers[lopr->op - OP_BITOR])(lopr);
+		expr->kids[1] = (*BinaryOPCheckers[lopr->op - OP_BITOR])(lopr);
 
 	}
 	// we have use CanModify() to test whether left operand is modifiable.

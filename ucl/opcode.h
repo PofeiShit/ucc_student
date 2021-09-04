@@ -7,6 +7,8 @@
 OPCODE(BOR,     "|",                    Assign)
 OPCODE(BXOR,    "^",                    Assign)
 OPCODE(BAND,    "&",                    Assign) 
+OPCODE(LSH,     "<<",                   Assign)
+OPCODE(RSH,     ">>",                   Assign)
 OPCODE(ADD,     "+",                    Assign)
 OPCODE(SUB,     "-",                    Assign)
 OPCODE(MUL,     "*",                    Assign)

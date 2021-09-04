@@ -34,6 +34,13 @@ typedef struct astNode
 
 AstStatement       ParseCompoundStatement(void);
 AstExpression      ParseExpression(void);
+AstDeclaration     ParseDeclaration(void);
+AstExpression      ParseAssignmentExpression(void);
+AstTranslationUnit ParseTranslationUnit(char *file);
+
+void CheckTranslationUnit(AstTranslationUnit transUnit);
+void Translate(AstTranslationUnit transUnit);
+void EmitTranslationUnit(AstTranslationUnit transUnit);
 extern int CurFileLineNo;
 extern const char *CurFileName;
 void Do_Expect(int tok);

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <limits.h>
+#include <ctype.h>
 
 #include "input.h"
 #include "error.h"

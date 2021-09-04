@@ -121,11 +121,12 @@ AstExpression ParseAssignmentExpression(void)
 
 	if (CurrentToken >= TK_ASSIGN && CurrentToken <= TK_MOD_ASSIGN) {
 		AstExpression asgnExpr;
+		CREATE_AST_NODE(asgnExpr, Expression);
 		asgnExpr->op = BINARY_OP;
 		asgnExpr->kids[0] = expr;
 		NEXT_TOKEN;		 
 		asgnExpr->kids[1] = ParsePostfixExpression();
-		expr = asgnExpr;
+		return asgnExpr;
 	}
 	return expr;
 }

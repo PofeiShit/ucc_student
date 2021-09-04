@@ -402,6 +402,16 @@ void SetupLexer(void)
 	Scanners[END_OF_FILE] = ScanEOF;
 	Scanners['\''] = ScanCharLiteral;
 	Scanners['"'] = ScanStringLiteral;
+	Scanners['+']  = ScanPlus;
+	Scanners['-']  = ScanMinus;
+	Scanners['*']  = ScanStar;
+	Scanners['/']  = ScanSlash;
+	Scanners['%']  = ScanPercent;
+	Scanners['<']  = ScanLess;
+	Scanners['>']  = ScanGreat;
+	Scanners['|']  = ScanBar;
+	Scanners['&']  = ScanAmpersand;
+	Scanners['^']  = ScanCaret;
 	Scanners['{'] = ScanLBRACE;
 	Scanners['}'] = ScanRBRACE;
 	Scanners['('] = ScanLPAREN;

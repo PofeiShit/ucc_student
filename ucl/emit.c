@@ -1,7 +1,7 @@
 #include "ucl.h"
 #include "ast.h"
 #include "decl.h"
-
+#include "output.h"
 #include "target.h"
 /**
  * Emit all the strings to assembly file

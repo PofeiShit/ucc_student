@@ -92,7 +92,20 @@ typedef struct functionType
 #define IsArithType(ty)    (ty->categ <= LONGDOUBLE)
 #define BothIntegType(ty1, ty2)   (IsIntegType(ty1) && IsIntegType(ty2))
 #define BothArithType(ty1, ty2)   (IsArithType(ty1) && IsArithType(ty2))
-extern int TypeCode(Type ty);
+
+Type  StartRecord(char *id, int categ);
+Field AddField(Type ty, char *id, Type fty);
+void EndRecord(Type ty);
+Type PointerTo(Type ty);
+Type ArrayOf(int len, Type ty);
+Type FunctionReturn(Type ty, Signature sig);
+Type Promote(Type ty);
+
+Type CommonRealType(Type ty1, Type ty2);
+int TypeCode(Type ty);
+Type AdjustParameter(Type ty);
+
+void SetupTypeSystem(void);
 extern struct type Types[VOID - CHAR + 1];
 extern Type DefaultFunctionType;
 #endif
