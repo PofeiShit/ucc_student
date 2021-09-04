@@ -76,10 +76,23 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 		return NULL;
 	}
 }
+static Symbol TranslateBinaryExpression(AstExpression expr)
+{
+	Symbol src1, src2;
+	src1 = TranslateExpression(expr->kids[0]);
+	src2 = TranslateExpression(expr->kids[1]);
+
+	return Simplify(expr->ty, OPMap[expr->op], src1, src2);
+}
+
 static Symbol TranslateAssignmentExpression(AstExpression expr)
 {
 	Symbol dst, src;
 	dst = TranslateExpression(expr->kids[0]);
+	if (expr->op != OP_ASSIGN) {
+		expr->kids[0]->op = OP_ID;
+		expr->kids[1]->val.p = dst;
+	}
 	src = TranslateExpression(expr->kids[1]);
 
 	GenerateMove(expr->ty, dst, src);
@@ -89,6 +102,11 @@ static Symbol TranslateCommaExpression(AstExpression expr)
 {
 	TranslateExpression(expr->kids[0]);
 	return TranslateExpression(expr->kids[1]);
+}
+
+static Symbol TranslateErrorExpression(AstExpression expr)
+{
+	return NULL;
 }
 static Symbol (* ExprTrans[])(AstExpression) = 
 {

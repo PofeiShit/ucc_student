@@ -33,6 +33,7 @@ typedef struct astNode
 #define NEXT_TOKEN  CurrentToken = GetNextToken();
 
 AstStatement       ParseCompoundStatement(void);
+AstExpression      ParseExpression(void);
 extern int CurFileLineNo;
 extern const char *CurFileName;
 void Do_Expect(int tok);

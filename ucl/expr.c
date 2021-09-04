@@ -2,6 +2,23 @@
 #include "ast.h"
 #include "expr.h"
 
+
+static struct tokenOp TokenOps[] = 
+{
+#define TOKENOP(tok, bop, uop) {bop, uop},
+#include "tokenop.h"
+#undef  TOKENOP
+};
+
+// operators' precedence
+static int Prec[] =
+{
+#define OPINFO(op, prec, name, func, opcode) prec,
+#include "opinfo.h"
+	0
+#undef OPINFO
+};
+
 AstExpression Constant0;
 
 /**
@@ -101,10 +118,10 @@ AstExpression ParseAssignmentExpression(void)
 	AstExpression expr;	 
 
 	expr = ParsePostfixExpression();
-		
-	if (CurrentToken == TK_ASSIGN) {
+
+	if (CurrentToken >= TK_ASSIGN && CurrentToken <= TK_MOD_ASSIGN) {
 		AstExpression asgnExpr;
-		asgnExpr->op = OP_ASSIGN;
+		asgnExpr->op = BINARY_OP;
 		asgnExpr->kids[0] = expr;
 		NEXT_TOKEN;		 
 		asgnExpr->kids[1] = ParsePostfixExpression();

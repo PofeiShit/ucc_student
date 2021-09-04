@@ -163,3 +163,38 @@ void EndRecord(Type ty)
 		rty->size = ALIGN(rty->size, rty->align);
 	}
 }
+Type CommonRealType(Type ty1, Type ty2)
+{
+	ty1 = ty1->categ < INT ? T(INT) : ty1;
+	ty2 = ty2->categ < INT ? T(INT) : ty2;
+	if (ty1->categ == ty2->categ)
+		return ty1;
+	// ty1 and ty2 have the same sign
+	// if ((IsUnsigned(ty1) ^ IsUnsigned(ty2)) == 0)
+	// 	return ty1->categ > ty2->categ ? ty1 : ty2;
+
+	// Their signs are different.
+	// Swap ty1 and ty2, then we treat ty1 as Unsigned, ty2 as signed later.
+	// if (IsUnsigned(ty2))
+	// {
+	// 	Type ty;
+
+	// 	ty = ty1;
+	// 	ty1 = ty2;
+	// 	ty2 = ty;
+	// }		
+	// fg: (ty1,ty2) : ( ULONG,INT)
+	if (ty1->categ  >= ty2->categ)
+		return ty1;
+	// fg: (ty1,ty2) : ( UINT, LONG)
+	/**
+		if the size of UINT and LONG are both 4 bytes,
+			we will return ULONG as the common real type later.
+		If signed long is large enough to accommodate UINT,
+			return LONG.
+	 */
+	if (ty2->size > ty1->size)
+		return ty2;
+
+	return T(ty2->categ + 1);
+}

@@ -143,7 +143,7 @@ static AstDeclarator ParseDirectDeclarator()
 	CREATE_AST_NODE(dec, NameDeclarator);
 	if (CurrentToken == TK_ID)
 	{
-		dec->id = TokenValue.p;
+		dec->id = TokenValue.p;		
 		NEXT_TOKEN;
 	}
 	return dec;
