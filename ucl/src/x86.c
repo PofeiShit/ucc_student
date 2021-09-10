@@ -149,7 +149,7 @@ static void EmitCall(IRInst inst)
 
 	for (i = LEN(args) - 1; i >= 0; --i)
 	{
-		arg = GET_ITEM(args, i);
+		arg = (ILArg)GET_ITEM(args, i);
 		PushArgument(arg->sym, arg->ty);
 		stksize += ALIGN(arg->ty->size, STACK_ALIGN_SIZE);
 	}

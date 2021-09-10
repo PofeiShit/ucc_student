@@ -60,7 +60,7 @@ static AstStructSpecifier ParseStructOrUnionSpecifier(void)
 	switch (CurrentToken) 
 	{
 		case TK_ID:
-			stSpec->id = TokenValue.p;			
+			stSpec->id = (char*)TokenValue.p;		
 			NEXT_TOKEN;
 			if (CurrentToken == TK_LBRACE) 
 				goto lbrace;			
@@ -143,7 +143,7 @@ static AstDeclarator ParseDirectDeclarator()
 	CREATE_AST_NODE(dec, NameDeclarator);
 	if (CurrentToken == TK_ID)
 	{
-		dec->id = TokenValue.p;		
+		dec->id = (char*)TokenValue.p;		
 		NEXT_TOKEN;
 	}
 	return dec;
@@ -221,7 +221,7 @@ static AstDeclaration ParseCommonHeader(void)
 	decl->specs = ParseDeclarationSpecifiers();
 		// f(int a, int b);		
 	if (CurrentToken != TK_SEMICOLON) {
-		decl->dec = ParseDeclarator();
+		decl->dec = (AstNode)ParseDeclarator();
 		tail = &decl->dec->next;
 		while (CurrentToken == TK_COMMA) {
 			NEXT_TOKEN;
@@ -301,7 +301,7 @@ static AstNode ParseExternalDeclaration(void)
 		 astPointerDeclarator-> astPointerDeclarator ->  astFunctionDeclarator --> astDeclarator
 			(dec)									(fdec )
 		 */
-		func->dec = decl->dec;
+		func->dec = (AstDeclarator)decl->dec;
 		//printf("%s\n", decl->dec->dec->kind);
 		func->fdec = fdec;
 

@@ -114,7 +114,7 @@ void ReadSourceFile(char *filename)
 	}
 	Input.size = st.st_size;
 	
-	Input.base = mmap(NULL, Input.size + 1, PROT_WRITE, MAP_PRIVATE, fno, 0);
+	Input.base = (unsigned char*)mmap(NULL, Input.size + 1, PROT_WRITE, MAP_PRIVATE, fno, 0);
 	if (Input.base == MAP_FAILED)
 	{
 		Fatal("Can't mmap file %s.\n", filename);
@@ -148,7 +148,7 @@ void CloseSourceFile(void)
 	CloseHandle(Input.file);
 
 #else
-	close((int)Input.file);
+	close((int)(size_t)Input.file);
 	munmap(Input.base, Input.size + 1);
 
 #endif

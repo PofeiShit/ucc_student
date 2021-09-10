@@ -25,7 +25,7 @@ static void EmitStrings(void)
 	while (p)
 	{
 		DefineGlobal(p);
-		str = p->val.p;
+		str = (String)p->val.p;
 		//printf("%s\n", str->chs);
 		//assert(p->ty->categ == ARRAY);
 		size = str->len + 1;

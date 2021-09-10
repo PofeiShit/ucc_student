@@ -25,7 +25,7 @@ void ExpandVector(Vector v)
 	void *orig;
 
 	orig = v->data;
-	v->data = HeapAllocate(CurrentHeap, v->size * 2 * sizeof(void *));
+	v->data = (void**)HeapAllocate(CurrentHeap, v->size * 2 * sizeof(void *));
 	memcpy(v->data, orig, v->size * sizeof(void *));
 	v->size *= 2;
 }

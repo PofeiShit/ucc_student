@@ -99,7 +99,7 @@ static Symbol AddSymbol(Table tbl, Symbol sym)
 	{
 		int size = sizeof(Symbol) * (SYM_HASH_MASK + 1);
 
-		tbl->buckets = HeapAllocate(CurrentHeap, size);
+		tbl->buckets = (Symbol*)HeapAllocate(CurrentHeap, size);
 		memset(tbl->buckets, 0, size);
 	}
 	// add the new symbol into the first positon of bucket[h] list.

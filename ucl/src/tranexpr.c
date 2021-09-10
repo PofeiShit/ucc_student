@@ -16,10 +16,10 @@ static Symbol TranslatePrimaryExpression(AstExpression expr)
 		//#if  1	// added
 		//assert(expr->op != OP_STR);
 		//#endif
-		return AddressOf(expr->val.p);
+		return AddressOf((Symbol)expr->val.p);
 	}
 
-	return expr->val.p;
+	return (Symbol)expr->val.p;
 }
 
 /**

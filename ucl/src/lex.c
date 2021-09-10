@@ -22,7 +22,10 @@ static void SkipWhiteSpace(void)
 		case '\n':
 			++CURSOR;        
 			break;
-
+		case '/':
+			if (CURSOR[1] != '/' && CURSOR[1] != '*')
+				return;
+			break;
 		default:
 			CURSOR++;
 			break;

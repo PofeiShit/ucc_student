@@ -26,10 +26,10 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 	}
 	if (expr->op == OP_STR) {
 		//expr->op = OP_ID;
-		expr->val.p = AddString(expr->ty, expr->val.p);
+		expr->val.p = AddString(expr->ty, (String)expr->val.p);
 		return expr;
 	} 
-	p = LookupID(expr->val.p);
+	p = LookupID((char*)expr->val.p);
 	{
 		expr->ty = p->ty;
 		expr->val.p = p;
@@ -76,7 +76,7 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 		*argFull = 0;
 		return arg;
 	} else if (argNo <= parLen) {
-		param = GET_ITEM(fty->sig->params, argNo - 1);
+		param = (Parameter)GET_ITEM(fty->sig->params, argNo - 1);
 		// 
 		if (param->ty->categ < INT)
 			arg = Cast(T(INT), arg);
@@ -93,9 +93,9 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	AstNode *tail;
 	int argNo, argFull;
 	
-	if (expr->kids[0]->op == OP_ID && LookupID(expr->kids[0]->val.p) == NULL) {
+	if (expr->kids[0]->op == OP_ID && LookupID((char*)expr->kids[0]->val.p) == NULL) {
 		expr->kids[0]->ty = DefaultFunctionType;
-		expr->kids[0]->val.p = AddFunction(expr->kids[0]->val.p, DefaultFunctionType, TK_EXTERN);
+		expr->kids[0]->val.p = AddFunction((char*)expr->kids[0]->val.p, DefaultFunctionType, TK_EXTERN);
 	} else {
 		expr->kids[0] = CheckExpression(expr->kids[0]);
 	}

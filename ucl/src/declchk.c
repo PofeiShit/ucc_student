@@ -116,7 +116,7 @@ static void CheckStructDeclaration(AstStructDeclaration stDecl, Type rty)
 {
 	AstDeclarator stDec;
 	CheckDeclarationSpecifiers(stDecl->specs);
-	stDec = (AstStructDeclarator)stDecl->stDecs;	
+	stDec = (AstDeclarator)stDecl->stDecs;	
 	/**
 		struct Data{
 			int;		----->		anonymous struct-declaration	
@@ -134,7 +134,7 @@ static void CheckStructDeclaration(AstStructDeclaration stDecl, Type rty)
 	while (stDec)
 	{
 		CheckStructDeclarator(rty, stDec, stDecl->specs->ty);
-		stDec = (AstStructDeclarator)stDec->next;
+		stDec = (AstDeclarator)stDec->next;
 	}  
 
 }
@@ -304,7 +304,7 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 		// if (sym->sclass == TK_EXTERN){
 		// 	sym->sclass = sclass;			
 		// }		
-		dec = dec->next;	
+		dec = (AstDeclarator)dec->next;	
 	}
 }
 
@@ -335,7 +335,7 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 		// if (sym->sclass == TK_EXTERN){
 		// 	sym->sclass = sclass;			
 		// }		
-		dec = dec->next;	
+		dec = (AstDeclarator)dec->next;	
 	}
 }
 

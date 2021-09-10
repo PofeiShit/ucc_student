@@ -29,13 +29,13 @@ typedef struct heap
 // In C++,  void *  --> int *   is an error
 // In C , it is OK  for both  void * --> int *  and  int * --> void *
 // In other words, the type checker of C++ is stricter.
-
+#ifdef __cplusplus
+#define DO_ALLOC(p)    ((p) = (decltype(p))(HeapAllocate(CurrentHeap, sizeof *(p))))
+#else
 #define DO_ALLOC(p)    ((p) = HeapAllocate(CurrentHeap, sizeof *(p)))
+#endif
 #define ALLOC(p)   memset(DO_ALLOC(p), 0, sizeof *(p))
 #define CALLOC(p)   memset(DO_ALLOC(p), 0, sizeof *(p))
-
-
-
 
 #define MBLOCK_SIZE (4 * 1024)
 #define HEAP(hp)    struct heap  hp = { &hp.head }

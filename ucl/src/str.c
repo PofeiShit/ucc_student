@@ -42,7 +42,7 @@ void AppendSTR(String str, char *tmp, int len, int wide)
 	size = str->len + len + 1;
 	// always save wide char as int, no matter	whether sizeof(WCHAR) is 2 or 4
 
-	p = HeapAllocate(&StringHeap, size * times);
+	p = (char*)HeapAllocate(&StringHeap, size * times);
 	for (i = 0; i < str->len * times; ++i)
 	{
 		p[i] = str->chs[i];
@@ -75,9 +75,9 @@ char* InternName(char *id, int len)
 			return p->name;
 	}
 	// allocate memory for struct nameBucket object
-	p = HeapAllocate(&StringHeap, sizeof(*p));
+	p = (NameBucket)HeapAllocate(&StringHeap, sizeof(*p));
 	// allocate memory for string
-	p->name = HeapAllocate(&StringHeap, len + 1);
+	p->name = (char*)HeapAllocate(&StringHeap, len + 1);
 	for (i = 0; i < len; ++i)
 	{
 		p->name[i] = id[i];
