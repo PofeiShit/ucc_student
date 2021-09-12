@@ -10,14 +10,11 @@ if (BUILD_LLT MATCHES ON)
     file(GLOB_RECURSE CFILES "${UCL_DIR}/src/*.c")
     SET_SOURCE_FILES_PROPERTIES(${CFILES} PROPERTIES LANGUAGE CXX )
 
+    aux_source_directory(${UCL_DIR}/src SRC)
+    list(REMOVE_ITEM SRC ${UCL_DIR}/src/ucl.c)
+    message(INFO ${SRC})
     aux_source_directory(${UCL_DIR}/test_case TEST_CASE_SRC)
-    add_executable(${PROJECT_NAME} ${TEST_CASE_SRC}
-        ${UCL_DIR}/src/alloc.c
-        ${UCL_DIR}/src/error.c
-
-        ${UCL_DIR}/src/lex.c
-        ${UCL_DIR}/src/input.c
-        ${UCL_DIR}/src/str.c)
+    add_executable(${PROJECT_NAME} ${TEST_CASE_SRC} ${SRC})
     set(GTEST_LIB gtest gtest_main)
     target_link_libraries(${PROJECT_NAME} ${GTEST_LIB})
 
