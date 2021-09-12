@@ -46,12 +46,8 @@ main:
         ret
 ```
 ## 词法分析
-    token.h新增TK_STATIC，keyword.h新增STATIC.
-## 语法分析
 
-ParseDeclarationSpecifiers:
-    
-    生成AstSpecifiers(说明符节点)，说明符节点包含AstToken节点(token成员指向词法分析的CurrentToken).在语法分析阶段不为ty节点赋值,新增解析static的代码，语法阶段允许多个static修饰比如 static static static int a;在语义分析阶段报错
+## 语法分析
 
 ParseStatement:
 
