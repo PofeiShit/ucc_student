@@ -55,6 +55,7 @@ void SetupTypeSystem(void)
 	for (i = CHAR; i <= VOID; ++i)
 	{
 		T(i)->categ = i;
+		T(i)->align = T(i)->size;
 	}
 
 	ALLOC(fty);
