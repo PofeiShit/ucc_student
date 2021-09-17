@@ -1,7 +1,7 @@
 #ifndef TOKENOP
 #error "You must define TOKENOP macro before include this file"
 #endif
-
+//      Token               binary op       unary op
 TOKENOP(TK_ASSIGN,        OP_ASSIGN,        OP_NONE)
 TOKENOP(TK_BITOR_ASSIGN,  OP_BITOR_ASSIGN,  OP_NONE)
 TOKENOP(TK_BITXOR_ASSIGN, OP_BITXOR_ASSIGN, OP_NONE)

@@ -4,7 +4,7 @@
 /**
 	opinfo here is used by AST
  */
-
+// 	    op				prec	name	func			opcode
 OPINFO(OP_COMMA,         1,    ",",      Comma,          NOP)
 OPINFO(OP_ASSIGN,        2,    "=",      Assignment,     NOP)
 OPINFO(OP_BITOR_ASSIGN,  2,    "|=",     Assignment,     NOP)

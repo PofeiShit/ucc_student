@@ -245,8 +245,8 @@ static void EmitMove(IRInst inst)
 				/**
 					we try to reuse the temporary value in register.
 				*/			
-				AllocateReg(inst, 1);
-				AllocateReg(inst, 0);
+				// AllocateReg(inst, 1);
+				// AllocateReg(inst, 0);
 				if (SRC1->reg == NULL && DST->reg == NULL)
 				{
 					;
@@ -278,8 +278,8 @@ static void EmitAssign(IRInst inst)
 	switch(code)
 	{
 	default:
-		AllocateReg(inst, 1);
-		AllocateReg(inst, 2);
+		// AllocateReg(inst, 1);
+		// AllocateReg(inst, 2);
 put_code:
 		AllocateReg(inst, 0);
 		if (DST->reg != SRC1->reg)
