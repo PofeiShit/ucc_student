@@ -287,7 +287,7 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 0);
 	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
 
-	if (expr->op != OP_ADD_ASSIGN) {
+	if (expr->op != OP_ASSIGN) {
 		AstExpression lopr;
 		CREATE_AST_NODE(lopr, Expression);
 		lopr->op = ops[expr->op - OP_BITOR_ASSIGN];
