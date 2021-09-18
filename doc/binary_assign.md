@@ -1,4 +1,5 @@
-# BITOR_ASSIGN
+# ASSIGN
+以位或为例子讲解，其他的都差不多
 ```
 void main()
 {
@@ -75,3 +76,8 @@ main:
 .PutASMCode(code, inst->opds); code = X86_BORI4, 对应汇编TEMPLATE(X86_BORI4,     "orl %2, %0")， orl取GenerateAssign的DST:t和SRC2:1
 生成 orl $1, %eax
 .EmitMove对应GenerateMove, 	Move(X86_MOVI4, DST, SRC1);就生成movl %eax, -4(%ebp) DST就是a也就是-4(%ebp), SRC1: %eax
+
+ps:
+^=, &=, <<=, >>=, +=, /=同上
+-=在simp.c中转换成+=
+

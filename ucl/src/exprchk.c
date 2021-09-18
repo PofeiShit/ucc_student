@@ -185,15 +185,14 @@ type of the result is that of the promoted left operand.
  */
 static AstExpression CheckShiftOP(AstExpression expr)
 {
-	return expr;
-	// if (BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
-	// {
+	if (BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
+	{
 	// 	expr->kids[0] = DoIntegerPromotion(expr->kids[0]);
 	// 	expr->kids[1] = DoIntegerPromotion(expr->kids[1]);
-	// 	expr->ty = expr->kids[0]->ty;
+		expr->ty = expr->kids[0]->ty;
 
-	// 	return FoldConstant(expr);
-	// }
+		return FoldConstant(expr);
+	}
 
 	// REPORT_OP_ERROR;
 }
@@ -212,6 +211,7 @@ static AstExpression CheckShiftOP(AstExpression expr)
  */
 static AstExpression CheckMultiplicativeOP(AstExpression expr)
 {
+	PERFORM_ARITH_CONVERSION(expr);
 	return expr;
 // 	if (expr->op != OP_MOD && BothArithType(expr->kids[0]->ty, expr->kids[1]->ty))
 // 		goto ok;
@@ -227,10 +227,12 @@ static AstExpression CheckMultiplicativeOP(AstExpression expr)
 }
 static AstExpression CheckAddOP(AstExpression expr)
 {
+	PERFORM_ARITH_CONVERSION(expr);
 	return expr;
 }
 static AstExpression CheckSubOP(AstExpression expr)
 {
+	PERFORM_ARITH_CONVERSION(expr);
 	return expr;
 }
 

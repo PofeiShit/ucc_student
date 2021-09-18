@@ -277,6 +277,9 @@ static void EmitAssign(IRInst inst)
 	code = ASM_CODE(inst->opcode, tcode);
 	switch(code)
 	{
+	case X86_LSHI4:
+	case X86_RSHI4:
+		goto put_code;
 	default:
 		// AllocateReg(inst, 1);
 		// AllocateReg(inst, 2);
