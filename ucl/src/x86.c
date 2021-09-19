@@ -277,6 +277,27 @@ static void EmitAssign(IRInst inst)
 	code = ASM_CODE(inst->opcode, tcode);
 	switch(code)
 	{
+	case X86_DIVI4:
+	case X86_MODI4:
+		if (SRC1->reg == X86Regs[EAX]) {
+			// TODO;
+		} else {
+			SpillReg(X86Regs[EAX]);
+			Move(X86_MOVI4, X86Regs[EAX], SRC1);
+		}
+		SpillReg(X86Regs[EDX]);
+		UsedRegs = 1 << EAX | 1 << EDX;
+		if (SRC2->kind == SK_Constant) {
+			Symbol reg = GetReg();
+			Move(X86_MOVI4, reg, SRC2);
+			SRC2 = reg;
+		}
+		PutASMCode(code, inst->opds);
+		if (code == X86_MODI4)
+			AddVarToReg(X86Regs[EDX], DST);
+		else
+			AddVarToReg(X86Regs[EAX], DST);
+		break;
 	case X86_LSHI4:
 	case X86_RSHI4:
 		goto put_code;
@@ -310,7 +331,8 @@ static void EmitBBlock(BBlock bb)
 	IRInst inst = bb->insth.next;
 	while (inst != &bb->insth)
 	{
-		//UsedRegs = 0;
+		// 为一条中间代码生成汇编指令前，都会把变量UsedRegs清零
+		UsedRegs = 0;
 		//  the kernel part of emit ASM from IR.
 		EmitIRInst(inst);
 

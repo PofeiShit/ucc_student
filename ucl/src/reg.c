@@ -19,6 +19,7 @@ Symbol X86ByteRegs[EDI + 1];
 		 return 0;
 	 }
 */
+int UsedRegs;
 void SpillReg(Symbol reg)
 {
 	reg->link = NULL;
@@ -55,3 +56,33 @@ Symbol CreateReg(char *name, char *iname, int no)
 	}
 	return reg;
 }
+static int FindEmptyRegs(int endr)
+{
+	int i;
+	for (i = EAX; i <= endr; i++) {
+		//  esp and ebp 			寄存器中没有保存临时变量的值	该寄存器还没有分配给当前中间代码, <<优先级大于&
+		if (X86Regs[i] != NULL && X86Regs[i]->link == NULL && !(1 << i & UsedRegs))
+			return i;
+	}
+	return NO_REG;
+}
+static Symbol GetRegInternal(int width)
+{
+	int endr, i;
+	Symbol *regs;
+	switch(width) {
+		case 4:
+			endr = EDI;
+			regs = X86Regs;
+			break;
+	}
+	i = FindEmptyRegs(endr);
+	UsedRegs |= 1 << i;
+
+	return regs[i];
+}
+Symbol GetReg(void)
+{
+	return GetRegInternal(4);
+}
+

@@ -78,6 +78,6 @@ main:
 .EmitMove对应GenerateMove, 	Move(X86_MOVI4, DST, SRC1);就生成movl %eax, -4(%ebp) DST就是a也就是-4(%ebp), SRC1: %eax
 
 ps:
-^=, &=, <<=, >>=, +=, /=同上
+^=, &=, <<=, >>=, +=同上
 -=在simp.c中转换成+=
 

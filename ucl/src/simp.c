@@ -14,7 +14,7 @@ Symbol Simplify(Type ty, int opcode, Symbol src1, Symbol src2)
 		    p1 = src1; c1 = 0;
 
             p2 = src2; c2 = 0;
-            if (src2->kind = SK_Constant) {
+            if (src2->kind == SK_Constant) {
                 p2 = NULL;
                 c2 = src2->val.i[0];
             }
