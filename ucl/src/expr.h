@@ -33,7 +33,7 @@ struct astExpression
 	union value val;
 };
 // test whether it is a binary operator
-#define IsBinaryOP(tok) (tok >= TK_EQUAL && tok <= TK_LESS_EQ)
+#define IsBinaryOP(tok) (tok >= TK_BITOR && tok <= TK_MOD)
 // token used as binary operator
 #define	BINARY_OP       TokenOps[CurrentToken - TK_ASSIGN].bop
 AstExpression FoldConstant(AstExpression expr);

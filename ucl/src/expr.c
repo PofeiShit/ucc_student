@@ -104,6 +104,23 @@ static AstExpression ParsePostfixExpression(void)
 		}
 	}
 }
+AstExpression ParseBinaryExpression(int prec)
+{
+	AstExpression binExpr;
+	AstExpression expr;
+	int newPrec;
+	expr = ParsePostfixExpression();
+
+	while (IsBinaryOP(CurrentToken) && (newPrec = Prec[BINARY_OP]) >= prec) {
+		CREATE_AST_NODE(binExpr, Expression);
+		binExpr->op = BINARY_OP;
+		binExpr->kids[0] = expr;
+		NEXT_TOKEN;
+		binExpr->kids[1] = ParseBinaryExpression(newPrec + 1);
+		expr = binExpr;
+	}
+	return expr;
+}
 /**
  *  assignment-expression:
  *      conditional-expression
@@ -117,7 +134,7 @@ AstExpression ParseAssignmentExpression(void)
 {
 	AstExpression expr;	 
 
-	expr = ParsePostfixExpression();
+	expr = ParseBinaryExpression(Prec[OP_BITOR]);
 
 	if (CurrentToken >= TK_ASSIGN && CurrentToken <= TK_MOD_ASSIGN) {
 		AstExpression asgnExpr;
@@ -125,7 +142,7 @@ AstExpression ParseAssignmentExpression(void)
 		asgnExpr->op = BINARY_OP;
 		asgnExpr->kids[0] = expr;
 		NEXT_TOKEN;		 
-		asgnExpr->kids[1] = ParsePostfixExpression();
+		asgnExpr->kids[1] = ParseBinaryExpression(Prec[OP_BITOR]);
 		return asgnExpr;
 	}
 	return expr;

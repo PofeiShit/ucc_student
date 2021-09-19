@@ -50,7 +50,7 @@ static int ScanBar(void)
 	}
 	else	// |
 	{
-		return -1;
+		return TK_BITOR;
 	}
 }
 
@@ -69,7 +69,7 @@ static int ScanAmpersand(void)
 	}
 	else		// &
 	{
-		return -1;
+		return TK_BITAND;
 	}
 }
 
@@ -83,7 +83,7 @@ static int ScanCaret(void)	// ^	exclusive or
 	}
 	else
 	{
-		return -1;
+		return TK_BITXOR;
 	}
 }
 static int ScanLess(void)
@@ -97,7 +97,7 @@ static int ScanLess(void)
 			CURSOR++;
 			return TK_LSHIFT_ASSIGN;		// <<=
 		}
-		return -1;		// <<
+		return TK_LSHIFT;		// <<
 	}
 	else if (*CURSOR == '=')
 	{
@@ -121,7 +121,7 @@ static int ScanGreat(void)
 			CURSOR++;
 			return TK_RSHIFT_ASSIGN;
 		}
-		return -1;		// >>
+		return TK_RSHIFT;		// >>
 	}
 	else if (*CURSOR == '=')
 	{
@@ -148,7 +148,7 @@ static int ScanPlus(void)
 	}
 	else
 	{
-		return -1;			// +
+		return TK_ADD;			// +
 	}
 }
 
@@ -172,7 +172,7 @@ static int ScanMinus(void)
 	}
 	else
 	{
-		return -1;			// -
+		return TK_SUB;			// -
 	}
 }
 
@@ -186,7 +186,7 @@ static int ScanStar(void)
 	}
 	else
 	{
-		return -1;				// *
+		return TK_MUL;				// *
 	}
 }
 
@@ -200,7 +200,7 @@ static int ScanSlash(void)
 	}
 	else
 	{
-		return -1;				// 		/
+		return TK_DIV;				// 		/
 	}
 }
 
@@ -214,7 +214,7 @@ static int ScanPercent(void)
 	}
 	else
 	{
-		return -1;				// %
+		return TK_MOD;				// %
 	}
 }
 

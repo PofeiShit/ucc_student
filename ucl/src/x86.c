@@ -78,11 +78,11 @@ static void AllocateReg(IRInst inst, int index)
 	// if it is already in a register, mark the register as used by current uil
 	if (p->reg != NULL)
 	{
-		//UsedRegs |= 1 << p->reg->val.i[0];
+		UsedRegs |= 1 << p->reg->val.i[0];
 		return;
 	}
 
-	reg = X86Regs[0];
+	reg = GetReg();
 
 	AddVarToReg(reg, p);
 }

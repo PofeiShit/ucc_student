@@ -77,6 +77,10 @@ static Symbol GetRegInternal(int width)
 			break;
 	}
 	i = FindEmptyRegs(endr);
+	if (i == NO_REG) {
+		i = 0;
+		SpillReg(X86Regs[i]);
+	}
 	UsedRegs |= 1 << i;
 
 	return regs[i];
