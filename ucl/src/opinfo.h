@@ -18,7 +18,8 @@ OPINFO(OP_MUL_ASSIGN,    2,    "*=",     Assignment,     NOP)
 OPINFO(OP_DIV_ASSIGN,    2,    "/=",     Assignment,     NOP)
 OPINFO(OP_MOD_ASSIGN,    2,    "%=",     Assignment,     NOP)
 //
-
+OPINFO(OP_OR,			 4,    "||", 	 Binary, 		 NOP)
+OPINFO(OP_AND, 			 5, 	"&", 	 Binary,		 NOP)
 OPINFO(OP_BITOR,         6,    "|",      Binary,         BOR)
 OPINFO(OP_BITXOR,        7,    "^",      Binary,         BXOR)
 OPINFO(OP_BITAND,        8,    "&",      Binary,         BAND)

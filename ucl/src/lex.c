@@ -41,7 +41,7 @@ static int ScanBar(void)
 	if (*CURSOR == '|')		// ||
 	{
 		CURSOR++;
-		return -1;
+		return TK_OR;
 	}
 	else if (*CURSOR == '=')	// |=
 	{
@@ -60,7 +60,7 @@ static int ScanAmpersand(void)
 	if (*CURSOR == '&')		// &&
 	{
 		CURSOR++;
-		return -1;
+		return TK_AND;
 	}
 	else if (*CURSOR == '=')	// &=
 	{
@@ -102,11 +102,11 @@ static int ScanLess(void)
 	else if (*CURSOR == '=')
 	{
 		CURSOR++;
-		return -1;		// <=
+		return TK_LESS_EQ;		// <=
 	}
 	else
 	{
-		return -1;			// <
+		return TK_LESS;			// <
 	}
 }
 
@@ -126,11 +126,11 @@ static int ScanGreat(void)
 	else if (*CURSOR == '=')
 	{
 		CURSOR++;
-		return -1;			// >=
+		return TK_GREAT_EQ;			// >=
 	}
 	else
 	{
-		return -1;		// >
+		return TK_GREAT;		// >
 	}
 }
 static int ScanPlus(void)
@@ -385,10 +385,25 @@ int GetNextToken(void)
 	tok = (*Scanners[*CURSOR])();
 	return tok;
 }
+static int ScanExclamation(void)
+{
+	CURSOR++;
+	if (*CURSOR == '=') {
+		CURSOR++;
+		return TK_UNEQUAL;
+	} else {
+		return -1;
+	}
+}
 static int ScanEqual(void)
 {
 	CURSOR++;
-	return TK_ASSIGN;
+	if (*CURSOR == '=') {
+		CURSOR++;
+		return TK_EQUAL; // ==
+	} else {
+		return TK_ASSIGN; // = 
+	}
 }
 void SetupLexer(void)
 {
@@ -412,6 +427,7 @@ void SetupLexer(void)
 	Scanners['%']  = ScanPercent;
 	Scanners['<']  = ScanLess;
 	Scanners['>']  = ScanGreat;
+	Scanners['!']  = ScanExclamation;
 	Scanners['|']  = ScanBar;
 	Scanners['&']  = ScanAmpersand;
 	Scanners['^']  = ScanCaret;

@@ -34,6 +34,16 @@ static void EmitNOP(IRInst inst)
 {
 	;
 }
+static void EmitBranch(IRInst inst)
+{
+	int tcode = TypeCode(inst->ty);
+	BBlock p = (BBlock)DST;
+
+	DST = p->sym;
+	ClearRegs();
+	PutASMCode(ASM_CODE(inst->opcode, tcode), inst->opds);
+
+}
 static void EmitJump(IRInst inst)
 {
 	BBlock p = (BBlock)DST;

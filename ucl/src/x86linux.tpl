@@ -54,6 +54,11 @@ TEMPLATE(X86_MODU4,    "movl $0, %%edx; divl %2")
 TEMPLATE(X86_MODF4,    NULL)
 TEMPLATE(X86_MODF8,    NULL)
 
+TEMPLATE(X86_JNZI4,    "cmpl $0, %1;jne %0")
+TEMPLATE(X86_JNZU4,    "cmpl $0, %1;jne %0")
+TEMPLATE(X86_JNZF4,    "fldz;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
+TEMPLATE(X86_JNZF8,    "fldz;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
+
 TEMPLATE(X86_ADDR,     "leal %1, %0")
 
 TEMPLATE(X86_PROLOGUE, "pushl %%ebp;pushl %%ebx;pushl %%esi;pushl %%edi;movl %%esp, %%ebp")

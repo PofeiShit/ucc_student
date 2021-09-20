@@ -235,9 +235,23 @@ static AstExpression CheckSubOP(AstExpression expr)
 	PERFORM_ARITH_CONVERSION(expr);
 	return expr;
 }
-
+static AstExpression CheckLogicalOP(AstExpression expr)
+{
+	expr->ty = T(INT);
+	return expr;
+}
+static AstExpression CheckEqualityOP(AstExpression expr)
+{
+	return expr;
+}
+static AstExpression CheckRelationalOP(AstExpression expr)
+{
+	return expr;
+}
 static AstExpression (* BinaryOPCheckers[])(AstExpression) = 
 {
+	CheckLogicalOP, // ||
+	CheckLogicalOP, // &&
 	CheckBitwiseOP,	// |
 	CheckBitwiseOP, // ^
 	CheckBitwiseOP,	// &
@@ -251,10 +265,10 @@ static AstExpression (* BinaryOPCheckers[])(AstExpression) =
 };
 static AstExpression CheckBinaryExpression(AstExpression expr)
 {
-
-	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);;
+	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
 	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
-	return (* BinaryOPCheckers[expr->op - OP_BITOR])(expr);
+
+	return (* BinaryOPCheckers[expr->op - OP_OR])(expr);
 }
 /**
  Syntax
@@ -295,8 +309,7 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 		lopr->op = ops[expr->op - OP_BITOR_ASSIGN];
 		lopr->kids[0] = expr->kids[0];
 		lopr->kids[1] = expr->kids[1];
-
-		expr->kids[1] = (*BinaryOPCheckers[lopr->op - OP_BITOR])(lopr);
+		expr->kids[1] = (*BinaryOPCheckers[lopr->op - OP_OR])(lopr);
 
 	}
 	// we have use CanModify() to test whether left operand is modifiable.
@@ -305,6 +318,7 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 	expr->ty = ty;	
 	return expr;
 }
+
 static AstExpression CheckCommaExpression(AstExpression expr)
 {
 	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);

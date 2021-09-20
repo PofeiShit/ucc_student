@@ -171,6 +171,22 @@ void GenerateReturn(Type ty, Symbol src)
 	inst->opds[1] = inst->opds[2] = NULL;
 	AppendInst(inst);
 }
+void GenerateBranch(Type ty, BBlock dstBB, int opcode, Symbol src1, Symbol src2)
+{
+	IRInst inst;
+
+	ALLOC(inst);
+	// dstBB->ref++;
+	// src1->ref++;
+	// if (src2) src2->ref++;
+	// DrawCFGEdge(CurrentBB, dstBB);
+	inst->ty = ty;
+	inst->opcode  = opcode;
+	inst->opds[0] = (Symbol)dstBB;
+	inst->opds[1] = src1;
+	inst->opds[2] = src2;
+	AppendInst(inst);
+}
 void GenerateJump(BBlock dstBB)
 {
 	IRInst inst;

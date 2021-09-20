@@ -76,9 +76,32 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 		return NULL;
 	}
 }
+static Symbol TransBranchExpression(AstExpression expr)
+{
+	BBlock nextBB, trueBB, falseBB;
+	Symbol t;
+	t = CreateTemp(expr->ty);
+	nextBB = CreateBBlock();
+	trueBB = CreateBBlock();
+	falseBB = CreateBBlock();
+
+	TranslateBranch(expr, trueBB, falseBB);
+	StartBBlock(falseBB);
+	GenerateMove(expr->ty, t, IntConstant(0));
+	// goto BB1
+	GenerateJump(nextBB);
+	StartBBlock(trueBB);
+	GenerateMove(expr->ty, t, IntConstant(1));
+	StartBBlock(nextBB);
+	return t;
+}
+
 static Symbol TranslateBinaryExpression(AstExpression expr)
 {
 	Symbol src1, src2;
+	if (expr->op == OP_OR || expr->op == OP_AND) {
+		return TransBranchExpression(expr);
+	}
 	src1 = TranslateExpression(expr->kids[0]);
 	src2 = TranslateExpression(expr->kids[1]);
 	return Simplify(expr->ty, OPMap[expr->op], src1, src2);
@@ -108,6 +131,37 @@ static Symbol (* ExprTrans[])(AstExpression) =
 #include "opinfo.h"
 #undef OPINFO
 };
+void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
+{
+	BBlock rtestBB;
+	Symbol src1;
+	Type ty;
+	switch(expr->op) {
+	case OP_CONST:
+		if (! (expr->val.i[0] == 0 && expr->val.i[1] == 0))
+		{			
+			GenerateJump(trueBB);
+		}
+		break;
+
+	case OP_OR:
+		rtestBB = CreateBBlock();
+		TranslateBranch(expr->kids[0], trueBB, rtestBB);
+		StartBBlock(rtestBB);
+		TranslateBranch(expr->kids[1], trueBB, falseBB);
+		break;
+
+	default:
+		src1 = TranslateExpression(expr);
+		if (src1->kind == SK_Constant) {
+			// TODO
+		} else {
+			ty = expr->ty;
+			GenerateBranch(ty, trueBB, JNZ, src1, NULL);
+		}
+		break;
+	}
+}
 Symbol TranslateExpression(AstExpression expr)
 {
 	return (* ExprTrans[expr->op])(expr);

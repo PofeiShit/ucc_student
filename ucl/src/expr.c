@@ -134,7 +134,7 @@ AstExpression ParseAssignmentExpression(void)
 {
 	AstExpression expr;	 
 
-	expr = ParseBinaryExpression(Prec[OP_BITOR]);
+	expr = ParseBinaryExpression(Prec[OP_OR]);
 
 	if (CurrentToken >= TK_ASSIGN && CurrentToken <= TK_MOD_ASSIGN) {
 		AstExpression asgnExpr;
@@ -142,7 +142,7 @@ AstExpression ParseAssignmentExpression(void)
 		asgnExpr->op = BINARY_OP;
 		asgnExpr->kids[0] = expr;
 		NEXT_TOKEN;		 
-		asgnExpr->kids[1] = ParseBinaryExpression(Prec[OP_BITOR]);
+		asgnExpr->kids[1] = ParseBinaryExpression(Prec[OP_OR]);
 		return asgnExpr;
 	}
 	return expr;
