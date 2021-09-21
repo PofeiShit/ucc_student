@@ -246,6 +246,7 @@ static AstExpression CheckLogicalOP(AstExpression expr)
 }
 static AstExpression CheckEqualityOP(AstExpression expr)
 {
+	expr->ty = T(INT);
 	return expr;
 }
 static AstExpression CheckRelationalOP(AstExpression expr)
@@ -259,6 +260,8 @@ static AstExpression (* BinaryOPCheckers[])(AstExpression) =
 	CheckBitwiseOP,	// |
 	CheckBitwiseOP, // ^
 	CheckBitwiseOP,	// &
+	CheckEqualityOP, // ==
+	CheckEqualityOP, // !=
 	CheckShiftOP,		//	<<
 	CheckShiftOP,		// >>
 	CheckAddOP,			// +

@@ -64,6 +64,16 @@ TEMPLATE(X86_JNZU4,    "cmpl $0, %1;jne %0")
 TEMPLATE(X86_JNZF4,    "fldz;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
 TEMPLATE(X86_JNZF8,    "fldz;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
 
+TEMPLATE(X86_JEI4,     "cmpl %2, %1;je %0")
+TEMPLATE(X86_JEU4,     "cmpl %2, %1;je %0")
+TEMPLATE(X86_JEF4,     "flds %2;fucompp;fnstsw %%ax;test $0x44, %%ah;jnp %0")
+TEMPLATE(X86_JEF8,     "fldl %2;fucompp;fnstsw %%ax;test $0x44, %%ah;jnp %0")
+
+TEMPLATE(X86_JNEI4,    "cmpl %2, %1;jne %0")
+TEMPLATE(X86_JNEU4,    "cmpl %2, %1;jne %0")
+TEMPLATE(X86_JNEF4,    "flds %2;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
+TEMPLATE(X86_JNEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
+
 TEMPLATE(X86_ADDR,     "leal %1, %0")
 
 TEMPLATE(X86_PROLOGUE, "pushl %%ebp;pushl %%ebx;pushl %%esi;pushl %%edi;movl %%esp, %%ebp")
