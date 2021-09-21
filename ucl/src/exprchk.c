@@ -135,6 +135,10 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 			;
 	}
 }
+static AstExpression CheckUnaryExpression(AstExpression expr)
+{
+	;
+}
 /**
  Syntax 
 		   AND-expression:

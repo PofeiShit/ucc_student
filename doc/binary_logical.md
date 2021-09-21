@@ -5,6 +5,7 @@ void main()
 {
     int a;
     a || 3;
+	a && 3;
 }
 
 ```
@@ -59,9 +60,9 @@ BB13:
 BB14:
     c = t;
 ```
-先介绍下TransBranchExpression函数
+先介绍下TranslatBranchExpression函数
 ```
-static Symbol TransBranchExpression(AstExpression expr)
+static Symbol TranslateBranchExpression(AstExpression expr)
 {
 	BBlock nextBB, trueBB, falseBB;
 	Symbol t;
@@ -160,3 +161,34 @@ void GenerateBranch(Type ty, BBlock dstBB, int opcode, Symbol src1, Symbol src2)
 	AppendInst(inst);
 }
 ```
+
+&& 操作符号
+---
+在TranslateBranch中添加OP_AND分支
+```
+		rtestBB = CreateBBlock();
+		TranslateBranch(Not(expr->kids[0]), falseBB, rtestBB);
+		StartBBlock(rtestBB);
+		TranslateBranch(expr->kids[1], trueBB, falseBB);
+```
+这里非得Not嘛？
+1. 假如按照OP_OR搞, 
+TranslateBranch(expr->kids[0], rtestBB, falseBB);
+那就需要StartBBlock(falseBB); 而不是StartBBock(rtestBB),这样无论kids[0]是否正常正确，都会走到rtestBB, 而&&只要左边为false就不需要判断右边了
+但是StartBBlock(falseBB)已经在TranslateBranchExpression()逻辑已经写好。非得把falseBB写到这里，整体的逻辑如下:
+```
+BB0
+	if (a) goto rtestBB
+falseBB:
+	t = 0
+	goto returnBB
+trueBB:
+	t = 1
+	goto returnBB
+rtestBB:
+	if (b) goto trueBB
+returnBB:
+	xxx
+```
+判断被割裂，逻辑混乱，不如价格Not性价比高
+

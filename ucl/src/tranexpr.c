@@ -76,7 +76,11 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 		return NULL;
 	}
 }
-static Symbol TransBranchExpression(AstExpression expr)
+static Symbol TranslateUnaryExpression(AstExpression expr)
+{
+	return NULL;
+}
+static Symbol TranslateBranchExpression(AstExpression expr)
 {
 	BBlock nextBB, trueBB, falseBB;
 	Symbol t;
@@ -100,7 +104,7 @@ static Symbol TranslateBinaryExpression(AstExpression expr)
 {
 	Symbol src1, src2;
 	if (expr->op == OP_OR || expr->op == OP_AND) {
-		return TransBranchExpression(expr);
+		return TranslateBranchExpression(expr);
 	}
 	src1 = TranslateExpression(expr->kids[0]);
 	src2 = TranslateExpression(expr->kids[1]);
@@ -131,11 +135,30 @@ static Symbol (* ExprTrans[])(AstExpression) =
 #include "opinfo.h"
 #undef OPINFO
 };
+AstExpression Not(AstExpression expr)
+{
+	AstExpression t;
+	switch(expr->op)
+	{
+	case OP_AND:
+		expr->op = OP_OR;
+		expr->kids[0] = Not(expr->kids[0]);
+		expr->kids[1] = Not(expr->kids[1]);
+		return expr;
+	default:
+		CREATE_AST_NODE(t, Expression);
+		t->ty = T(INT);
+		t->op = OP_NOT;
+		t->kids[0] = expr;
+		return t;
+	}
+}
 void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
 {
 	BBlock rtestBB;
 	Symbol src1;
 	Type ty;
+
 	switch(expr->op) {
 	case OP_CONST:
 		if (! (expr->val.i[0] == 0 && expr->val.i[1] == 0))
@@ -143,14 +166,26 @@ void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
 			GenerateJump(trueBB);
 		}
 		break;
-
+	case OP_AND:
+		rtestBB = CreateBBlock();
+		TranslateBranch(Not(expr->kids[0]), falseBB, rtestBB);
+		StartBBlock(rtestBB);
+		TranslateBranch(expr->kids[1], trueBB, falseBB);
+		break;
 	case OP_OR:
 		rtestBB = CreateBBlock();
 		TranslateBranch(expr->kids[0], trueBB, rtestBB);
 		StartBBlock(rtestBB);
 		TranslateBranch(expr->kids[1], trueBB, falseBB);
 		break;
-
+	case OP_NOT:
+		{
+			AstExpression parent = expr;
+			src1 = TranslateExpression(parent->kids[0]);
+			ty = parent->kids[0]->ty;
+			GenerateBranch(ty, trueBB, JZ, src1, NULL);
+		}
+		break;
 	default:
 		src1 = TranslateExpression(expr);
 		if (src1->kind == SK_Constant) {
