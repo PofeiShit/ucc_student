@@ -103,7 +103,7 @@ static Symbol TranslateBranchExpression(AstExpression expr)
 static Symbol TranslateBinaryExpression(AstExpression expr)
 {
 	Symbol src1, src2;
-	if (expr->op == OP_OR || expr->op == OP_AND || (expr->op >= OP_EQUAL && expr->op <= OP_UNEQUAL)) {
+	if (expr->op == OP_OR || expr->op == OP_AND || (expr->op >= OP_EQUAL && expr->op <= OP_LESS_EQ)) {
 		return TranslateBranchExpression(expr);
 	}
 	src1 = TranslateExpression(expr->kids[0]);
@@ -177,6 +177,10 @@ void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
 		StartBBlock(rtestBB);
 		TranslateBranch(expr->kids[1], trueBB, falseBB);
 		break;
+	case OP_GREAT:
+	case OP_LESS:
+	case OP_GREAT_EQ:
+	case OP_LESS_EQ:
 	case OP_UNEQUAL:
 	case OP_EQUAL:
 		src1 = TranslateExpression(expr->kids[0]);

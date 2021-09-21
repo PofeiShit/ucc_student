@@ -74,6 +74,27 @@ TEMPLATE(X86_JNEU4,    "cmpl %2, %1;jne %0")
 TEMPLATE(X86_JNEF4,    "flds %2;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
 TEMPLATE(X86_JNEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x44, %%ah;jp %0")
 
+TEMPLATE(X86_JGI4,     "cmpl %2, %1;jg %0")
+TEMPLATE(X86_JGU4,     "cmpl %2, %1;ja %0")
+TEMPLATE(X86_JGF4,     "flds %2;fucompp;fnstsw %%ax;test $0x1, %%ah;jne %0")
+TEMPLATE(X86_JGF8,     "fldl %2;fucompp;fnstsw %%ax;test $0x1, %%ah;jne %0")
+
+TEMPLATE(X86_JLI4,     "cmpl %2, %1;jl %0")
+TEMPLATE(X86_JLU4,     "cmpl %2, %1;jb %0")
+TEMPLATE(X86_JLF4,     "flds %2;fucompp;fnstsw %%ax;test $0x41, %%ah;jp %0")
+TEMPLATE(X86_JLF8,     "fldl %2;fucompp;fnstsw %%ax;test $0x41, %%ah;jp %0")
+
+TEMPLATE(X86_JGEI4,    "cmpl %2, %1;jge %0")
+TEMPLATE(X86_JGEU4,    "cmpl %2, %1;jae %0")
+TEMPLATE(X86_JGEF4,    "flds %2;fucompp;fnstsw %%ax;test $0x41, %%ah;jne %0")
+TEMPLATE(X86_JGEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x41, %%ah;jne %0")
+
+TEMPLATE(X86_JLEI4,    "cmpl %2, %1;jle %0")
+TEMPLATE(X86_JLEU4,    "cmpl %2, %1;jbe %0")
+TEMPLATE(X86_JLEF4,    "flds %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
+TEMPLATE(X86_JLEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
+
+
 TEMPLATE(X86_ADDR,     "leal %1, %0")
 
 TEMPLATE(X86_PROLOGUE, "pushl %%ebp;pushl %%ebx;pushl %%esi;pushl %%edi;movl %%esp, %%ebp")
