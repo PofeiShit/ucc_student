@@ -18,6 +18,8 @@ TOKEN(TK_ID,        "ID")
 TOKEN(TK_INTCONST, "int")
 //operators
 TOKEN(TK_COMMA,			",")
+TOKEN(TK_QUESTION,      "?")
+TOKEN(TK_COLON,         ":")
 TOKEN(TK_ASSIGN,        "=")
 TOKEN(TK_BITOR_ASSIGN,  "|=")
 TOKEN(TK_BITXOR_ASSIGN, "^=")

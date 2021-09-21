@@ -110,7 +110,33 @@ static Symbol TranslateBinaryExpression(AstExpression expr)
 	src2 = TranslateExpression(expr->kids[1]);
 	return Simplify(expr->ty, OPMap[expr->op], src1, src2);
 }
+static Symbol TranslateConditionalExpression(AstExpression expr)
+{
+	Symbol t, t1, t2;
+	BBlock trueBB, falseBB, nextBB;
+	t = NULL;
+	if (expr->ty->categ != VOID) {
+		t = CreateTemp(expr->ty);
+	}
+	trueBB = CreateBBlock();
+	falseBB = CreateBBlock();
+	nextBB = CreateBBlock();
+	TranslateBranch(Not(expr->kids[0]), falseBB, trueBB);
 
+	StartBBlock(trueBB);
+	t1 = TranslateExpression(expr->kids[1]->kids[0]);
+	if (t1 != NULL)
+		GenerateMove(expr->ty, t, t1);
+	GenerateJump(nextBB);
+
+	StartBBlock(falseBB);
+	t2 = TranslateExpression(expr->kids[1]->kids[1]);
+	if (t2 != NULL)
+		GenerateMove(expr->ty, t, t2);
+
+	StartBBlock(nextBB);
+	return t;
+}
 static Symbol TranslateAssignmentExpression(AstExpression expr)
 {
 	Symbol dst, src;

@@ -285,6 +285,29 @@ static AstExpression CheckBinaryExpression(AstExpression expr)
 /**
  Syntax
  
+		   conditional-expression:
+				   logical-OR-expression
+				   logical-OR-expression ?	expression :  conditional-expression
+ OPINFO(OP_QUESTION,	  3,	"?",	  Conditional,	  NOP)
+ */
+static AstExpression CheckConditionalExpression(AstExpression expr)
+{
+	Type ty1, ty2;
+	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+	expr->kids[1]->kids[0] = Adjust(CheckExpression(expr->kids[1]->kids[0]), 1);
+	expr->kids[1]->kids[1] = Adjust(CheckExpression(expr->kids[1]->kids[1]), 1);
+	ty1 = expr->kids[1]->kids[0]->ty;
+	ty2 = expr->kids[1]->kids[1]->ty;
+	if (BothArithType(ty1, ty2)) {
+		expr->ty = CommonRealType(ty1, ty2);
+		expr->kids[1]->kids[0] = Cast(expr->ty, expr->kids[1]->kids[0]);
+		expr->kids[1]->kids[1] = Cast(expr->ty, expr->kids[1]->kids[1]);
+		return expr;
+	}
+}
+/**
+ Syntax
+ 
 		   assignment-expression:
 				   conditional-expression
 				   unary-expression assignment-operator assignment-expression

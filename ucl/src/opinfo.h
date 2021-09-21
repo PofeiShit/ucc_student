@@ -17,6 +17,8 @@ OPINFO(OP_SUB_ASSIGN,    2,    "-=",     Assignment,     NOP)
 OPINFO(OP_MUL_ASSIGN,    2,    "*=",     Assignment,     NOP)
 OPINFO(OP_DIV_ASSIGN,    2,    "/=",     Assignment,     NOP)
 OPINFO(OP_MOD_ASSIGN,    2,    "%=",     Assignment,     NOP)
+OPINFO(OP_QUESTION,      3,    "?",      Conditional,    NOP)
+OPINFO(OP_COLON,         3,    ":",      Error,          NOP)
 //
 OPINFO(OP_OR,			 4,    "||", 	 Binary, 		 NOP)
 OPINFO(OP_AND, 			 5, 	"&", 	 Binary,		 NOP)

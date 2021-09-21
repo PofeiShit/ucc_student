@@ -121,6 +121,34 @@ AstExpression ParseBinaryExpression(int prec)
 	}
 	return expr;
 }
+
+/**
+ *  conditional-expression:
+ *      logical-OR-expression
+ *      logical-OR-expression ? expression : conditional-expression
+ */
+static AstExpression ParseConditionalExpression(void)
+{
+	AstExpression expr;
+	expr = ParseBinaryExpression(Prec[OP_OR]);
+	if (CurrentToken == TK_QUESTION) {
+		AstExpression condExpr;
+		CREATE_AST_NODE(condExpr, Expression);
+		condExpr->op = OP_QUESTION;
+		condExpr->kids[0] = expr;
+		NEXT_TOKEN;
+		// use colonExpr for pass llt c++ compile
+		AstExpression colonExpr;
+		CREATE_AST_NODE(colonExpr, Expression);
+		colonExpr->kids[0] = ParseExpression();
+		Expect(TK_COLON);
+		colonExpr->kids[1] = ParseConditionalExpression();
+		condExpr->kids[1] = colonExpr;
+		return condExpr;
+	}
+	return expr;
+
+}
 /**
  *  assignment-expression:
  *      conditional-expression
@@ -134,7 +162,7 @@ AstExpression ParseAssignmentExpression(void)
 {
 	AstExpression expr;	 
 
-	expr = ParseBinaryExpression(Prec[OP_OR]);
+	expr = ParseConditionalExpression();
 
 	if (CurrentToken >= TK_ASSIGN && CurrentToken <= TK_MOD_ASSIGN) {
 		AstExpression asgnExpr;
@@ -142,7 +170,7 @@ AstExpression ParseAssignmentExpression(void)
 		asgnExpr->op = BINARY_OP;
 		asgnExpr->kids[0] = expr;
 		NEXT_TOKEN;		 
-		asgnExpr->kids[1] = ParseBinaryExpression(Prec[OP_OR]);
+		asgnExpr->kids[1] = ParseAssignmentExpression();
 		return asgnExpr;
 	}
 	return expr;

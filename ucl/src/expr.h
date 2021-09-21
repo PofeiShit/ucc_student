@@ -41,5 +41,6 @@ AstExpression CheckExpression(AstExpression expr);
 AstExpression Cast(Type ty, AstExpression expr);
 AstExpression Adjust(AstExpression expr, int rvalue);
 Symbol TranslateExpression(AstExpression expr);
+AstExpression Not(AstExpression expr);
 void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB);
 #endif
