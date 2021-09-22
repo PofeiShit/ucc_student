@@ -8,3 +8,13 @@ AstExpression FoldConstant(AstExpression expr)
 	    ! (expr->kids[0]->op == OP_CONST && expr->kids[1]->op == OP_CONST))
 		return expr;
 }
+
+AstExpression Constant(Type ty, union value val)
+{
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	expr->op = OP_CONST;
+	expr->ty = ty;
+	expr->val = val;
+	return expr;
+}

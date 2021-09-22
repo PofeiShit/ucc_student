@@ -139,7 +139,7 @@ static int ScanPlus(void)
 	if (*CURSOR == '+')
 	{
 		CURSOR++;
-		return -1;			// ++
+		return TK_INC;			// ++
 	}
 	else if (*CURSOR == '=')
 	{
@@ -158,7 +158,7 @@ static int ScanMinus(void)
 	if (*CURSOR == '-')
 	{
 		CURSOR++;
-		return -1;			// --
+		return TK_DEC;			// --
 	}
 	else if (*CURSOR == '=')
 	{

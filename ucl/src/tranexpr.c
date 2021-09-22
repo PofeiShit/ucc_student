@@ -64,6 +64,13 @@ static Symbol TranslateFunctionCall(AstExpression expr)
 	GenerateFunctionCall(expr->ty, recv, faddr, args);
 	return recv;
 }
+static Symbol TranslateIncrement(AstExpression expr)
+{
+	AstExpression casgn;
+	Symbol p;
+	casgn = expr->kids[0];
+	return TranslateExpression(casgn);
+}
 static Symbol TranslatePostfixExpression(AstExpression expr)
 {
 	switch (expr->op)
@@ -78,6 +85,10 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 }
 static Symbol TranslateUnaryExpression(AstExpression expr)
 {
+	Symbol src;
+	if (expr->op == OP_PREINC || expr->op == OP_PREDEC) {
+		return TranslateIncrement(expr);
+	}
 	return NULL;
 }
 static Symbol TranslateBranchExpression(AstExpression expr)

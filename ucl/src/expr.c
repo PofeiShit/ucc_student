@@ -104,12 +104,47 @@ static AstExpression ParsePostfixExpression(void)
 		}
 	}
 }
+/**
+ *  unary-expression:
+ *		postfix-expression
+ *		unary-operator unary-expression
+ *		( type-name ) unary-expression
+ *		sizeof unary-expression
+ *		sizeof ( type-name )
+ *
+ *  unary-operator:
+ *		++ -- & * + - ! ~
+ */
+ // The grammar of unary-expression in UCC is a little different from C89.
+ // There is no cast-expression in UCC.
+AstExpression ParseUnaryExpression()
+{
+	AstExpression expr;
+	int t;
+	// printf("%d-%d\n", TK_INC, CurrentToken);
+	// while(1);
+	switch(CurrentToken)
+	{
+	case TK_DEC:
+	case TK_INC:
+		CREATE_AST_NODE(expr, Expression);
+		expr->op = UNARY_OP;
+		NEXT_TOKEN;
+		expr->kids[0] = ParseUnaryExpression();
+		return expr;
+
+	case TK_LPAREN:
+		return ParsePostfixExpression();
+	default:
+		return ParsePostfixExpression();
+	}
+}
 AstExpression ParseBinaryExpression(int prec)
 {
 	AstExpression binExpr;
 	AstExpression expr;
 	int newPrec;
-	expr = ParsePostfixExpression();
+	expr = ParseUnaryExpression();
 
 	while (IsBinaryOP(CurrentToken) && (newPrec = Prec[BINARY_OP]) >= prec) {
 		CREATE_AST_NODE(binExpr, Expression);
