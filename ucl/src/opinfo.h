@@ -40,6 +40,8 @@ OPINFO(OP_DIV,           13,   "/",      Binary,         DIV)
 OPINFO(OP_MOD,           13,   "%",      Binary,         MOD)
 OPINFO(OP_PREINC,	     14,   "++",	 Unary,			 NOP)
 OPINFO(OP_PREDEC,		 14,   "--",	 Unary,			 NOP)
+OPINFO(OP_POSTINC,		 15,   "++", 	 Postfix,		 NOP)
+OPINFO(OP_POSTDEC,		 15,   "--", 	 Postfix,		 NOP)
 // 
 OPINFO(OP_NOT,           14,   "!",      Unary,          NOP)
 OPINFO(OP_CALL,          15,   "call",   Postfix,        NOP)

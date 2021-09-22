@@ -1149,7 +1149,7 @@ TEST_F(TestUcl, Test_Unary_Inc)
                                 "pushl %esi"
                                 "pushl %edi"
                                 "movl %esp, %ebp"
-                                "subl $12, %esp"
+                                "subl $28, %esp"
                             ".BB0:"
                                 "movl -4(%ebp), %eax"
                                 "addl $1, %eax"
@@ -1157,6 +1157,14 @@ TEST_F(TestUcl, Test_Unary_Inc)
                                 "movl -4(%ebp), %ecx"
                                 "addl $-1, %ecx"
                                 "movl %ecx, -4(%ebp)"
+                                "movl -4(%ebp), %edx"
+                                "movl -4(%ebp), %ebx"
+                                "addl $1, %ebx"
+                                "movl %ebx, -4(%ebp)"
+                                "movl -4(%ebp), %esi"
+                                "movl -4(%ebp), %edi"
+                                "addl $-1, %edi"
+                                "movl %edi, -4(%ebp)"
                             ".BB1:"
                                 "movl %ebp, %esp"
                                 "popl %edi"
@@ -1179,8 +1187,3 @@ TEST_F(TestUcl, Test_Unary_Inc)
     EXPECT_EQ(get_string(asmcode), get_string(testcode));
     asmFile.close();
 }
-
-
-
-
-

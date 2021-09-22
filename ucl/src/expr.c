@@ -98,7 +98,14 @@ static AstExpression ParsePostfixExpression(void)
 			Expect(TK_RPAREN);
 			expr = p;
 			break;
-
+		case TK_DEC:
+		case TK_INC:
+			CREATE_AST_NODE(p, Expression);
+			p->op = (CurrentToken == TK_INC) ? OP_POSTINC : OP_POSTDEC;
+			p->kids[0] = expr;
+			NEXT_TOKEN;
+			expr = p;
+			break;
 		default:
 			return expr;
 		}

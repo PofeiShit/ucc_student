@@ -69,6 +69,17 @@ static Symbol TranslateIncrement(AstExpression expr)
 	AstExpression casgn;
 	Symbol p;
 	casgn = expr->kids[0];
+	p = TranslateExpression(casgn->kids[0]);
+	if (expr->op == OP_POSTINC || expr->op == OP_POSTDEC) {
+		Symbol ret;
+		ret = p;
+		if (p->kind != SK_Temp) {
+			ret = CreateTemp(expr->ty);
+			GenerateMove(expr->ty, ret, p);
+		}
+		TranslateExpression(casgn);
+		return ret;
+	}
 	return TranslateExpression(casgn);
 }
 static Symbol TranslatePostfixExpression(AstExpression expr)
@@ -77,6 +88,9 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 	{
 	case OP_CALL:
 		return TranslateFunctionCall(expr);
+	case OP_POSTDEC:
+	case OP_POSTINC:
+		return TranslateIncrement(expr);
 	default:
 		//assert(0);
 		;

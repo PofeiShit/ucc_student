@@ -125,16 +125,6 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	return expr;
 }
 
-static AstExpression CheckPostfixExpression(AstExpression expr)
-{
-	switch(expr->op) {
-		case OP_CALL:
-			return CheckFunctionCall(expr);
-		default:
-			//assert(0);
-			;
-	}
-}
 //	a++,a--,++a,--a		------------->     a+= 1, a-=1
 static AstExpression TransformIncrement(AstExpression expr)
 {
@@ -143,13 +133,26 @@ static AstExpression TransformIncrement(AstExpression expr)
 	
 	val.i[1] = 0; val.i[0] = 1;
 	CREATE_AST_NODE(casgn, Expression);
-	casgn->op = expr->op == OP_PREINC ? OP_ADD_ASSIGN : OP_SUB_ASSIGN;
+	casgn->op = (expr->op == OP_POSTINC || expr->op == OP_PREINC) ? OP_ADD_ASSIGN : OP_SUB_ASSIGN;
 	casgn->kids[0] = expr->kids[0];
 	casgn->kids[1] = Constant(T(INT), val);
 
 	expr->kids[0] = CheckExpression(casgn);
 	expr->ty = expr->kids[0]->ty;
 	return expr;
+}
+static AstExpression CheckPostfixExpression(AstExpression expr)
+{
+	switch(expr->op) {
+		case OP_CALL:
+			return CheckFunctionCall(expr);
+		case OP_POSTDEC:
+		case OP_POSTINC:
+			return TransformIncrement(expr);
+		default:
+			//assert(0);
+			;
+	}
 }
 static AstExpression CheckUnaryExpression(AstExpression expr)
 {
