@@ -128,12 +128,11 @@ AstExpression ParseUnaryExpression()
 {
 	AstExpression expr;
 	int t;
-	// printf("%d-%d\n", TK_INC, CurrentToken);
-	// while(1);
 	switch(CurrentToken)
 	{
 	case TK_DEC:
 	case TK_INC:
+	case TK_NOT:
 		CREATE_AST_NODE(expr, Expression);
 		expr->op = UNARY_OP;
 		NEXT_TOKEN;

@@ -394,7 +394,7 @@ static int ScanExclamation(void)
 		CURSOR++;
 		return TK_UNEQUAL;
 	} else {
-		return -1;
+		return TK_NOT;
 	}
 }
 static int ScanEqual(void)

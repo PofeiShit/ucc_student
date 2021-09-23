@@ -87,6 +87,7 @@ typedef struct functionType
 #define T(categ) (Types + categ)
 
 #define IsIntegType(ty) (ty->categ <= ENUM)
+#define IsScalarType(ty) (ty->categ <= POINTER)
 #define IsPtrType(ty) (ty->categ == POINTER)
 #define IsFunctionType(ty) (ty->categ == FUNCTION)
 #define IsArithType(ty)    (ty->categ <= LONGDOUBLE)

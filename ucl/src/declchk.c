@@ -363,4 +363,5 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 		}
 		p = p->next;
 	}
+	printf("Check done\n");
 }

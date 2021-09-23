@@ -53,6 +53,7 @@ TOKEN(TK_DIV,           "/")
 TOKEN(TK_MOD,           "%")
 TOKEN(TK_INC,           "++")
 TOKEN(TK_DEC,           "--")
+TOKEN(TK_NOT,           "!")
 TOKEN(TK_LPAREN,        "(")
 
 TOKEN(TK_RPAREN,        ")")

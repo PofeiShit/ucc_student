@@ -97,14 +97,7 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 		return NULL;
 	}
 }
-static Symbol TranslateUnaryExpression(AstExpression expr)
-{
-	Symbol src;
-	if (expr->op == OP_PREINC || expr->op == OP_PREDEC) {
-		return TranslateIncrement(expr);
-	}
-	return NULL;
-}
+
 static Symbol TranslateBranchExpression(AstExpression expr)
 {
 	BBlock nextBB, trueBB, falseBB;
@@ -124,7 +117,17 @@ static Symbol TranslateBranchExpression(AstExpression expr)
 	StartBBlock(nextBB);
 	return t;
 }
-
+static Symbol TranslateUnaryExpression(AstExpression expr)
+{
+	Symbol src;
+	if (expr->op == OP_NOT) {
+		return TranslateBranchExpression(expr);
+	}
+	if (expr->op == OP_PREINC || expr->op == OP_PREDEC) {
+		return TranslateIncrement(expr);
+	}
+	return NULL;
+}
 static Symbol TranslateBinaryExpression(AstExpression expr)
 {
 	Symbol src1, src2;

@@ -163,6 +163,15 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 	case OP_PREDEC:
 	case OP_PREINC:
 		return TransformIncrement(expr);
+
+	case OP_NOT: // !a
+		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+		if (IsScalarType(expr->kids[0]->ty)) {
+			expr->ty = T(INT);
+			return FoldConstant(expr);
+		}
+		break;
+
 	default:
 		break;
 	}
