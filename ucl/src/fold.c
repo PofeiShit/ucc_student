@@ -8,7 +8,7 @@ AstExpression FoldConstant(AstExpression expr)
 	    ! (expr->kids[0]->op == OP_CONST && expr->kids[1]->op == OP_CONST))
 		return expr;
 
-	if (expr->op <= OP_NOT && expr->kids[0]->op != OP_CONST)
+	if (expr->op >= OP_POS && expr->op <= OP_NOT && expr->kids[0]->op != OP_CONST)
 		return expr;
 }
 

@@ -38,13 +38,16 @@ OPINFO(OP_SUB,           12,   "-",      Binary,         SUB)
 OPINFO(OP_MUL,           13,   "*",      Binary,         MUL)
 OPINFO(OP_DIV,           13,   "/",      Binary,         DIV)
 OPINFO(OP_MOD,           13,   "%",      Binary,         MOD)
+
 OPINFO(OP_PREINC,	     14,   "++",	 Unary,			 NOP)
 OPINFO(OP_PREDEC,		 14,   "--",	 Unary,			 NOP)
+OPINFO(OP_POS,			 14,   "+", 	 Unary,			 NOP)
+OPINFO(OP_NEG,			 14,   "-", 	 Unary,			 NEG)
 OPINFO(OP_COMP,			 14,   "~", 	 Unary,			 BCOM)
 OPINFO(OP_NOT,           14,   "!",      Unary,          NOP)
+
 OPINFO(OP_POSTINC,		 15,   "++", 	 Postfix,		 NOP)
 OPINFO(OP_POSTDEC,		 15,   "--", 	 Postfix,		 NOP)
-// 
 OPINFO(OP_CALL,          15,   "call",   Postfix,        NOP)
 OPINFO(OP_ID,            16,   "id",     Primary,        NOP)
 OPINFO(OP_CONST,         16,   "const",  Primary,        NOP)

@@ -128,6 +128,7 @@ static Symbol TranslateUnaryExpression(AstExpression expr)
 	}
 	src = TranslateExpression(expr->kids[0]);
 	switch(expr->op) {
+	case OP_NEG:
 	case OP_COMP:
 		return Simplify(expr->ty, OPMap[expr->op], src, NULL);
 	default:
