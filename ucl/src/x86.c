@@ -311,6 +311,9 @@ static void EmitAssign(IRInst inst)
 	case X86_LSHI4:
 	case X86_RSHI4:
 		goto put_code;
+	case X86_COMPI4:
+		AllocateReg(inst, 1);
+		goto put_code;
 	default:
 		// AllocateReg(inst, 1);
 		// AllocateReg(inst, 2);

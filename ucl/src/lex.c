@@ -232,6 +232,7 @@ SINGLE_CHAR_SCANNER(SEMICOLON)
 SINGLE_CHAR_SCANNER(COMMA)
 SINGLE_CHAR_SCANNER(QUESTION)
 SINGLE_CHAR_SCANNER(COLON)
+SINGLE_CHAR_SCANNER(COMP)
 
 static int ScanEOF(void)
 {
@@ -440,8 +441,9 @@ void SetupLexer(void)
 	Scanners[';'] = ScanSEMICOLON;
 	Scanners[','] = ScanCOMMA;
 	Scanners['='] = ScanEqual;
-	Scanners['?']  = ScanQUESTION;
-	Scanners[':']  = ScanCOLON;	
+	Scanners['?'] = ScanQUESTION;
+	Scanners[':'] = ScanCOLON;	
+	Scanners['~'] = ScanCOMP;
 
 }
 

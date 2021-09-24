@@ -171,7 +171,12 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 			return FoldConstant(expr);
 		}
 		break;
-
+	case OP_COMP:
+		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+		if (IsIntegType(expr->kids[0]->ty)) {
+			expr->ty = expr->kids[0]->ty;
+			return FoldConstant(expr);
+		}
 	default:
 		break;
 	}

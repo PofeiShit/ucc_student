@@ -7,6 +7,8 @@ Symbol Simplify(Type ty, int opcode, Symbol src1, Symbol src2)
 {
     Symbol p1, p2;
     int c1, c2;
+    if (src2 == NULL) 
+        goto add_value;
     switch(opcode)
     {
         case SUB:
@@ -34,5 +36,6 @@ Symbol Simplify(Type ty, int opcode, Symbol src1, Symbol src2)
         default:
             break;
     }
+add_value:
 	return TryAddValue(ty, opcode, src1, src2);    
 }

@@ -126,7 +126,13 @@ static Symbol TranslateUnaryExpression(AstExpression expr)
 	if (expr->op == OP_PREINC || expr->op == OP_PREDEC) {
 		return TranslateIncrement(expr);
 	}
-	return NULL;
+	src = TranslateExpression(expr->kids[0]);
+	switch(expr->op) {
+	case OP_COMP:
+		return Simplify(expr->ty, OPMap[expr->op], src, NULL);
+	default:
+		return NULL;
+	}
 }
 static Symbol TranslateBinaryExpression(AstExpression expr)
 {

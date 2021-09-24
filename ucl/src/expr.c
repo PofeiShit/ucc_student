@@ -132,6 +132,7 @@ AstExpression ParseUnaryExpression()
 	{
 	case TK_DEC:
 	case TK_INC:
+	case TK_COMP:
 	case TK_NOT:
 		CREATE_AST_NODE(expr, Expression);
 		expr->op = UNARY_OP;

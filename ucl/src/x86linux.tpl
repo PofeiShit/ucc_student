@@ -54,6 +54,11 @@ TEMPLATE(X86_MODU4,    "movl $0, %%edx; divl %2")
 TEMPLATE(X86_MODF4,    NULL)
 TEMPLATE(X86_MODF8,    NULL)
 
+TEMPLATE(X86_COMPI4,   "notl %0")
+TEMPLATE(X86_COMPU4,   "notl %0")
+TEMPLATE(X86_COMPF4,   NULL)
+TEMPLATE(X86_COMPF8,   NULL)
+
 TEMPLATE(X86_JZI4,     "cmpl $0, %1;je %0")
 TEMPLATE(X86_JZU4,     "cmpl $0, %1;je %0")
 TEMPLATE(X86_JZF4,     "fldz;fucompp;fnstsw %%ax;test $0x44, %%ah;jnp %0")
