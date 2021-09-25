@@ -11,6 +11,7 @@ TOKEN(TK_INT, 		"int")
 TOKEN(TK_VOID,      "void")
 TOKEN(TK_STRUCT,    "struct")
 TOKEN(TK_RETURN, 	"return")
+TOKEN(TK_SIZEOF,    "sizeof")
 //identifier
 TOKEN(TK_ID,        "ID")
 

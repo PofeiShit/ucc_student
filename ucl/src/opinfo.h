@@ -45,7 +45,7 @@ OPINFO(OP_POS,			 14,   "+", 	 Unary,			 NOP)
 OPINFO(OP_NEG,			 14,   "-", 	 Unary,			 NEG)
 OPINFO(OP_COMP,			 14,   "~", 	 Unary,			 BCOM)
 OPINFO(OP_NOT,           14,   "!",      Unary,          NOP)
-
+OPINFO(OP_SIZEOF, 		 14,   "sizeof", Unary, 		 NOP)
 OPINFO(OP_POSTINC,		 15,   "++", 	 Postfix,		 NOP)
 OPINFO(OP_POSTDEC,		 15,   "--", 	 Postfix,		 NOP)
 OPINFO(OP_CALL,          15,   "call",   Postfix,        NOP)

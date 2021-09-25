@@ -184,6 +184,16 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 			expr->ty = expr->kids[0]->ty;
 			return expr->op == OP_POS ? expr->kids[0] : FoldConstant(expr);
 		}
+	case OP_SIZEOF:
+		if (expr->kids[0]->kind == NK_Expression) {
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			ty = expr->kids[0]->ty;
+		}
+		expr->ty = T(INT);
+		expr->op = OP_CONST;
+		expr->val.i[0] = ty->size;
+		return expr;
+
 	default:
 		break;
 	}

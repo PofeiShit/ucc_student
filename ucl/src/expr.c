@@ -141,6 +141,18 @@ AstExpression ParseUnaryExpression()
 		NEXT_TOKEN;
 		expr->kids[0] = ParseUnaryExpression();
 		return expr;
+	case TK_SIZEOF:
+		CREATE_AST_NODE(expr, Expression);
+		expr->op = OP_SIZEOF;
+		NEXT_TOKEN;
+		if (CurrentToken == TK_LPAREN) {
+			NEXT_TOKEN;
+			expr->kids[0] = ParseUnaryExpression();	
+			Expect(TK_RPAREN);
+		} else {
+			expr->kids[0] = ParseUnaryExpression();
+		}
+		return expr;
 
 	case TK_LPAREN:
 		return ParsePostfixExpression();
