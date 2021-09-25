@@ -18,6 +18,8 @@ static Type DeriveType(TypeDerivList tyDrvList, Type ty)
 	while (tyDrvList != NULL) {
 		if (tyDrvList->ctor == FUNCTION_RETURN) {
 			ty = FunctionReturn(ty, tyDrvList->sig);
+		} else if (tyDrvList->ctor == POINTER_TO) {
+			ty = PointerTo(ty);
 		}
 		tyDrvList = tyDrvList->next;
 	}
@@ -88,7 +90,16 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 	SaveParameterListTable();	
 	LeaveParemeterList();
 }
+static void CheckPointerDeclarator(AstPointerDeclarator dec)
+{
+	AstPointerDeclarator ptrDec = (AstPointerDeclarator)dec;
+	CheckDeclarator(ptrDec->dec);
+	ALLOC(ptrDec->tyDrvList);
+	ptrDec->tyDrvList->ctor = POINTER_TO;
+	ptrDec->tyDrvList->next = ptrDec->dec->tyDrvList;
+	ptrDec->id = ptrDec->dec->id;
 
+}
 static void CheckDeclarator(AstDeclarator dec)
 {
 	switch(dec->kind) {
@@ -96,6 +107,9 @@ static void CheckDeclarator(AstDeclarator dec)
 			break;
 		case NK_FunctionDeclarator:
 			CheckFunctionDeclarator((AstFunctionDeclarator)dec);
+			break;
+		case NK_PointerDeclarator:
+			CheckPointerDeclarator((AstPointerDeclarator)dec);
 			break;
 		default:
 			;

@@ -208,6 +208,14 @@ static AstDeclarator ParsePostfixDeclarator()
 }
 static AstDeclarator ParseDeclarator()
 {
+	if (CurrentToken == TK_MUL) {
+		// * declarator
+		AstPointerDeclarator ptrDec;
+		CREATE_AST_NODE(ptrDec, PointerDeclarator);
+		NEXT_TOKEN;
+		ptrDec->dec = ParseDeclarator();
+		return (AstDeclarator)ptrDec;
+	}
 	return ParsePostfixDeclarator();
 }
 

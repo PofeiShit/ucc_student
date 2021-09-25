@@ -17,6 +17,8 @@ static char *ASMTemplate[] =
  */
 static char* GetAccessName(Symbol p)
 {
+	if (p->aname != NULL)
+		return p->aname;
 	switch (p->kind)
 	{
 	case SK_Constant:

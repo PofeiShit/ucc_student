@@ -169,6 +169,13 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 		ty = expr->kids[0]->ty;
 		expr->ty = PointerTo(ty);
 		return expr;
+	case OP_DEREF: // *a
+		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+		ty = expr->kids[0]->ty;
+		if (IsPtrType(ty)) {
+			expr->ty = ty->bty;
+			return expr;
+		}
 
 	case OP_NOT: // !a
 		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);

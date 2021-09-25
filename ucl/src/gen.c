@@ -68,6 +68,13 @@ Symbol AddressOf(Symbol p)
 	// p->addressed = 1;
 	return TryAddValue(T(POINTER), ADDR, p, NULL); 
 }
+
+Symbol Deref(Type ty, Symbol addr)
+{
+	Symbol tmp;
+	tmp = CreateTemp(ty);
+	GenerateAssign(ty, tmp, DEREF, addr, NULL);
+}
 /**
 	(1)
 		The returned bblock of CreateBBlock(...) is not named yet.

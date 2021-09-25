@@ -130,6 +130,8 @@ static Symbol TranslateUnaryExpression(AstExpression expr)
 	switch(expr->op) {
 	case OP_ADDRESS:
 		return AddressOf(src);
+	case OP_DEREF: // *a
+		return Deref(expr->ty, src);
 	case OP_NEG:
 	case OP_COMP:
 		return Simplify(expr->ty, OPMap[expr->op], src, NULL);

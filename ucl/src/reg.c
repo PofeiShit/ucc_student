@@ -52,7 +52,7 @@ Symbol CreateReg(char *name, char *iname, int no)
 	if (iname != NULL) {
 		CALLOC(reg->next);
 		reg->next->kind = SK_IRegister;
-		reg->next->name = iname;
+		reg->next->name = reg->next->aname = iname;
 	}
 	return reg;
 }

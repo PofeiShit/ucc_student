@@ -133,6 +133,7 @@ AstExpression ParseUnaryExpression()
 	case TK_DEC:
 	case TK_INC:
 	case TK_BITAND:
+	case TK_MUL:
 	case TK_ADD:
 	case TK_SUB:
 	case TK_COMP:

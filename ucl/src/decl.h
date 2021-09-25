@@ -1,7 +1,7 @@
 #ifndef __DECL_H_
 #define __DECL_H_
 
-enum { FUNCTION_RETURN };
+enum { POINTER_TO, FUNCTION_RETURN };
 #define AST_DECLARATOR_COMMON   \
     AST_NODE_COMMON             \
     struct astDeclarator *dec;  \
@@ -41,6 +41,11 @@ struct astSpecifiers
 	int sclass;	
 	Type ty;
 };
+typedef struct astPointerDeclarator
+{
+	AST_DECLARATOR_COMMON
+} *AstPointerDeclarator;
+
 typedef struct astStructSpecifier
 {
 	AST_NODE_COMMON

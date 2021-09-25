@@ -328,6 +328,27 @@ put_code:
 		break;
 	}
 }
+static Symbol PutInReg(Symbol p)
+{
+	Symbol reg;
+	if (p->reg != NULL) {
+		return p->reg;
+	}
+	reg = GetReg();
+	Move(X86_MOVI4, reg, p);
+	return reg;
+}
+static void EmitDeref(IRInst inst)
+{
+	Symbol reg;
+	reg = PutInReg(SRC1);
+
+	inst->opcode = MOV;
+	SRC1 = reg->next;
+	EmitMove(inst);
+	// ModifyVar(DST);
+	return;
+}
 static void (* Emitter[])(IRInst inst) = 
 {
 #define OPCODE(code, name, func) Emit##func, 

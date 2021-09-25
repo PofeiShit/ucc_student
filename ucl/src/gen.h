@@ -40,6 +40,7 @@ typedef struct ilarg
 
 void DefineTemp(Symbol t, int op, Symbol src1, Symbol src2);
 Symbol AddressOf(Symbol sym);
+Symbol Deref(Type ty, Symbol addr);
 Symbol Simplify(Type ty, int op, Symbol src1, Symbol src2);
 Symbol TryAddValue(Type ty, int op, Symbol src1, Symbol src2);
 	
