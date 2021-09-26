@@ -105,6 +105,8 @@ TEMPLATE(X86_JLEF4,    "flds %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
 TEMPLATE(X86_JLEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
 
 
+TEMPLATE(X86_TRUI1,    "movb %%al, %0")
+
 TEMPLATE(X86_ADDR,     "leal %1, %0")
 
 TEMPLATE(X86_PROLOGUE, "pushl %%ebp;pushl %%ebx;pushl %%esi;pushl %%edi;movl %%esp, %%ebp")

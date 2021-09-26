@@ -328,6 +328,30 @@ put_code:
 		break;
 	}
 }
+static void EmitCast(IRInst inst)
+{
+	Symbol dst, reg;
+	int code;
+	dst = DST;
+	reg = NULL;
+	code = inst->opcode + X86_TRUI1 - TRUI1;
+	switch(code) 
+	{
+	case X86_TRUI1:
+		if (SRC1->reg != NULL) {
+			reg = X86ByteRegs[SRC1->reg->val.i[0]];
+		}
+		if (reg == NULL) {
+			reg = GetByteReg();
+			Move(X86_MOVI4, X86Regs[reg->val.i[0]], SRC1);
+		}
+		Move(X86_MOVI1, DST, reg);
+		break;
+	default:
+		;
+	}
+
+}
 static Symbol PutInReg(Symbol p)
 {
 	Symbol reg;

@@ -25,5 +25,7 @@ union value
 #define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
 int  GetNextToken(void);
 void SetupLexer(void);
+void BeginPeekToken(void);
+void EndPeekToken(void);
 extern union value TokenValue;
 #endif

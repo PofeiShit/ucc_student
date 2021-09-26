@@ -39,6 +39,7 @@ OPINFO(OP_MUL,           13,   "*",      Binary,         MUL)
 OPINFO(OP_DIV,           13,   "/",      Binary,         DIV)
 OPINFO(OP_MOD,           13,   "%",      Binary,         MOD)
 
+OPINFO(OP_CAST,			 14,   "cast",   Unary, 		 NOP)
 OPINFO(OP_PREINC,	     14,   "++",	 Unary,			 NOP)
 OPINFO(OP_PREDEC,		 14,   "--",	 Unary,			 NOP)
 OPINFO(OP_ADDRESS,		 14,   "&",		 Unary,			 ADDR)

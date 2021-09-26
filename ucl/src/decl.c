@@ -153,7 +153,13 @@ int IsTypeName(int tok)
 {
 	return tok >= TK_CHAR && tok <= TK_VOID;
 }
-
+AstTypeName ParseTypeName(void)
+{
+	AstTypeName tyName;
+	CREATE_AST_NODE(tyName, TypeName);
+	tyName->specs = ParseDeclarationSpecifiers();
+	return tyName;
+}
 static AstParameterDeclaration ParseParameterDeclaration(void)
 {
 	AstParameterDeclaration paramDecl;

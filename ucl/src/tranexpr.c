@@ -117,6 +117,28 @@ static Symbol TranslateBranchExpression(AstExpression expr)
 	StartBBlock(nextBB);
 	return t;
 }
+static Symbol TranslateCast(Type ty, Type sty, Symbol src)
+{
+	Symbol dst;
+	int scode, dcode, opcode;
+	dcode = TypeCode(ty);
+	scode = TypeCode(sty);
+	if (scode == dcode) {
+		return src;
+	}
+	switch(scode) 
+	{
+	case I4:
+		if (dcode <= I1) 
+			opcode = TRUI1;
+		break;
+	default:
+		;
+	}
+	dst = CreateTemp(ty);
+	GenerateAssign(ty, dst, opcode, src, NULL);
+	return dst;
+}
 static Symbol TranslateUnaryExpression(AstExpression expr)
 {
 	Symbol src;
@@ -127,7 +149,10 @@ static Symbol TranslateUnaryExpression(AstExpression expr)
 		return TranslateIncrement(expr);
 	}
 	src = TranslateExpression(expr->kids[0]);
-	switch(expr->op) {
+	switch(expr->op) 
+	{
+	case OP_CAST:
+		return TranslateCast(expr->ty, expr->kids[0]->ty, src);
 	case OP_ADDRESS:
 		return AddressOf(src);
 	case OP_DEREF: // *a

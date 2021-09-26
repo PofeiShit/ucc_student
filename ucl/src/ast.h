@@ -5,7 +5,7 @@
 enum nodeKind 
 { 
 	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_StructSpecifier, NK_StructDeclaration, NK_StructDeclarator, 
-	NK_Function, NK_Declaration, NK_PointerDeclarator,
+	NK_Function, NK_Declaration, NK_PointerDeclarator, NK_TypeName,
 	NK_FunctionDeclarator, NK_ParameterTypeList, NK_ParameterDeclaration, NK_NameDeclarator,
 
 	NK_Expression, 
@@ -16,6 +16,7 @@ typedef struct astExpression *AstExpression;
 typedef struct astStatement *AstStatement;
 typedef struct astDeclaration *AstDeclaration;
 typedef struct astTranslationUnit *AstTranslationUnit;
+typedef struct astTypeName *AstTypeName;
 
 #define AST_NODE_COMMON   \
     int kind;             \
@@ -37,6 +38,7 @@ AstExpression      ParseExpression(void);
 AstDeclaration     ParseDeclaration(void);
 AstExpression      ParseAssignmentExpression(void);
 AstTranslationUnit ParseTranslationUnit(char *file);
+AstTypeName        ParseTypeName(void);
 
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void Translate(AstTranslationUnit transUnit);
@@ -48,5 +50,6 @@ void Do_Expect(int tok);
 
 extern int CurrentToken;
 int  CurrentTokenIn(int toks[]);
+int IsTypeName(int tok);
 extern int FIRST_Declaration[];
 #endif

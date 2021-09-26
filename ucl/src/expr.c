@@ -157,7 +157,23 @@ AstExpression ParseUnaryExpression()
 		return expr;
 
 	case TK_LPAREN:
-		return ParsePostfixExpression();
+		BeginPeekToken();
+		t = GetNextToken();
+		if (IsTypeName(t)) {
+			EndPeekToken();
+			CREATE_AST_NODE(expr, Expression);
+			expr->op = OP_CAST;
+			NEXT_TOKEN;
+			expr->kids[0] = (AstExpression)ParseTypeName();
+			Expect(TK_RPAREN);
+			expr->kids[1] = ParseUnaryExpression();
+			return expr;
+		} else {
+			EndPeekToken();
+			return ParsePostfixExpression();
+		}
+		break;
+		
 	default:
 		return ParsePostfixExpression();
 	}

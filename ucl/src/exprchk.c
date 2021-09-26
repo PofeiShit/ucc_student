@@ -8,13 +8,28 @@
     expr->kids[0] = Cast(expr->ty, expr->kids[0]);                     \
     expr->kids[1] = Cast(expr->ty, expr->kids[1]);
 
+static AstExpression CastExpression(Type ty, AstExpression expr)
+{
+	AstExpression cast;
+	if (expr->op == OP_CONST && ty->categ != VOID)
+		return NULL;
+	CREATE_AST_NODE(cast, Expression);
+	cast->op = OP_CAST;
+	cast->ty = ty;
+	cast->kids[0] = expr;
 
+	return cast;
+}
 AstExpression Cast(Type ty, AstExpression expr)
 {
 	int scode = TypeCode(expr->ty);
 	int dcode = TypeCode(ty);
-	
-	expr->ty = ty;
+	if (scode != dcode) {
+		if (dcode < I4) {
+			expr = CastExpression(T(INT), expr);
+		}
+		expr = CastExpression(ty, expr);
+	}
 	return expr;
 }
 
@@ -154,6 +169,13 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 			;
 	}
 }
+static AstExpression CheckTypeCast(AstExpression expr)
+{
+	Type ty;
+	ty = CheckTypeName((AstTypeName)expr->kids[0]);
+	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
+	return Cast(ty, expr->kids[1]);
+}
 static AstExpression CheckUnaryExpression(AstExpression expr)
 {
 	Type ty;
@@ -207,6 +229,8 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 		expr->val.i[0] = ty->size;
 		return expr;
 
+	case OP_CAST: // (int)a
+		return CheckTypeCast(expr);
 	default:
 		break;
 	}

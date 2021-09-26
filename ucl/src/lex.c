@@ -5,6 +5,8 @@
 #define CURSOR      (Input.cursor)
 
 typedef int (*Scanner)(void);
+static unsigned char  *PeekPoint;
+static union value    PeekValue;
 static Scanner        Scanners[256];
 
 union value TokenValue;
@@ -447,3 +449,14 @@ void SetupLexer(void)
 
 }
 
+void BeginPeekToken(void)
+{
+	PeekPoint = CURSOR;
+	PeekValue = TokenValue;
+}
+
+void EndPeekToken(void)
+{
+	CURSOR = PeekPoint;
+	TokenValue = PeekValue;
+}

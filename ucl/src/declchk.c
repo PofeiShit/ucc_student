@@ -285,7 +285,14 @@ void CheckFunction(AstFunction func)
 	ExitScope();	
 	// Referencing an undefined label is considered as an error.
 }
-
+//
+Type CheckTypeName(AstTypeName tname)
+{
+	Type ty;
+	CheckDeclarationSpecifiers(tname->specs);
+	ty = tname->specs->ty;
+	return ty;
+}
 void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 {
 	Symbol sym;

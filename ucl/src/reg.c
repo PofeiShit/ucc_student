@@ -71,6 +71,10 @@ static Symbol GetRegInternal(int width)
 	int endr, i;
 	Symbol *regs;
 	switch(width) {
+		case 1:
+			endr = EDX;
+			regs = X86ByteRegs;
+			break;
 		case 4:
 			endr = EDI;
 			regs = X86Regs;
@@ -90,3 +94,7 @@ Symbol GetReg(void)
 	return GetRegInternal(4);
 }
 
+Symbol GetByteReg(void)
+{
+	return GetRegInternal(1);
+}

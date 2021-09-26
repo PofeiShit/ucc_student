@@ -41,6 +41,11 @@ struct astSpecifiers
 	int sclass;	
 	Type ty;
 };
+struct astTypeName
+{
+	AST_NODE_COMMON;
+	AstSpecifiers specs;
+};
 typedef struct astPointerDeclarator
 {
 	AST_DECLARATOR_COMMON
@@ -122,5 +127,6 @@ struct astDeclaration
 	AstNode dec;
 };
 void CheckLocalDeclaration(AstDeclaration decl, Vector v);
+Type CheckTypeName(AstTypeName tname);
 extern AstFunction CURRENTF;
 #endif
