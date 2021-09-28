@@ -114,7 +114,17 @@ Field AddField(Type ty, char *id, Type fty)
 
 	return fld;
 }
-
+Field LookupField(Type ty, char *id)
+{
+	RecordType rty = (RecordType)ty;
+	Field fld = rty->flds;
+	while (fld) {
+		if (fld->id == id)
+			return fld;
+		fld = fld->next;
+	}
+	return NULL;
+}
 /**
  * Construct a struct/union type whose name is id, id can be NULL.
  */

@@ -315,4 +315,17 @@ Symbol CreateLabel(void)
 	
 	return p;
 }
-
+Symbol CreateOffset(Type ty, Symbol base, int coff)
+{
+	VariableSymbol p;
+	if (coff == 0 && (IsArithType(base->ty) || (ty == base->ty))) {
+		return base;
+	}
+	CALLOC(p);
+	p->kind = SK_Offset;
+	p->ty = ty;
+	p->link = base;
+	p->offset = coff;
+	p->name = FormatName("%s[%d]", base->name, coff);
+	return (Symbol)p;
+}

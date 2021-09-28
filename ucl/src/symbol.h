@@ -3,7 +3,7 @@
 
 enum 
 { 
-	SK_Tag, SK_Temp, SK_String, SK_Label, SK_Constant, SK_Variable, SK_Function, SK_Register, SK_IRegister,
+	SK_Tag, SK_Temp, SK_String, SK_Label, SK_Constant, SK_Variable, SK_Function, SK_Register, SK_IRegister, SK_Offset
 };
 
 #define SYM_HASH_MASK 127
@@ -66,6 +66,7 @@ Symbol AddTag(char *id, Type ty);
 Symbol IntConstant(int i);
 Symbol CreateTemp(Type ty);
 Symbol CreateLabel(void);
+Symbol CreateOffset(Type ty, Symbol base, int coff);
 Symbol AddString(Type ty, String str);
 
 Symbol LookupID(char *id);

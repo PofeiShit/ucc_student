@@ -56,6 +56,7 @@ TOKEN(TK_INC,           "++")
 TOKEN(TK_DEC,           "--")
 TOKEN(TK_NOT,           "!")
 TOKEN(TK_COMP,          "~")
+TOKEN(TK_DOT,           ".")
 TOKEN(TK_LPAREN,        "(")
 
 TOKEN(TK_RPAREN,        ")")

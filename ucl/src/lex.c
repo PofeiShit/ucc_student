@@ -88,6 +88,11 @@ static int ScanCaret(void)	// ^	exclusive or
 		return TK_BITXOR;
 	}
 }
+static int ScanDot(void)
+{
+	CURSOR++;
+	return TK_DOT;
+}
 static int ScanLess(void)
 {
 	CURSOR++;
@@ -436,6 +441,7 @@ void SetupLexer(void)
 	Scanners['|']  = ScanBar;
 	Scanners['&']  = ScanAmpersand;
 	Scanners['^']  = ScanCaret;
+	Scanners['.'] = ScanDot;
 	Scanners['{'] = ScanLBRACE;
 	Scanners['}'] = ScanRBRACE;
 	Scanners['('] = ScanLPAREN;

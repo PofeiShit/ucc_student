@@ -93,7 +93,7 @@ typedef struct functionType
 #define IsArithType(ty)    (ty->categ <= LONGDOUBLE)
 #define BothIntegType(ty1, ty2)   (IsIntegType(ty1) && IsIntegType(ty2))
 #define BothArithType(ty1, ty2)   (IsArithType(ty1) && IsArithType(ty2))
-
+Field LookupField(Type ty, char *id);
 Type  StartRecord(char *id, int categ);
 Field AddField(Type ty, char *id, Type fty);
 void EndRecord(Type ty);

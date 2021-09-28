@@ -156,6 +156,24 @@ static AstExpression TransformIncrement(AstExpression expr)
 	expr->ty = expr->kids[0]->ty;
 	return expr;
 }
+static AstExpression CheckMemberAccess(AstExpression expr)
+{
+	Type ty;
+	Field fld;
+	expr->kids[0] = CheckExpression(expr->kids[0]);
+	if (expr->op == OP_MEMBER) {
+		expr->kids[0] = Adjust(expr->kids[0], 0);
+		ty = expr->kids[0]->ty;
+	}
+	fld = LookupField(ty, (char*)expr->val.p);
+	if (fld == NULL) {
+		expr->ty = T(INT);
+		return expr;
+	}
+	expr->ty = fld->ty;
+	expr->val.p = fld;
+	return expr;
+}
 static AstExpression CheckPostfixExpression(AstExpression expr)
 {
 	switch(expr->op) {
@@ -164,6 +182,9 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 		case OP_POSTDEC:
 		case OP_POSTINC:
 			return TransformIncrement(expr);
+		case OP_MEMBER:
+			return CheckMemberAccess(expr);
+
 		default:
 			//assert(0);
 			;

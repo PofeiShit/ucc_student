@@ -61,6 +61,14 @@ static char* GetAccessName(Symbol p)
 		**/
 		p->aname = p->name;
 		break;
+	case SK_Offset:
+		{
+			Symbol base = p->link;
+			int n = AsVar(p)->offset;
+			n += AsVar(base)->offset;
+			p->aname = FormatName("%d(%%ebp)", n);
+		}
+		break;
 
 	default:
 		;

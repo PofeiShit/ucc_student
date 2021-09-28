@@ -82,6 +82,36 @@ static Symbol TranslateIncrement(AstExpression expr)
 	}
 	return TranslateExpression(casgn);
 }
+
+// voff: variable offset, coff: constant offset
+static Symbol Offset(Type ty, Symbol addr, Symbol voff, int coff)
+{
+	// TranslateMemberAccess
+	if (addr->kind == SK_Temp) {
+		return CreateOffset(ty, addr, coff);
+	}
+
+}
+static Symbol TranslateMemberAccess(AstExpression expr)
+{
+	AstExpression p;
+	Field fld;
+	Symbol addr, dst, tmp;
+	p = expr;
+	int coff = 0;
+	if (p->op == OP_MEMBER) {
+		while (p->op == OP_MEMBER) {
+			fld = (Field)p->val.p;
+			coff += fld->offset;
+			p = p->kids[0];
+		}
+		tmp = TranslateExpression(p);
+		addr = AddressOf(tmp);
+	}
+	dst = Offset(expr->ty, tmp, NULL, coff);
+	return dst;
+}
+
 static Symbol TranslatePostfixExpression(AstExpression expr)
 {
 	switch (expr->op)
@@ -91,6 +121,8 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 	case OP_POSTDEC:
 	case OP_POSTINC:
 		return TranslateIncrement(expr);
+	case OP_MEMBER:
+		return TranslateMemberAccess(expr);
 	default:
 		//assert(0);
 		;
