@@ -46,6 +46,7 @@ Symbol TryAddValue(Type ty, int op, Symbol src1, Symbol src2);
 	
 void GenerateMove(Type ty, Symbol dst, Symbol src);
 void GenerateAssign(Type ty, Symbol dst, int opcode, Symbol src1, Symbol src2);
+void GenerateIndirectMove(Type ty, Symbol dst, Symbol src);
 void GenerateJump(BBlock dstBB);
 void GenerateReturn(Type ty, Symbol src);
 void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, Vector args);

@@ -362,6 +362,14 @@ static Symbol PutInReg(Symbol p)
 	Move(X86_MOVI4, reg, p);
 	return reg;
 }
+static void EmitIndirectMove(IRInst inst)
+{
+	Symbol reg;
+	reg = PutInReg(DST);
+	inst->opcode = MOV;
+	DST = reg->next;
+	EmitMove(inst);
+}
 static void EmitDeref(IRInst inst)
 {
 	Symbol reg;

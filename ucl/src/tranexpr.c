@@ -90,7 +90,7 @@ static Symbol Offset(Type ty, Symbol addr, Symbol voff, int coff)
 	if (addr->kind == SK_Temp) {
 		return CreateOffset(ty, addr, coff);
 	}
-
+	return Deref(ty, Simplify(T(POINTER), ADD, addr, IntConstant(coff))); 
 }
 static Symbol TranslateMemberAccess(AstExpression expr)
 {
@@ -107,8 +107,15 @@ static Symbol TranslateMemberAccess(AstExpression expr)
 		}
 		tmp = TranslateExpression(p);
 		addr = AddressOf(tmp);
+		dst = CreateOffset(expr->ty, tmp, coff);
+	} else {
+		fld = (Field)p->val.p;
+		coff = fld->offset;
+		addr = TranslateExpression(expr->kids[0]);
+		dst = Deref(expr->ty, Simplify(T(POINTER), ADD, addr, IntConstant(coff)));
+		return addr;
 	}
-	dst = Offset(expr->ty, tmp, NULL, coff);
+	// dst = Offset(expr->ty, addr, NULL, coff);
 	return dst;
 }
 
@@ -122,6 +129,7 @@ static Symbol TranslatePostfixExpression(AstExpression expr)
 	case OP_POSTINC:
 		return TranslateIncrement(expr);
 	case OP_MEMBER:
+	case OP_PTR_MEMBER:
 		return TranslateMemberAccess(expr);
 	default:
 		//assert(0);
@@ -238,7 +246,12 @@ static Symbol TranslateAssignmentExpression(AstExpression expr)
 	Symbol dst, src;
 	dst = TranslateExpression(expr->kids[0]);
 	src = TranslateExpression(expr->kids[1]);
-	GenerateMove(expr->ty, dst, src);
+	if (expr->kids[0]->op == OP_PTR_MEMBER) {
+		GenerateIndirectMove(expr->ty, dst, src); // dst is base address
+		dst = Deref(expr->ty, dst);
+	} else {
+		GenerateMove(expr->ty, dst, src);
+	}
 	return dst;
 }
 static Symbol TranslateCommaExpression(AstExpression expr)

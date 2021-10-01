@@ -164,6 +164,10 @@ static AstExpression CheckMemberAccess(AstExpression expr)
 	if (expr->op == OP_MEMBER) {
 		expr->kids[0] = Adjust(expr->kids[0], 0);
 		ty = expr->kids[0]->ty;
+	} else {
+		expr->kids[0] = Adjust(expr->kids[0], 1);
+		ty = expr->kids[0]->ty;
+		ty = ty->bty;
 	}
 	fld = LookupField(ty, (char*)expr->val.p);
 	if (fld == NULL) {
@@ -182,6 +186,7 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 		case OP_POSTDEC:
 		case OP_POSTINC:
 			return TransformIncrement(expr);
+		case OP_PTR_MEMBER:
 		case OP_MEMBER:
 			return CheckMemberAccess(expr);
 

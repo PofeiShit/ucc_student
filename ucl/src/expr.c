@@ -99,9 +99,10 @@ static AstExpression ParsePostfixExpression(void)
 			expr = p;
 			break;
 
+		case TK_POINTER:
 		case TK_DOT:
 			CREATE_AST_NODE(p, Expression);
-			p->op = OP_MEMBER;
+			p->op = (CurrentToken == TK_DOT) ? OP_MEMBER : OP_PTR_MEMBER;
 			p->kids[0] = expr;
 			NEXT_TOKEN;
 			p->val = TokenValue;

@@ -11,6 +11,10 @@ Symbol Simplify(Type ty, int opcode, Symbol src1, Symbol src2)
         goto add_value;
     switch(opcode)
     {
+        case ADD:
+            if (src2->val.i[0] == 0)
+                return src1;
+            break;
         case SUB:
 		// put source operand into v + c format (v maybe NULL, c maybe 0)
 		    p1 = src1; c1 = 0;

@@ -77,10 +77,13 @@ expr->kids[0] = CheckExpression(expr->kids[0]);对成员选择运算符的左操
 1.TranslatePostfixExpression添加OP_MEMBER分支,在分支中调用TranslateMemberAccess函数生成中间代码
 
 2.addr = AddressOf(TranslateExpression(p));用于计算出p.a的结构体成员的基地址和常量偏移，在确定基地址和常量偏移后，就可以调用 Offset()函数
+生成	GenerateAssign(ty, Temp, ADDR, Base, src2); 生成取基地址的中间代码
 
 3.Offset函数：当 C 程序员访问数组元素或结构体成员时，参数 addr 是数组或结构体的基地址，参数 voff 是“可变偏移(variable offset)”。当访问结构体成员 p.a 时，由于结构体成员 p.a 在结构体对象是固定的，此时voff参数为NULL。 第 2 行的另一个参数 coff 代表“常量偏移(const offset)。CreateOffset()来为不存在可变偏移的结构体成员创建一个符号对象
 
 4.CreateOffset():base 代表基地址，coff 代表“常量偏移”。p.a 在对象 p 中的偏移为 0，但 p.a 和 p 的类型不一样，因此我们需要为 p.a 创建一个新的符号对象,而不能使用和 dt 一样的符号对象,CALLOC(p);用于在堆空间中分配一个符号对象.设置该符号对象的类型为 SK_Offset，设置其类型，保存其基地址对应的符号对象，存放常量 偏移，用于生成形如“arr[8]”的符号名。
 
+
 ## 汇编代码生成
 ---
+GenerateAssign对应取基地址汇编leal -4(%ebp), %eax

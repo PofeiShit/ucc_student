@@ -175,7 +175,7 @@ static int ScanMinus(void)
 	else if (*CURSOR == '>')
 	{
 		CURSOR++;
-		return -1;		// ->
+		return TK_POINTER;		// ->
 	}
 	else
 	{

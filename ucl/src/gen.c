@@ -37,6 +37,17 @@ void GenerateMove(Type ty, Symbol dst, Symbol src)
 	inst->opds[2] = NULL;
 	AppendInst(inst);
 }
+void GenerateIndirectMove(Type ty, Symbol dst, Symbol src)
+{
+	IRInst inst;
+	ALLOC(inst);
+	inst->ty = ty;
+	inst->opcode = IMOV;
+	inst->opds[0] = dst;
+	inst->opds[1] = src;
+	inst->opds[2] = NULL;
+	AppendInst(inst);
+}
 void GenerateAssign(Type ty, Symbol dst, int opcode, Symbol src1, Symbol src2)
 {
 	IRInst inst;
@@ -74,6 +85,7 @@ Symbol Deref(Type ty, Symbol addr)
 	Symbol tmp;
 	tmp = CreateTemp(ty);
 	GenerateAssign(ty, tmp, DEREF, addr, NULL);
+	return tmp;
 }
 /**
 	(1)
