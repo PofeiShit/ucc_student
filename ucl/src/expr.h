@@ -23,7 +23,7 @@ struct astExpression
 	AST_NODE_COMMON
 	Type ty;
 	int op : 16;
-	// int isarray : 1;
+	int isarray : 1;
 	// int isfunc  : 1;
 	// int lvalue  : 1;
 	// int bitfld  : 1;
@@ -39,6 +39,7 @@ struct astExpression
 #define UNARY_OP		TokenOps[CurrentToken - TK_ASSIGN].uop
 AstExpression FoldConstant(AstExpression expr);
 AstExpression CheckExpression(AstExpression expr);
+AstExpression CheckConstantExpression(AstExpression expr);
 AstExpression Constant(Type ty, union value val);
 AstExpression Cast(Type ty, AstExpression expr);
 AstExpression Adjust(AstExpression expr, int rvalue);

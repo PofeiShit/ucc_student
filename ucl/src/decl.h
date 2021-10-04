@@ -1,7 +1,7 @@
 #ifndef __DECL_H_
 #define __DECL_H_
 
-enum { POINTER_TO, FUNCTION_RETURN };
+enum { POINTER_TO, ARRAY_OF, FUNCTION_RETURN };
 #define AST_DECLARATOR_COMMON   \
     AST_NODE_COMMON             \
     struct astDeclarator *dec;  \
@@ -15,6 +15,7 @@ typedef struct typeDerivList
 	int ctor; // type construct 
 	union 
 	{
+		int len;		// array size
 		Signature sig; // function signature
 	};
 	struct typeDerivList *next;
@@ -104,6 +105,12 @@ typedef struct astFunctionDeclarator
 	AstParameterTypeList paramTyList;
 	Signature sig;
 } *AstFunctionDeclarator;
+
+typedef struct astArrayDeclarator
+{
+	AST_DECLARATOR_COMMON
+	AstExpression expr;
+} *AstArrayDeclarator;
 
 typedef struct astFunction
 {

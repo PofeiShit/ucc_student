@@ -231,6 +231,8 @@ static int Scan##t(void)       \
     CURSOR++;                  \
     return TK_##t;             \
 }
+SINGLE_CHAR_SCANNER(LBRACKET)
+SINGLE_CHAR_SCANNER(RBRACKET)
 SINGLE_CHAR_SCANNER(LBRACE)
 SINGLE_CHAR_SCANNER(RBRACE)
 SINGLE_CHAR_SCANNER(LPAREN)
@@ -442,6 +444,9 @@ void SetupLexer(void)
 	Scanners['&']  = ScanAmpersand;
 	Scanners['^']  = ScanCaret;
 	Scanners['.'] = ScanDot;
+
+	Scanners['['] = ScanLBRACKET;
+	Scanners[']'] = ScanRBRACKET;
 	Scanners['{'] = ScanLBRACE;
 	Scanners['}'] = ScanRBRACE;
 	Scanners['('] = ScanLPAREN;

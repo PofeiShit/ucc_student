@@ -90,6 +90,7 @@ typedef struct functionType
 #define IsScalarType(ty) (ty->categ <= POINTER)
 #define IsPtrType(ty) (ty->categ == POINTER)
 #define IsFunctionType(ty) (ty->categ == FUNCTION)
+#define IsObjectPtr(ty) (ty->categ == POINTER && ty->bty->categ != FUNCTION)
 #define IsArithType(ty)    (ty->categ <= LONGDOUBLE)
 #define BothIntegType(ty1, ty2)   (IsIntegType(ty1) && IsIntegType(ty2))
 #define BothArithType(ty1, ty2)   (IsArithType(ty1) && IsArithType(ty2))

@@ -43,7 +43,7 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 		//expr->op = OP_ID;
 		expr->val.p = AddString(expr->ty, (String)expr->val.p);
 		return expr;
-	} 
+	}	
 	p = LookupID((char*)expr->val.p);
 	{
 		expr->ty = p->ty;
@@ -62,8 +62,10 @@ AstExpression Adjust(AstExpression expr, int rvalue)
 {
 	if (expr->ty->categ == FUNCTION) {
 		expr->ty = PointerTo(expr->ty);
-	} else if (expr->ty->categ == ARRAY)
+	} else if (expr->ty->categ == ARRAY) {
 		expr->ty = PointerTo(expr->ty->bty);
+		expr->isarray = 1;
+	}
 	return expr;
 }
 
@@ -178,9 +180,32 @@ static AstExpression CheckMemberAccess(AstExpression expr)
 	expr->val.p = fld;
 	return expr;
 }
+static AstExpression ScalePointerOffset(AstExpression offset, int scale)
+{
+	AstExpression expr;
+	union value val;
+	CREATE_AST_NODE(expr, Expression);
+	expr->ty = offset->ty;
+	expr->op = OP_MUL;
+	expr->kids[0] = offset;
+	val.i[1] = 0;
+	val.i[0] = scale;
+	expr->kids[1] = Constant(offset->ty, val);
+	return FoldConstant(expr);
+}
 static AstExpression CheckPostfixExpression(AstExpression expr)
 {
 	switch(expr->op) {
+		case OP_INDEX:
+			expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+			expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
+			if (IsObjectPtr(expr->kids[0]->ty) && IsIntegType(expr->kids[1]->ty)) {
+				expr->ty = expr->kids[0]->ty->bty;
+				// printf("cpe:%d\n", expr->ty->size);
+				expr->kids[1] = ScalePointerOffset(expr->kids[1], expr->ty->size);	
+			}
+			return expr;
+
 		case OP_CALL:
 			return CheckFunctionCall(expr);
 		case OP_POSTDEC:
@@ -500,4 +525,13 @@ static AstExpression (*ExprCheckers[])(AstExpression) =
 AstExpression CheckExpression(AstExpression expr)
 {
 	return (*ExprCheckers[expr->op])(expr);
+}
+
+AstExpression CheckConstantExpression(AstExpression expr)
+{
+	expr = CheckExpression(expr);
+	if (!(expr->op == OP_CONST && IsIntegType(expr->ty))) {
+		return NULL;
+	}
+	return expr;
 }

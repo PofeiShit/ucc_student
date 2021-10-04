@@ -61,6 +61,8 @@ TOKEN(TK_POINTER,       "->")
 TOKEN(TK_LPAREN,        "(")
 
 TOKEN(TK_RPAREN,        ")")
+TOKEN(TK_LBRACKET,       "[")
+TOKEN(TK_RBRACKET,       "]")
 TOKEN(TK_STRING, 	"STR")
 //punctuators
 TOKEN(TK_LBRACE,        "{")

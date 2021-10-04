@@ -206,6 +206,17 @@ static AstDeclarator ParsePostfixDeclarator()
 			Expect(TK_RPAREN);
 			dec = (AstDeclarator)funcDec;
 		}
+		else if (CurrentToken == TK_LBRACKET) {
+			AstArrayDeclarator arrDec;
+			CREATE_AST_NODE(arrDec, ArrayDeclarator);
+			arrDec->dec = dec;
+			NEXT_TOKEN;
+			if (CurrentToken != TK_LBRACKET) {
+				arrDec->expr = ParseConstantExpression();
+			}
+			Expect(TK_RBRACKET);
+			dec = (AstDeclarator)arrDec;
+		}
 		else
 		{
 			return dec;

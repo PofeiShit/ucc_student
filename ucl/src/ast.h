@@ -5,7 +5,7 @@
 enum nodeKind 
 { 
 	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_StructSpecifier, NK_StructDeclaration, NK_StructDeclarator, 
-	NK_Function, NK_Declaration, NK_PointerDeclarator, NK_TypeName,
+	NK_Function, NK_Declaration, NK_PointerDeclarator, NK_TypeName, NK_ArrayDeclarator,
 	NK_FunctionDeclarator, NK_ParameterTypeList, NK_ParameterDeclaration, NK_NameDeclarator,
 
 	NK_Expression, 
@@ -35,6 +35,7 @@ typedef struct astNode
 
 AstStatement       ParseCompoundStatement(void);
 AstExpression      ParseExpression(void);
+AstExpression      ParseConstantExpression(void);
 AstDeclaration     ParseDeclaration(void);
 AstExpression      ParseAssignmentExpression(void);
 AstTranslationUnit ParseTranslationUnit(char *file);

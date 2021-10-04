@@ -75,6 +75,16 @@ static AstExpression ParsePostfixExpression(void)
 	{
 		switch (CurrentToken)
 		{
+		case TK_LBRACKET:
+			CREATE_AST_NODE(p, Expression);
+			p->op = OP_INDEX;
+			p->kids[0] = expr;
+			NEXT_TOKEN;
+			p->kids[1] = ParseExpression();
+			Expect(TK_RBRACKET);
+			expr = p;
+			break;
+			
 		case TK_LPAREN:		// postfix-expression ( [argument-expression-list] )
 
 			CREATE_AST_NODE(p, Expression);
@@ -281,4 +291,9 @@ AstExpression ParseExpression(void)
 		expr = comaExpr;		
 	}
 	return expr;
+}
+
+AstExpression ParseConstantExpression(void)
+{
+	return ParseConditionalExpression();
 }

@@ -118,11 +118,37 @@ static Symbol TranslateMemberAccess(AstExpression expr)
 	// dst = Offset(expr->ty, addr, NULL, coff);
 	return dst;
 }
+static Symbol TranslateArrayIndex(AstExpression expr)
+{
+	AstExpression p;
+	Symbol addr, dst, voff = NULL, tmp;
+	int coff = 0;
+	p = expr;
+	do 
+	{
+		if (p->kids[1]->op == OP_CONST) {
+			coff += p->kids[1]->val.i[0];	
+		} else if (voff == NULL) {
+			voff = TranslateExpression(p->kids[1]);
+		} else {
+			voff = Simplify(voff->ty, ADD, voff, TranslateExpression(p->kids[1]));
+		}
+		p = p->kids[0];
+
+	} while (p->op == OP_INDEX);
+	tmp = TranslateExpression(p);
+	addr = AddressOf(tmp);
+	// dst = Offset(expr->ty, addr, voff, coff);
+	dst = CreateOffset(expr->ty, tmp, coff);
+	return dst;
+}
 
 static Symbol TranslatePostfixExpression(AstExpression expr)
 {
 	switch (expr->op)
 	{
+	case OP_INDEX:
+		return TranslateArrayIndex(expr);
 	case OP_CALL:
 		return TranslateFunctionCall(expr);
 	case OP_POSTDEC:

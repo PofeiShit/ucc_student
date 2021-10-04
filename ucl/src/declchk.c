@@ -20,6 +20,8 @@ static Type DeriveType(TypeDerivList tyDrvList, Type ty)
 			ty = FunctionReturn(ty, tyDrvList->sig);
 		} else if (tyDrvList->ctor == POINTER_TO) {
 			ty = PointerTo(ty);
+		} else if (tyDrvList->ctor == ARRAY_OF) {
+			ty = ArrayOf(tyDrvList->len, ty);
 		}
 		tyDrvList = tyDrvList->next;
 	}
@@ -100,10 +102,27 @@ static void CheckPointerDeclarator(AstPointerDeclarator dec)
 	ptrDec->id = ptrDec->dec->id;
 
 }
+static void CheckArrayDeclarator(AstArrayDeclarator arrDec)
+{
+	CheckDeclarator(arrDec->dec);
+	if (arrDec->expr) {
+		if ((arrDec->expr = CheckConstantExpression(arrDec->expr)) == NULL) {
+			;
+		}
+	}
+	ALLOC(arrDec->tyDrvList);
+	arrDec->tyDrvList->ctor = ARRAY_OF;
+	arrDec->tyDrvList->len = arrDec->expr ? arrDec->expr->val.i[0] : 0;
+	arrDec->tyDrvList->next = arrDec->dec->tyDrvList;
+	arrDec->id = arrDec->dec->id;
+}
 static void CheckDeclarator(AstDeclarator dec)
 {
 	switch(dec->kind) {
 		case NK_NameDeclarator:
+			break;
+		case NK_ArrayDeclarator:
+			CheckArrayDeclarator((AstArrayDeclarator)dec);
 			break;
 		case NK_FunctionDeclarator:
 			CheckFunctionDeclarator((AstFunctionDeclarator)dec);
