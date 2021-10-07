@@ -102,3 +102,16 @@ static void TranslateWhileStatement(AstStatement stmt)
 ## 汇编代码生成
 ---
 
+# do-while
+---
+
+区别在于中间代码的翻译方案:
+```
+loopBB:
+    stmt
+continueBB:
+    if (expr) goto loopBB
+nextBB:
+    ...
+```
+

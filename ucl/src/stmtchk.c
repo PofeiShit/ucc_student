@@ -41,7 +41,7 @@ static AstStatement CheckIfStatement(AstStatement stmt)
 	}
 	return stmt;
 }
-static AstStatement CheckWhileStatement(AstStatement stmt)
+static AstStatement CheckLoopStatement(AstStatement stmt)
 {
 	AstLoopStatement loopStmt = AsLoop(stmt);
 	PushStatement(CURRENTF->loops,    stmt);
@@ -67,7 +67,8 @@ static AstStatement (*Stmtcheckers[])(AstStatement) =
 	CheckExpressionStatment,
 	CheckReturnStatement,
 	CheckIfStatement,
-	CheckWhileStatement,
+	CheckLoopStatement, // do {} while();
+	CheckLoopStatement, // while() {}
 	CheckLocalStatement,
 };
 
