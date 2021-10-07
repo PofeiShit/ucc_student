@@ -17,6 +17,14 @@ typedef struct astLoopStatement
 	AST_LOOP_STATEMENT_COMMON
 } *AstLoopStatement;
 
+typedef struct astForStatement
+{
+	AST_LOOP_STATEMENT_COMMON
+	AstExpression initExpr;
+	AstExpression incrExpr;
+	BBlock testBB;
+} *AstForStatement;
+
 typedef struct astExpressionStatement
 {
 	AST_STATEMENT_COMMON
@@ -50,6 +58,6 @@ typedef struct astCompoundStatement
 #define AsRet(stmt) ((AstReturnStatement)stmt)
 #define AsIf(stmt) ((AstIfStatement)stmt)
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
-
+#define AsFor(stmt) ((AstForStatement)stmt)
 AstStatement CheckCompoundStatement(AstStatement stmt);
 #endif

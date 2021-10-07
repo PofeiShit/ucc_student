@@ -71,7 +71,24 @@ static AstStatement ParseIfStatement(void)
 	}
 	return (AstStatement)ifStmt;
 }
-
+static AstStatement ParseForStatement(void)
+{
+	AstForStatement forStmt;
+	CREATE_AST_NODE(forStmt, ForStatement);
+	NEXT_TOKEN;
+	Expect(TK_LPAREN);
+	if (CurrentToken != TK_SEMICOLON)
+		forStmt->initExpr = ParseExpression();
+	Expect(TK_SEMICOLON);
+	if (CurrentToken != TK_SEMICOLON)
+		forStmt->expr = ParseExpression();
+	Expect(TK_SEMICOLON);
+	if (CurrentToken != TK_RPAREN)
+		forStmt->incrExpr = ParseExpression();
+	Expect(TK_RPAREN);
+	forStmt->stmt = ParseStatement();
+	return (AstStatement)forStmt;
+}
 AstStatement ParseCompoundStatement(void)
 {
 	AstCompoundStatement compStmt;
@@ -109,6 +126,8 @@ static AstStatement ParseStatement(void)
 {
 	switch (CurrentToken)
 	{
+	case TK_FOR:
+		return ParseForStatement();
 	case TK_DO:
 		return ParseDoStatement();
 	case TK_WHILE:

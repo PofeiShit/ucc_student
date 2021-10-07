@@ -115,3 +115,20 @@ nextBB:
     ...
 ```
 
+# for
+---
+for循环可以表示成for (expr1; expr2; expr3) stmt
+中间代码的翻译方案
+```
+	initExpr
+	goto testBB
+loopBB:
+	stmt
+continueBB
+	incrExpr
+testBB:
+	if (expr is NULL or expr is True) goto loopBB
+nextBB:
+	...
+```
+expr2如果为空的话，就直接跳到loopBB

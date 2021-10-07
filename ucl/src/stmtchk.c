@@ -54,6 +54,27 @@ static AstStatement CheckLoopStatement(AstStatement stmt)
 
 	return stmt;
 }
+static AstStatement CheckForStatement(AstStatement stmt)
+{
+	AstForStatement forStmt = AsFor(stmt);
+	PushStatement(CURRENTF->loops,    stmt);
+	PushStatement(CURRENTF->breakable, stmt);
+
+	if (forStmt->initExpr) {
+		forStmt->initExpr = CheckExpression(forStmt->initExpr);
+	}
+	if (forStmt->expr) {
+		forStmt->expr = Adjust(CheckExpression(forStmt->expr), 1);
+	}
+	if (forStmt->incrExpr) {
+		forStmt->incrExpr = CheckExpression(forStmt->incrExpr);
+	}
+	forStmt->stmt = CheckStatement(forStmt->stmt);
+	PopStatement(CURRENTF->loops);
+	PopStatement(CURRENTF->breakable);
+
+	return stmt;	
+}
 static AstStatement CheckLocalStatement(AstStatement stmt)
 {
 	AstStatement s;
@@ -69,6 +90,7 @@ static AstStatement (*Stmtcheckers[])(AstStatement) =
 	CheckIfStatement,
 	CheckLoopStatement, // do {} while();
 	CheckLoopStatement, // while() {}
+	CheckForStatement,
 	CheckLocalStatement,
 };
 

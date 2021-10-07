@@ -293,7 +293,6 @@ Symbol CreateTemp(Type ty)
 	VariableSymbol p;
 
 	CALLOC(p);
-	printf("CreateTemp\n");
 	p->kind = SK_Temp;
 	p->name = FormatName("t%d", TempNum++);
 	p->ty = ty;

@@ -30,6 +30,7 @@ static struct keyword keywordsE[] =
 };
 static struct keyword keywordsF[] =
 {
+	{"for", 3, TK_FOR},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsG[] =

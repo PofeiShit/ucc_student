@@ -99,6 +99,45 @@ static void TranslateWhileStatement(AstStatement stmt)
 	
 	StartBBlock(whileStmt->nextBB);
 }
+/*
+	expr1
+	goto testBB
+loopBB:
+	stmt
+contBB:
+	expr3
+testBB:
+	if expr2 is NULL or expr2 is true goto loopBB
+nextBB:
+	...
+*/
+static void TranslateForStatement(AstStatement stmt)
+{
+	AstForStatement forStmt = AsFor(stmt);
+	forStmt->loopBB = CreateBBlock();
+	forStmt->contBB = CreateBBlock();
+	forStmt->nextBB = CreateBBlock();
+	forStmt->testBB = CreateBBlock();
+
+	if (forStmt->initExpr)
+		TranslateExpression(forStmt->initExpr);
+	GenerateJump(forStmt->testBB);
+
+	StartBBlock(forStmt->loopBB);
+	TranslateStatement(forStmt->stmt);
+	
+	StartBBlock(forStmt->contBB);
+	if (forStmt->incrExpr)
+		TranslateExpression(forStmt->incrExpr);
+
+	StartBBlock(forStmt->testBB);	
+	if (forStmt->expr)
+		TranslateBranch(forStmt->expr, forStmt->loopBB, forStmt->nextBB);
+	else
+		GenerateJump(forStmt->loopBB);
+
+	StartBBlock(forStmt->nextBB);
+}
 static void (* StmtTrans[])(AstStatement) = 
 {
 	TranslateExpressionStatement,
@@ -106,6 +145,7 @@ static void (* StmtTrans[])(AstStatement) =
 	TranslateIfStatement,
 	TranslateDoStatement,
 	TranslateWhileStatement,
+	TranslateForStatement,
 	TranslateCompoundStatement,
 };
 

@@ -17,6 +17,7 @@ TOKEN(TK_IF,        "if")
 TOKEN(TK_ELSE,      "else")
 TOKEN(TK_WHILE,     "while")
 TOKEN(TK_DO,        "do")
+TOKEN(TK_FOR,       "for")
 //identifier
 TOKEN(TK_ID,        "ID")
 
