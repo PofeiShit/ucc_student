@@ -231,10 +231,17 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	AstNode p;
 	Type ty;
 	int tyCnt = 0;
+	int qual = 0;
 	//storage-class-specifier:		extern	, auto,	static, register, ... 
 	tok = (AstToken)specs->stgClasses;
 	if (tok) {
 		specs->sclass = tok->token;
+	}
+	// type qualifiers
+	tok = (AstToken)specs->tyQuals;
+	while (tok) {
+		qual |= (tok->token == TK_CONST ? CONST : CONST);
+		tok = (AstToken)tok->next;
 	}
 	p = specs->tySpecs;
 	while (p) {
@@ -258,7 +265,7 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		p = p->next;
 	}
 	ty = tyCnt == 0 ? T(INT) : ty;
-	specs->ty = ty;
+	specs->ty = Qualify(qual, ty);
 	return ;
 }
 

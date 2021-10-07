@@ -21,7 +21,32 @@ Type PointerTo(Type ty)
 	pty->bty = ty;
 	return pty;
 }
-
+static Type DoTypeClone(Type ty)
+{
+	int categ = ty->categ;
+	if (categ == STRUCT) {
+		;
+	} else {
+		Type qty;
+		CALLOC(qty);
+		*qty = *ty;
+		return qty;
+	}
+}
+Type Qualify(int qual, Type ty)
+{
+	Type qty;
+	if (qual == 0 || qual == ty->qual)
+		return ty;
+	qty = DoTypeClone(ty);
+	qty->qual |= qual;
+	if (ty->qual != 0) {
+		qty->bty = ty->bty;
+	} else {
+		qty->bty = ty;
+	}
+	return qty;
+}
 Type ArrayOf(int len, Type ty)
 {
 	ArrayType aty;

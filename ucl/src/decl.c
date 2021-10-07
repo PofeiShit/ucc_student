@@ -92,11 +92,12 @@ static AstSpecifiers ParseDeclarationSpecifiers(void)
 {
 	AstSpecifiers specs;
 	AstToken tok;
-	AstNode *scTail, *tsTail;
+	AstNode *scTail, *tsTail, *tqTail;
 
 	CREATE_AST_NODE(specs, Specifiers);
 	scTail = &specs->stgClasses;
 	tsTail = &specs->tySpecs;	
+	tqTail = &specs->tyQuals;
 next_specifiers:
 	switch(CurrentToken) 
 	{
@@ -121,7 +122,15 @@ next_specifiers:
 		*tsTail = (AstNode)ParseStructOrUnionSpecifier();
 		tsTail = &(*tsTail)->next;		
 		break;
-
+	case TK_CONST:
+		// type qualifiers
+		CREATE_AST_NODE(tok, Token);
+		tok->token = CurrentToken;
+		*tqTail = (AstNode)tok;
+		tqTail = &tok->next;
+		NEXT_TOKEN;
+		break;
+		
 	default:
 		return specs;
 	}

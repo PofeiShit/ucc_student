@@ -8,6 +8,10 @@
     expr->kids[0] = Cast(expr->ty, expr->kids[0]);                     \
     expr->kids[1] = Cast(expr->ty, expr->kids[1]);
 
+static int CanModify(AstExpression expr)
+{
+	return (!(expr->ty->qual & CONST));
+}
 static AstExpression CastExpression(Type ty, AstExpression expr)
 {
 	AstExpression cast;
@@ -485,6 +489,9 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 0);
 	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
 
+	if (!CanModify(expr->kids[0])) {
+		Error(NULL, "The Left operand cannot be modified!");
+	}
 	if (expr->op != OP_ASSIGN) {
 		AstExpression lopr;
 		CREATE_AST_NODE(lopr, Expression);

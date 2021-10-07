@@ -38,6 +38,7 @@ struct astSpecifiers
 	AST_NODE_COMMON
 	AstNode tySpecs;
 	AstNode stgClasses;
+	AstNode tyQuals;
 	// After semantics check ,we know the storage-class
 	int sclass;	
 	Type ty;
@@ -129,7 +130,7 @@ typedef struct astFunction
 struct astDeclaration
 {
 	AST_NODE_COMMON
-	// declaration-specifiers:	(staic | int | const | ...) +
+	// declaration-specifiers:	(static | int | const | ...) +
 	AstSpecifiers specs;
 	AstNode dec;
 };

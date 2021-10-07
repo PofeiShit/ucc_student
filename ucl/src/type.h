@@ -5,10 +5,12 @@ enum
 {
 	CHAR, INT, ENUM, LONGDOUBLE, POINTER, VOID, STRUCT, ARRAY, FUNCTION
 };
+enum {CONST=0x1};
 enum {I1, I4};
 
 #define TYPE_COMMON \
 	int categ : 8; \
+	int qual : 8; \
 	int align : 16; \
 	int size; \
 	struct type *bty;
@@ -99,6 +101,7 @@ Type  StartRecord(char *id, int categ);
 Field AddField(Type ty, char *id, Type fty);
 void EndRecord(Type ty);
 Type PointerTo(Type ty);
+Type Qualify(int qual, Type ty);
 Type ArrayOf(int len, Type ty);
 Type FunctionReturn(Type ty, Signature sig);
 Type Promote(Type ty);
