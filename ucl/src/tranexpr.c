@@ -298,6 +298,7 @@ static Symbol (* ExprTrans[])(AstExpression) =
 };
 AstExpression Not(AstExpression expr)
 {
+	static int rops[] = {OP_UNEQUAL};
 	AstExpression t;
 	switch(expr->op)
 	{
@@ -306,6 +307,10 @@ AstExpression Not(AstExpression expr)
 		expr->kids[0] = Not(expr->kids[0]);
 		expr->kids[1] = Not(expr->kids[1]);
 		return expr;
+	case OP_EQUAL:
+		expr->op = rops[expr->op - OP_EQUAL];
+		return expr;
+
 	default:
 		CREATE_AST_NODE(t, Expression);
 		t->ty = T(INT);

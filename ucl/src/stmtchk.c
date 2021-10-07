@@ -4,6 +4,7 @@
 #include "expr.h"
 #include "stmt.h"
 
+static AstStatement CheckStatement(AstStatement stmt);
 static AstStatement CheckExpressionStatment(AstStatement stmt)
 {
 	AstExpressionStatement exprStmt = AsExpr(stmt);
@@ -29,11 +30,30 @@ static AstStatement CheckReturnStatement(AstStatement stmt)
 		
 	return stmt;
 }
-
+static AstStatement CheckIfStatement(AstStatement stmt)
+{
+	AstIfStatement ifStmt = AsIf(stmt);
+	ifStmt->expr = Adjust(CheckExpression(ifStmt->expr), 1);
+	ifStmt->thenStmt = CheckStatement(ifStmt->thenStmt);
+	if (ifStmt->elseStmt) {
+		ifStmt->elseStmt = CheckStatement(ifStmt->elseStmt);
+	}
+	return stmt;
+}
+static AstStatement CheckLocalStatement(AstStatement stmt)
+{
+	AstStatement s;
+	EnterScope();
+	s = CheckCompoundStatement(stmt);
+	ExitScope();
+	return stmt;
+}
 static AstStatement (*Stmtcheckers[])(AstStatement) = 
 {
 	CheckExpressionStatment,
-	CheckReturnStatement
+	CheckReturnStatement,
+	CheckIfStatement,
+	CheckLocalStatement,
 };
 
 static AstStatement CheckStatement(AstStatement stmt)
@@ -44,7 +64,6 @@ static AstStatement CheckStatement(AstStatement stmt)
 AstStatement CheckCompoundStatement(AstStatement stmt)
 {
 	AstCompoundStatement compStmt = AsComp(stmt);
-
 	AstNode p;
 	compStmt->ilocals = CreateVector(1);
 	p = compStmt->decls;
@@ -56,6 +75,7 @@ AstStatement CheckCompoundStatement(AstStatement stmt)
 	p = compStmt->stmts;
 	while(p) 
 	{
+
 		CheckStatement((AstStatement)p);
 		p = p->next;
 	}

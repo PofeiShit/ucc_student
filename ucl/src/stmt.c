@@ -30,7 +30,22 @@ static AstStatement ParseReturnStatement(void)
 	Expect(TK_SEMICOLON);
 	return (AstStatement)retStmt;
 }
+static AstStatement ParseIfStatement(void)
+{
+	AstIfStatement ifStmt;
 
+	CREATE_AST_NODE(ifStmt, IfStatement);
+	NEXT_TOKEN;
+	Expect(TK_LPAREN);
+	ifStmt->expr = ParseExpression();
+	Expect(TK_RPAREN);
+	ifStmt->thenStmt = ParseStatement();
+	if (CurrentToken == TK_ELSE) {
+		NEXT_TOKEN;
+		ifStmt->elseStmt = ParseStatement();
+	}
+	return (AstStatement)ifStmt;
+}
 
 AstStatement ParseCompoundStatement(void)
 {
@@ -69,6 +84,8 @@ static AstStatement ParseStatement(void)
 {
 	switch (CurrentToken)
 	{
+	case TK_IF:
+		return ParseIfStatement();
 	case TK_RETURN:
 		return ParseReturnStatement();
 	case TK_LBRACE:

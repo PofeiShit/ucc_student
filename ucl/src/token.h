@@ -13,6 +13,8 @@ TOKEN(TK_VOID,      "void")
 TOKEN(TK_STRUCT,    "struct")
 TOKEN(TK_RETURN, 	"return")
 TOKEN(TK_SIZEOF,    "sizeof")
+TOKEN(TK_IF,        "if")
+TOKEN(TK_ELSE,      "else")
 //identifier
 TOKEN(TK_ID,        "ID")
 

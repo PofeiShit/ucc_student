@@ -24,6 +24,7 @@ static struct keyword keywordsD[] =
 };
 static struct keyword keywordsE[] =
 {
+	{"else", 4, TK_ELSE},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsF[] =
@@ -40,6 +41,7 @@ static struct keyword keywordsH[] =
 };
 static struct keyword keywordsI[] =
 {
+	{"if", 2, TK_IF},
 	{"int", 3, TK_INT},
 	{NULL, 	0, TK_ID},
 };

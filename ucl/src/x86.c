@@ -432,6 +432,7 @@ static int LayoutFrame(FunctionSymbol fsym, int fstParamPos)
 		else
 			offset += ALIGN(p->ty->size, STACK_ALIGN_SIZE);
 		AsVar(p)->offset = -offset;
+		// printf(" offset = %d, name = %s\n",AsVar(p)->offset,AsVar(p)->name);
 		p = p->next;
 	}
 	return offset;

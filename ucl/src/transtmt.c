@@ -36,11 +36,37 @@ static void TranslateRetrunStatement(AstStatement stmt)
 	GenerateJump(FSYM->exitBB);
 	StartBBlock(CreateBBlock());
 }
+static void TranslateIfStatement(AstStatement stmt)
+{
+	AstIfStatement ifStmt = AsIf(stmt);
+	BBlock nextBB;
+	BBlock trueBB;
+	BBlock falseBB;
+	nextBB = CreateBBlock();
+	trueBB = CreateBBlock();
+	if (ifStmt->elseStmt == NULL) {
+		TranslateBranch(Not(ifStmt->expr), nextBB, trueBB);
+		StartBBlock(trueBB);
+		TranslateStatement(ifStmt->thenStmt);
+	} else {
+		// 
+		falseBB = CreateBBlock();
+		TranslateBranch(Not(ifStmt->expr), falseBB, trueBB);
 
+		StartBBlock(trueBB);
+		TranslateStatement(ifStmt->thenStmt);
+		GenerateJump(nextBB);
+		
+		StartBBlock(falseBB);
+		TranslateStatement(ifStmt->elseStmt);
+	} 
+	StartBBlock(nextBB);
+}
 static void (* StmtTrans[])(AstStatement) = 
 {
 	TranslateExpressionStatement,
 	TranslateRetrunStatement,
+	TranslateIfStatement,
 	TranslateCompoundStatement,
 };
 
