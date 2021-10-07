@@ -15,6 +15,8 @@ TOKEN(TK_RETURN, 	"return")
 TOKEN(TK_SIZEOF,    "sizeof")
 TOKEN(TK_IF,        "if")
 TOKEN(TK_ELSE,      "else")
+TOKEN(TK_WHILE,     "while")
+TOKEN(TK_DO,        "do")
 //identifier
 TOKEN(TK_ID,        "ID")
 

@@ -295,6 +295,8 @@ void CheckFunction(AstFunction func)
 
 	func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, sclass);
 
+	func->loops = CreateVector(4);
+	func->breakable = CreateVector(4);
 	CURRENTF = func;
 	FSYM = func->fsym;
 	RestoreParameterListTable();	

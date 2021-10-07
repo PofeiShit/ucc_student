@@ -20,6 +20,7 @@ static struct keyword keywordsC[] =
 };
 static struct keyword keywordsD[] =
 {
+	{"do", 2, TK_DO},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsE[] =
@@ -102,7 +103,11 @@ static struct keyword keywordsV[] =
 	{"void",     4, TK_VOID},
 	{NULL,       0, TK_ID}
 };
-
+static struct keyword keywordsW[] = 
+{
+	{"while", 5, TK_WHILE},
+	{NULL, 0, TK_ID}
+};
 /**
 	classify keywords by their first letter,
 	to speed up comparing.
@@ -136,4 +141,5 @@ static struct keyword *keywords[] =
 
 	keywordsU,
     keywordsV,
+	keywordsW,
 };

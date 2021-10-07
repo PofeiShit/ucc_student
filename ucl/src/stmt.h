@@ -1,11 +1,22 @@
 #ifndef __STMT_H_
 #define __STMT_H_
 #define AST_STATEMENT_COMMON AST_NODE_COMMON
-
+#define AST_LOOP_STATEMENT_COMMON 	\
+	AST_STATEMENT_COMMON 			\
+	AstExpression expr;				\
+	AstStatement stmt;				\
+	BBlock loopBB;					\
+	BBlock contBB;					\
+	BBlock nextBB;		
 struct astStatement
 {
 	AST_STATEMENT_COMMON
 };
+typedef struct astLoopStatement
+{
+	AST_LOOP_STATEMENT_COMMON
+} *AstLoopStatement;
+
 typedef struct astExpressionStatement
 {
 	AST_STATEMENT_COMMON
@@ -38,5 +49,7 @@ typedef struct astCompoundStatement
 #define AsComp(stmt) ((AstCompoundStatement)stmt)
 #define AsRet(stmt) ((AstReturnStatement)stmt)
 #define AsIf(stmt) ((AstIfStatement)stmt)
+#define AsLoop(stmt)   ((AstLoopStatement)stmt)
+
 AstStatement CheckCompoundStatement(AstStatement stmt);
 #endif

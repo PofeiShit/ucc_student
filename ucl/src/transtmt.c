@@ -62,11 +62,30 @@ static void TranslateIfStatement(AstStatement stmt)
 	} 
 	StartBBlock(nextBB);
 }
+
+static void TranslateWhileStatement(AstStatement stmt)
+{
+	AstLoopStatement whileStmt = AsLoop(stmt);
+	whileStmt->loopBB = CreateBBlock();
+	whileStmt->contBB = CreateBBlock();
+	whileStmt->nextBB = CreateBBlock();
+
+	GenerateJump(whileStmt->contBB);
+
+	StartBBlock(whileStmt->loopBB);
+	TranslateStatement(whileStmt->stmt);
+
+	StartBBlock(whileStmt->contBB);
+	TranslateBranch(whileStmt->expr, whileStmt->loopBB, whileStmt->nextBB);
+	
+	StartBBlock(whileStmt->nextBB);
+}
 static void (* StmtTrans[])(AstStatement) = 
 {
 	TranslateExpressionStatement,
 	TranslateRetrunStatement,
 	TranslateIfStatement,
+	TranslateWhileStatement,
 	TranslateCompoundStatement,
 };
 

@@ -3,7 +3,8 @@
 #include "decl.h"
 #include "expr.h"
 #include "stmt.h"
-
+#define PushStatement(v, stmt) INSERT_ITEM(v, stmt)
+#define PopStatement(v) (v->data[--v->len])
 static AstStatement CheckStatement(AstStatement stmt);
 static AstStatement CheckExpressionStatment(AstStatement stmt)
 {
@@ -40,6 +41,19 @@ static AstStatement CheckIfStatement(AstStatement stmt)
 	}
 	return stmt;
 }
+static AstStatement CheckWhileStatement(AstStatement stmt)
+{
+	AstLoopStatement loopStmt = AsLoop(stmt);
+	PushStatement(CURRENTF->loops,    stmt);
+	PushStatement(CURRENTF->breakable, stmt);
+
+	loopStmt->expr = Adjust(CheckExpression(loopStmt->expr), 1);
+	loopStmt->stmt = CheckStatement(loopStmt->stmt);
+	PopStatement(CURRENTF->loops);
+	PopStatement(CURRENTF->breakable);
+
+	return stmt;
+}
 static AstStatement CheckLocalStatement(AstStatement stmt)
 {
 	AstStatement s;
@@ -53,6 +67,7 @@ static AstStatement (*Stmtcheckers[])(AstStatement) =
 	CheckExpressionStatment,
 	CheckReturnStatement,
 	CheckIfStatement,
+	CheckWhileStatement,
 	CheckLocalStatement,
 };
 

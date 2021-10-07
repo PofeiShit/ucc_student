@@ -30,6 +30,18 @@ static AstStatement ParseReturnStatement(void)
 	Expect(TK_SEMICOLON);
 	return (AstStatement)retStmt;
 }
+static AstStatement ParseWhileStatement(void)
+{
+	AstLoopStatement whileStmt;
+	CREATE_AST_NODE(whileStmt, WhileStatement);
+	NEXT_TOKEN;
+	Expect(TK_LPAREN);
+	whileStmt->expr = ParseExpression();
+	Expect(TK_RPAREN);
+	whileStmt->stmt = ParseStatement();
+
+	return (AstStatement)whileStmt;
+}
 static AstStatement ParseIfStatement(void)
 {
 	AstIfStatement ifStmt;
@@ -84,6 +96,8 @@ static AstStatement ParseStatement(void)
 {
 	switch (CurrentToken)
 	{
+	case TK_WHILE:
+		return ParseWhileStatement();
 	case TK_IF:
 		return ParseIfStatement();
 	case TK_RETURN:
