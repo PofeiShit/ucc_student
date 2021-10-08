@@ -10,8 +10,8 @@ enum nodeKind
 
 	NK_Expression, 
 
-	NK_ExpressionStatement, NK_ReturnStatement, NK_IfStatement, NK_DoStatement, NK_WhileStatement, NK_ForStatement,
-	NK_CompoundStatement,
+	NK_ExpressionStatement, NK_BreakStatement, NK_ReturnStatement, NK_IfStatement, 
+	NK_DoStatement, NK_WhileStatement, NK_ForStatement, NK_CompoundStatement,
 };
 typedef struct astExpression *AstExpression;
 typedef struct astStatement *AstStatement;

@@ -10,6 +10,7 @@ static struct keyword keywordsA[] =
 };
 static struct keyword keywordsB[] =
 {
+	{"break", 5, TK_BREAK},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsC[] =

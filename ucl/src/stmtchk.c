@@ -5,6 +5,7 @@
 #include "stmt.h"
 #define PushStatement(v, stmt) INSERT_ITEM(v, stmt)
 #define PopStatement(v) (v->data[--v->len])
+#define TopStatement(v) TOP_ITEM(v)
 static AstStatement CheckStatement(AstStatement stmt);
 static AstStatement CheckExpressionStatment(AstStatement stmt)
 {
@@ -83,9 +84,19 @@ static AstStatement CheckLocalStatement(AstStatement stmt)
 	ExitScope();
 	return stmt;
 }
+static AstStatement CheckBreakStatement(AstStatement stmt)
+{
+	AstBreakStatement brkStmt = AsBreak(stmt);
+	brkStmt->target = (AstStatement)TopStatement(CURRENTF->breakable);
+	if (brkStmt->target == NULL) {
+		Error(NULL, "The break shall appear in a switch or loop");
+	}
+	return stmt;
+}
 static AstStatement (*Stmtcheckers[])(AstStatement) = 
 {
 	CheckExpressionStatment,
+	CheckBreakStatement,
 	CheckReturnStatement,
 	CheckIfStatement,
 	CheckLoopStatement, // do {} while();

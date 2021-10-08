@@ -45,6 +45,12 @@ typedef struct astIfStatement
 	AstStatement elseStmt;
 } *AstIfStatement;
 
+typedef struct astBreakStatement
+{
+	AST_STATEMENT_COMMON
+	AstStatement target;
+} *AstBreakStatement;
+
 typedef struct astCompoundStatement
 {
 	AST_STATEMENT_COMMON
@@ -59,5 +65,7 @@ typedef struct astCompoundStatement
 #define AsIf(stmt) ((AstIfStatement)stmt)
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
 #define AsFor(stmt) ((AstForStatement)stmt)
+#define AsBreak(stmt) ((AstBreakStatement)stmt)
+
 AstStatement CheckCompoundStatement(AstStatement stmt);
 #endif

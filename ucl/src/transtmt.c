@@ -138,9 +138,16 @@ static void TranslateForStatement(AstStatement stmt)
 
 	StartBBlock(forStmt->nextBB);
 }
+static void TranslateBreakStatement(AstStatement stmt)
+{
+	AstBreakStatement brkStmt = AsBreak(stmt);
+	GenerateJump(AsLoop(brkStmt->target)->nextBB);
+	StartBBlock(CreateBBlock());
+}
 static void (* StmtTrans[])(AstStatement) = 
 {
 	TranslateExpressionStatement,
+	TranslateBreakStatement,
 	TranslateRetrunStatement,
 	TranslateIfStatement,
 	TranslateDoStatement,

@@ -89,6 +89,14 @@ static AstStatement ParseForStatement(void)
 	forStmt->stmt = ParseStatement();
 	return (AstStatement)forStmt;
 }
+static AstStatement ParseBreakStatement(void)
+{
+	AstBreakStatement brkStmt;
+	CREATE_AST_NODE(brkStmt, BreakStatement);
+	NEXT_TOKEN;
+	Expect(TK_SEMICOLON);
+	return (AstStatement)brkStmt;
+}
 AstStatement ParseCompoundStatement(void)
 {
 	AstCompoundStatement compStmt;
@@ -126,6 +134,8 @@ static AstStatement ParseStatement(void)
 {
 	switch (CurrentToken)
 	{
+	case TK_BREAK:
+		return ParseBreakStatement();
 	case TK_FOR:
 		return ParseForStatement();
 	case TK_DO:
