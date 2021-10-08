@@ -144,10 +144,17 @@ static void TranslateBreakStatement(AstStatement stmt)
 	GenerateJump(AsLoop(brkStmt->target)->nextBB);
 	StartBBlock(CreateBBlock());
 }
+static void TranslateContinueStatement(AstStatement stmt)
+{
+	AstContinueStatement contStmt = AsContinue(stmt);
+	GenerateJump(contStmt->target->contBB);
+	StartBBlock(CreateBBlock());
+}
 static void (* StmtTrans[])(AstStatement) = 
 {
 	TranslateExpressionStatement,
 	TranslateBreakStatement,
+	TranslateContinueStatement,
 	TranslateRetrunStatement,
 	TranslateIfStatement,
 	TranslateDoStatement,

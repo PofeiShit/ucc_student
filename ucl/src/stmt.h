@@ -51,6 +51,12 @@ typedef struct astBreakStatement
 	AstStatement target;
 } *AstBreakStatement;
 
+typedef struct astContinueStatement
+{
+	AST_STATEMENT_COMMON
+	AstLoopStatement target;
+} *AstContinueStatement;
+
 typedef struct astCompoundStatement
 {
 	AST_STATEMENT_COMMON
@@ -66,6 +72,6 @@ typedef struct astCompoundStatement
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
 #define AsFor(stmt) ((AstForStatement)stmt)
 #define AsBreak(stmt) ((AstBreakStatement)stmt)
-
+#define AsContinue(stmt) ((AstContinueStatement)stmt)
 AstStatement CheckCompoundStatement(AstStatement stmt);
 #endif

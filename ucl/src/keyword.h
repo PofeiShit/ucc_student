@@ -17,6 +17,7 @@ static struct keyword keywordsC[] =
 {
 	{"char", 4, TK_CHAR},
 	{"const", 5, TK_CONST},
+	{"continue", 8, TK_CONTINUE},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsD[] =

@@ -97,6 +97,14 @@ static AstStatement ParseBreakStatement(void)
 	Expect(TK_SEMICOLON);
 	return (AstStatement)brkStmt;
 }
+static AstStatement ParseContinueStatement(void)
+{
+	AstContinueStatement contStmt;
+	CREATE_AST_NODE(contStmt, ContinueStatement);
+	NEXT_TOKEN;
+	Expect(TK_SEMICOLON);
+	return (AstStatement)contStmt;
+}
 AstStatement ParseCompoundStatement(void)
 {
 	AstCompoundStatement compStmt;
@@ -134,6 +142,8 @@ static AstStatement ParseStatement(void)
 {
 	switch (CurrentToken)
 	{
+	case TK_CONTINUE:
+		return ParseContinueStatement();
 	case TK_BREAK:
 		return ParseBreakStatement();
 	case TK_FOR:

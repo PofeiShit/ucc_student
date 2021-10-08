@@ -93,10 +93,20 @@ static AstStatement CheckBreakStatement(AstStatement stmt)
 	}
 	return stmt;
 }
+static AstStatement CheckContinueStatement(AstStatement stmt)
+{
+	AstContinueStatement contStmt = AsContinue(stmt);
+	contStmt->target = (AstLoopStatement)TopStatement(CURRENTF->loops);
+	if (contStmt->target == NULL) {
+		Error(NULL, "The continue shall appear in a loop");
+	}
+	return stmt;
+}
 static AstStatement (*Stmtcheckers[])(AstStatement) = 
 {
 	CheckExpressionStatment,
 	CheckBreakStatement,
+	CheckContinueStatement,
 	CheckReturnStatement,
 	CheckIfStatement,
 	CheckLoopStatement, // do {} while();
