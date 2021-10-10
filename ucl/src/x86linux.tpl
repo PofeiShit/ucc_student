@@ -118,3 +118,4 @@ TEMPLATE(X86_EPILOGUE, "movl %%ebp, %%esp;popl %%edi;popl %%esi;popl %%ebx;popl 
 TEMPLATE(X86_MOVI1,   "movb %1, %0")
 TEMPLATE(X86_MOVI4,   "movl %1, %0")
 TEMPLATE(X86_JMP, "jmp %0")
+TEMPLATE(X86_IJMP, "jmp *%0(,%1,4)")

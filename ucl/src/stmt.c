@@ -105,6 +105,37 @@ static AstStatement ParseContinueStatement(void)
 	Expect(TK_SEMICOLON);
 	return (AstStatement)contStmt;
 }
+static AstStatement ParseCaseStatement(void)
+{
+	AstCaseStatement caseStmt;
+	CREATE_AST_NODE(caseStmt, CaseStatement);
+	NEXT_TOKEN;
+	caseStmt->expr = ParseConstantExpression();
+	Expect(TK_COLON);
+	caseStmt->stmt = ParseStatement();
+
+	return (AstStatement)caseStmt;
+}
+static AstStatement ParseDefaultStatement(void)
+{
+	AstDefaultStatement defStmt;
+	CREATE_AST_NODE(defStmt, DefaultStatement);
+	NEXT_TOKEN;
+	Expect(TK_COLON);
+	defStmt->stmt = ParseStatement();
+	return (AstStatement)defStmt;
+}
+static AstStatement ParseSwitchStatement(void)
+{
+	AstSwitchStatement switchStmt;
+	CREATE_AST_NODE(switchStmt, SwitchStatement);
+	NEXT_TOKEN;
+	Expect(TK_LPAREN);
+	switchStmt->expr = ParseExpression();
+	Expect(TK_RPAREN);
+	switchStmt->stmt = ParseStatement();
+	return (AstStatement)switchStmt;
+}
 AstStatement ParseCompoundStatement(void)
 {
 	AstCompoundStatement compStmt;
@@ -142,6 +173,12 @@ static AstStatement ParseStatement(void)
 {
 	switch (CurrentToken)
 	{
+	case TK_CASE:
+		return ParseCaseStatement();
+	case TK_DEFAULT:
+		return ParseDefaultStatement();
+	case TK_SWITCH:
+		return ParseSwitchStatement();
 	case TK_CONTINUE:
 		return ParseContinueStatement();
 	case TK_BREAK:

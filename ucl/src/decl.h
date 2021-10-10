@@ -125,6 +125,7 @@ typedef struct astFunction
 	AstStatement stmt;
 	FunctionSymbol fsym;
 	Vector loops;
+	Vector switches;
 	Vector breakable;
 	int hasReturn;
 } *AstFunction;

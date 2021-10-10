@@ -13,7 +13,7 @@
 #define PRESERVE_REGS 4
 #define SCRATCH_REGS  4
 #define STACK_ALIGN_SIZE 4
-
+extern int SwitchTableNum;
 enum ASMCode 
 {
 #define TEMPLATE(code, str) code,
@@ -361,6 +361,41 @@ static Symbol PutInReg(Symbol p)
 	reg = GetReg();
 	Move(X86_MOVI4, reg, p);
 	return reg;
+}
+static void EmitIndirectJump(IRInst inst)
+{
+	BBlock *p;
+	Symbol swtch;
+	int len;
+	Symbol reg;
+	p = (BBlock*)DST;
+	reg = PutInReg(SRC1);
+	PutString("\n");
+	Segment(DATA);
+	CALLOC(swtch);
+	swtch->kind = SK_Variable;
+	swtch->ty = T(POINTER);
+	swtch->name = FormatName("swtchTable%d", SwitchTableNum++);
+	swtch->sclass = TK_STATIC;
+	swtch->level = 0;
+	DefineGlobal(swtch);
+
+	DST = swtch;
+	len = strlen(DST->aname);
+	while (*p != NULL) {
+		DefineAddress((*p)->sym);
+		PutString("\n");
+		LeftAlign(ASMFile, len);
+		PutString("\t");
+		p++;
+	}
+
+	PutString("\n");
+	Segment(CODE);
+	SRC1 = reg;
+	ClearRegs();
+	PutASMCode(X86_IJMP, inst->opds);
+
 }
 static void EmitIndirectMove(IRInst inst)
 {

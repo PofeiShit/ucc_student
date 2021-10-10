@@ -13,6 +13,7 @@ void DefineGlobal(Symbol p);
 void DefineCommData(Symbol p);
 void DefineString(String p, int size);
 void DefineLabel(Symbol p);
+void DefineAddress(Symbol p);
 void EmitFunction(FunctionSymbol p);
 void EndProgram(void);
 #endif

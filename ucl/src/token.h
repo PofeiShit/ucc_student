@@ -20,6 +20,9 @@ TOKEN(TK_DO,        "do")
 TOKEN(TK_FOR,       "for")
 TOKEN(TK_BREAK,     "break")
 TOKEN(TK_CONTINUE,  "continue")
+TOKEN(TK_SWITCH,    "switch")
+TOKEN(TK_CASE,      "case")
+TOKEN(TK_DEFAULT,   "default")
 //identifier
 TOKEN(TK_ID,        "ID")
 

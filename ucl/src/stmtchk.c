@@ -7,6 +7,26 @@
 #define PopStatement(v) (v->data[--v->len])
 #define TopStatement(v) TOP_ITEM(v)
 static AstStatement CheckStatement(AstStatement stmt);
+static void AddCase(AstSwitchStatement switchStmt, AstCaseStatement caseStmt)
+{
+	AstCaseStatement p = switchStmt->cases;
+	AstCaseStatement *pprev = &switchStmt->cases;
+	int diff;
+	while (p) {
+		diff = caseStmt->expr->val.i[0] - p->expr->val.i[0];
+		if (diff < 0)
+			break;
+		if (diff > 0) {
+			pprev = &p->nextCase;
+			p = p->nextCase;
+		} else {
+			Error(NULL, "Repeated constant in a switch statement");
+			return ;
+		}
+	}
+	*pprev = caseStmt;
+	caseStmt->nextCase = p;
+}
 static AstStatement CheckExpressionStatment(AstStatement stmt)
 {
 	AstExpressionStatement exprStmt = AsExpr(stmt);
@@ -102,9 +122,64 @@ static AstStatement CheckContinueStatement(AstStatement stmt)
 	}
 	return stmt;
 }
+static AstStatement CheckCaseStatement(AstStatement stmt)
+{
+	AstCaseStatement caseStmt = AsCase(stmt);
+	AstSwitchStatement switchStmt;
+	switchStmt = (AstSwitchStatement)TopStatement(CURRENTF->switches);
+	if (switchStmt == NULL) {
+		Error(NULL, "A case shall appear in a switch statement.");
+		return stmt;
+	}
+	caseStmt->expr = CheckConstantExpression(caseStmt->expr);
+	if (caseStmt->expr == NULL) {
+		Error(NULL, "The case value must be integer constant.");
+		return stmt;
+	}
+
+	caseStmt->stmt = CheckStatement(caseStmt->stmt);
+	AddCase(switchStmt, caseStmt);
+	return stmt;
+}
+static AstStatement CheckDefaultStatement(AstStatement stmt)
+{
+	AstDefaultStatement defStmt = AsDef(stmt);
+	AstSwitchStatement switchStmt;
+	switchStmt = (AstSwitchStatement)TopStatement(CURRENTF->switches);
+	if (switchStmt == NULL) {
+		Error(NULL, "A default shall appear in a switch statement.");
+		return stmt;
+	}
+	if (switchStmt->defStmt != NULL) {
+		Error(NULL, "There shall be only one default label in a switch statement.");
+		return stmt;
+	}
+	defStmt->stmt = CheckStatement(defStmt->stmt);
+	switchStmt->defStmt = defStmt;
+	return stmt;
+}
+static AstStatement CheckSwitchStatement(AstStatement stmt)
+{
+	AstSwitchStatement switchStmt = AsSwitch(stmt);
+	PushStatement(CURRENTF->switches, stmt);
+	PushStatement(CURRENTF->breakable, stmt);
+	switchStmt->expr = Adjust(CheckExpression(switchStmt->expr), 1);
+	if (!IsIntegType(switchStmt->expr->ty)) {
+		Error(NULL, "The expression in a switch statement shall be integer type.");
+		switchStmt->expr->ty = T(INT);
+	}
+
+	switchStmt->stmt = CheckStatement(switchStmt->stmt);
+	PopStatement(CURRENTF->switches);
+	PopStatement(CURRENTF->breakable);
+	return stmt;
+}
 static AstStatement (*Stmtcheckers[])(AstStatement) = 
 {
 	CheckExpressionStatment,
+	CheckCaseStatement,
+	CheckDefaultStatement,
+	CheckSwitchStatement,
 	CheckBreakStatement,
 	CheckContinueStatement,
 	CheckReturnStatement,

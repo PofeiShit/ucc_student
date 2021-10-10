@@ -254,6 +254,10 @@ void DefineCommData(Symbol p)
 		Print(".comm\t%s,%d\n", p->aname, p->ty->size);
 	}
 }
+void DefineAddress(Symbol p)
+{
+	Print(".long\t%s", GetAccessName(p));
+}
 void EndProgram(void)
 {
 	Flush();

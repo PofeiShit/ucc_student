@@ -15,6 +15,7 @@ static struct keyword keywordsB[] =
 };
 static struct keyword keywordsC[] =
 {
+	{"case", 4, TK_CASE},
 	{"char", 4, TK_CHAR},
 	{"const", 5, TK_CONST},
 	{"continue", 8, TK_CONTINUE},
@@ -22,6 +23,7 @@ static struct keyword keywordsC[] =
 };
 static struct keyword keywordsD[] =
 {
+	{"default", 7, TK_DEFAULT},
 	{"do", 2, TK_DO},
 	{NULL, 	0, TK_ID},
 };
@@ -91,6 +93,7 @@ static struct keyword keywordsS[] =
 	{"sizeof", 6, TK_SIZEOF},
 	{"static", 6, TK_STATIC},
 	{"struct", 6, TK_STRUCT},
+	{"switch", 6, TK_SWITCH},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsT[] =

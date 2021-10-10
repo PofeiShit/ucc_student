@@ -216,3 +216,16 @@ void GenerateJump(BBlock dstBB)
 	inst->opds[1] = inst->opds[2] = NULL;
 	AppendInst(inst);
 }
+void GenerateIndirectJump(BBlock *dstBBs, int len, Symbol index)
+{
+	IRInst inst;
+	int i;
+
+	ALLOC(inst);
+	inst->ty = T(VOID);
+	inst->opcode = IJMP;
+	inst->opds[0] = (Symbol)dstBBs;
+	inst->opds[1] = index;
+	inst->opds[2] = NULL;
+	AppendInst(inst);
+}

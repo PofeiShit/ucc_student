@@ -297,6 +297,7 @@ void CheckFunction(AstFunction func)
 
 	func->loops = CreateVector(4);
 	func->breakable = CreateVector(4);
+	func->switches = CreateVector(4);
 	CURRENTF = func;
 	FSYM = func->fsym;
 	RestoreParameterListTable();	

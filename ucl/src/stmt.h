@@ -57,6 +57,45 @@ typedef struct astContinueStatement
 	AstLoopStatement target;
 } *AstContinueStatement;
 
+typedef struct astCaseStatement
+{
+	AST_STATEMENT_COMMON
+	AstExpression expr;
+	AstStatement stmt;
+	struct astCaseStatement *nextCase;
+	BBlock respBB;
+} *AstCaseStatement;
+
+typedef struct astDefaultStatement
+{
+	AST_STATEMENT_COMMON
+	AstStatement stmt;
+	BBlock respBB;
+} *AstDefaultStatement;
+
+typedef struct switchBucket
+{
+	int ncase;
+	int minVal;
+	int maxVal;
+	AstCaseStatement cases;
+	AstCaseStatement *tail;
+	struct switchBucket *prev;
+} *SwitchBucket;
+
+typedef struct astSwitchStatement
+{
+	AST_STATEMENT_COMMON
+	AstExpression expr;
+	AstStatement stmt;
+	AstCaseStatement cases;
+	AstDefaultStatement defStmt;
+	SwitchBucket buckets;
+	int nbucket;
+	BBlock nextBB;
+	BBlock defBB;	
+} *AstSwitchStatement;
+
 typedef struct astCompoundStatement
 {
 	AST_STATEMENT_COMMON
@@ -73,5 +112,8 @@ typedef struct astCompoundStatement
 #define AsFor(stmt) ((AstForStatement)stmt)
 #define AsBreak(stmt) ((AstBreakStatement)stmt)
 #define AsContinue(stmt) ((AstContinueStatement)stmt)
+#define AsSwitch(stmt) ((AstSwitchStatement)stmt)
+#define AsDef(stmt) ((AstDefaultStatement)stmt)
+#define AsCase(stmt) ((AstCaseStatement)stmt)
 AstStatement CheckCompoundStatement(AstStatement stmt);
 #endif
