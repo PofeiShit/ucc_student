@@ -98,6 +98,7 @@ static struct keyword keywordsS[] =
 };
 static struct keyword keywordsT[] =
 {
+	{"typedef", 7, TK_TYPEDEF},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsU[] =

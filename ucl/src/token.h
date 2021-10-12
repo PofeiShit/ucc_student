@@ -5,6 +5,7 @@ TOKEN(TK_AUTO,		"auto")
 TOKEN(TK_EXTERN, 	"extern")
 TOKEN(TK_STATIC, 	"static")
 TOKEN(TK_CONST,     "const")
+TOKEN(TK_TYPEDEF,   "typedef")
 TOKEN(TK_CHAR, 		"char")
 TOKEN(TK_SHORT,		"short")
 

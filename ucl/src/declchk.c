@@ -249,6 +249,14 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		{
 			ty = CheckStructOrUnionSpecifier((AstStructSpecifier)p);
 			tyCnt++;
+		} else if (p->kind == NK_TypedefName) {
+			Symbol sym = LookupID(((AstTypedefName)p)->id);
+			if (sym) {
+				ty = sym->ty;
+			} else {
+				ty = T(INT);
+			}
+			tyCnt++;
 		} else {
 			tok = (AstToken)p;
 			switch(tok->token) {
@@ -314,6 +322,23 @@ void CheckFunction(AstFunction func)
 	ExitScope();	
 	// Referencing an undefined label is considered as an error.
 }
+static void CheckTypedef(AstDeclaration decl)
+{
+	AstDeclarator dec;
+	Type ty;
+	Symbol sym;
+	dec = (AstDeclarator)decl->dec;
+	while (dec) {
+		CheckDeclarator(dec);
+		if (dec->id == NULL)
+			goto next;
+		ty = DeriveType(dec->tyDrvList, decl->specs->ty);
+		sym = LookupID(dec->id);
+		AddTypedefName(dec->id, ty);
+next:
+		dec = (AstDeclarator)dec->next;
+	}
+}
 //
 Type CheckTypeName(AstTypeName tname)
 {
@@ -364,6 +389,11 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 	Type ty;
 	int sclass;	
 	CheckDeclarationSpecifiers(decl->specs);
+	if (decl->specs->sclass == TK_TYPEDEF)
+	{
+		CheckTypedef(decl);
+		return ;
+	}
 	ty = decl->specs->ty;
 	sclass = decl->specs->sclass;
 	// check declarator

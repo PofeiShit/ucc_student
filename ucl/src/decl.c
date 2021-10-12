@@ -2,11 +2,67 @@
 #include "grammer.h"
 #include "ast.h"
 #include "decl.h"
+static Vector TypedefNames, OverloadNames;
 
 int FIRST_Declaration[] = { FIRST_DECLARATION, 0};
 
 static AstDeclarator ParseDeclarator();
 static AstSpecifiers ParseDeclarationSpecifiers(void);
+
+static char* GetOutermostID(AstDeclarator dec)
+{
+	if (dec->kind == NK_NameDeclarator) 
+		return dec->id;
+	return GetOutermostID(dec->dec);
+}
+static int IsTypedefName(char *id)
+{
+	Vector v = TypedefNames;
+	TDName tn;
+	FOR_EACH_ITEM(TDName, tn, v)
+		if (tn->id == id && tn->level <= Level && ! tn->overload)
+			return 1;
+	ENDFOR
+	return 0;
+}
+static void CheckTypedefName(int sclass, char *id)
+{
+	Vector v;
+	TDName tn;
+	if (id == NULL)
+		return;
+	v = TypedefNames;
+	if (sclass == TK_TYPEDEF) {
+		FOR_EACH_ITEM(TDName, tn, v)
+			if (tn->id == id) {
+				if (Level < tn->level)
+					tn->level = Level;
+				return;
+			}
+		ENDFOR
+		ALLOC(tn);
+		tn->id = id;
+		tn->level = Level;
+		tn->overload = 0;
+		INSERT_ITEM(v, tn);
+	} else {
+		// TODO overload
+		;
+	}
+}
+static void PreCheckTypedef(AstDeclaration decl)
+{
+	AstNode p;
+	int sclass = 0;
+	if (decl->specs->stgClasses != NULL) {
+		sclass = ((AstToken)decl->specs->stgClasses)->token;
+	}
+	p = decl->dec;
+	while (p != NULL) {
+		CheckTypedefName(sclass, GetOutermostID((AstDeclarator)p));
+		p = p->next;
+	}
+}
 
 static AstStructDeclaration ParseStructDeclaration(void)
 {
@@ -93,7 +149,7 @@ static AstSpecifiers ParseDeclarationSpecifiers(void)
 	AstSpecifiers specs;
 	AstToken tok;
 	AstNode *scTail, *tsTail, *tqTail;
-
+	int seeTy = 0;
 	CREATE_AST_NODE(specs, Specifiers);
 	scTail = &specs->stgClasses;
 	tsTail = &specs->tySpecs;	
@@ -103,6 +159,8 @@ next_specifiers:
 	{
 	case TK_EXTERN:
 	case TK_STATIC:
+	case TK_TYPEDEF:
+		// storage classes
 		CREATE_AST_NODE(tok, Token);
 		tok->token = CurrentToken;
 		*scTail = (AstNode)tok;
@@ -116,8 +174,22 @@ next_specifiers:
 		CREATE_AST_NODE(tok, Token);
 		tok->token = CurrentToken;
 		specs->tySpecs = (AstNode)tok;
+		seeTy = 1;
 		NEXT_TOKEN;
 		break;
+	case TK_ID:
+		if (!seeTy && IsTypedefName((char*)TokenValue.p)) {
+			AstTypedefName tname;
+			CREATE_AST_NODE(tname, TypedefName);
+			tname->id = (char*)TokenValue.p;
+			*tsTail = (AstNode)tname;
+			tsTail = &tname->next;
+			NEXT_TOKEN;
+			seeTy = 1;
+			break;
+		}
+		return specs;
+	
 	case TK_STRUCT:
 		*tsTail = (AstNode)ParseStructOrUnionSpecifier();
 		tsTail = &(*tsTail)->next;		
@@ -152,7 +224,7 @@ static AstDeclarator ParseDirectDeclarator()
 	CREATE_AST_NODE(dec, NameDeclarator);
 	if (CurrentToken == TK_ID)
 	{
-		dec->id = (char*)TokenValue.p;		
+		dec->id = (char*)TokenValue.p;  
 		NEXT_TOKEN;
 	}
 	return dec;
@@ -160,7 +232,7 @@ static AstDeclarator ParseDirectDeclarator()
 
 int IsTypeName(int tok)
 {
-	return tok >= TK_CHAR && tok <= TK_VOID;
+	return tok == TK_ID ? IsTypedefName((char*)TokenValue.p) : (tok >= TK_CHAR && tok <= TK_VOID);
 }
 AstTypeName ParseTypeName(void)
 {
@@ -316,7 +388,8 @@ static AstNode ParseExternalDeclaration(void)
 	AstFunctionDeclarator fdec;
 
 	decl = ParseCommonHeader();
-
+	if (decl->specs->stgClasses != NULL && ((AstToken)decl->specs->stgClasses)->token == TK_TYPEDEF)
+		goto not_func;
 	// initDec = (AstInitDeclarator)decl->dec;
 	dec = (AstDeclarator)decl->dec;
 	//printf("%d,%d\n", fdec->kind, fdec->dec->kind);
@@ -350,7 +423,9 @@ static AstNode ParseExternalDeclaration(void)
 		func->stmt = ParseCompoundStatement();
 		return (AstNode)func;
 	}
+not_func:
 	Expect(TK_SEMICOLON);
+	PreCheckTypedef(decl);
 	return (AstNode)decl;
 }
 
@@ -368,6 +443,8 @@ AstTranslationUnit ParseTranslationUnit(char *filename)
 	AstTranslationUnit transUnit;
 	AstNode *tail;
 	ReadSourceFile(filename);
+	TypedefNames = CreateVector(8);
+	OverloadNames = CreateVector(8); 
 	// allocate a AST_NODE  and set its kind to NK_TranslationUnit.
 	CREATE_AST_NODE(transUnit, TranslationUnit);
 	tail = &transUnit->extDecls;

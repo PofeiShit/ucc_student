@@ -8,6 +8,14 @@ enum { POINTER_TO, ARRAY_OF, FUNCTION_RETURN };
     char *id;                   \
 	TypeDerivList tyDrvList;
 
+typedef struct tdname
+{
+	char *id;
+	int level;
+	int overload;
+	int overloadLevel;
+} *TDName;
+
 typedef struct astSpecifiers *AstSpecifiers;
 
 typedef struct typeDerivList
@@ -26,6 +34,13 @@ typedef struct astDeclarator
 {
 	AST_DECLARATOR_COMMON
 } *AstDeclarator;
+
+typedef struct astTypedefName
+{
+	AST_NODE_COMMON
+	char *id;
+	Symbol sym;
+} *AstTypedefName;
 
 typedef struct astToken
 {

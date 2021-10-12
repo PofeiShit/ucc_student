@@ -187,6 +187,15 @@ void InitSymbolTable()
 	Identifiers = &GlobalIDs;
 	TempNum = LabelNum = StringNum = 0;	
 }
+Symbol AddTypedefName(char *name, Type ty)
+{
+	Symbol p;
+	CALLOC(p);
+	p->kind = SK_TypedefName;
+	p->name = name;
+	p->ty = ty;
+	return AddSymbol(Identifiers, p);
+}
 Symbol AddVariable(char *name, Type ty, int sclass)
 {
 	VariableSymbol p;
