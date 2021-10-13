@@ -12,7 +12,11 @@ static void EmitGlobals(void)
 	Symbol p = Globals;
 	while (p)
 	{
-		DefineCommData(p);
+		if (p->sclass == TK_EXTERN) {
+			;
+		} else {
+			DefineCommData(p);
+		}
 		p = p->next;
 	}
 	PutString("\n");
