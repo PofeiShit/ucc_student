@@ -7,7 +7,7 @@ Type DefaultFunctionType;
 
 int TypeCode(Type ty)
 {
-	static int optypes[] = {I1, I4};
+	static int optypes[] = {I1, U1, I4, U4};
 	return optypes[ty->categ];
 }
 
@@ -72,8 +72,8 @@ void SetupTypeSystem(void)
 {
 	int i;
 	FunctionType fty;
-	T(CHAR)->size = CHAR_SIZE;
-	T(INT)->size = INT_SIZE;
+	T(CHAR)->size = T(UCHAR)->size = CHAR_SIZE;
+	T(INT)->size = T(UINT)->size = INT_SIZE;
 	T(POINTER)->size = INT_SIZE;
 	T(POINTER)->bty = T(INT);
 

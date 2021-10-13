@@ -245,10 +245,12 @@ static void EmitMove(IRInst inst)
 	switch (tcode)
 	{
 		case I1:
+		case U1:
 			if (SRC1->kind == SK_Constant)
 				Move(X86_MOVI1, DST, SRC1);
 			break;
 		case I4:
+		case U4:
 			if (SRC1->kind == SK_Constant)
 				Move(X86_MOVI4, DST, SRC1);
 			else {

@@ -5,6 +5,13 @@
 #define EXECUTE_BOP(op)													\
 	if (tcode == I4) val.i[0] = expr1->val.i[0] op expr2->val.i[0];         
 
+AstExpression FoldCast(Type ty, AstExpression expr)
+{
+	int scode = TypeCode(expr->ty);
+	int dcode = TypeCode(ty);
+	expr->ty = ty;
+	return expr;
+}
 AstExpression FoldConstant(AstExpression expr)
 {
 	int tcode;

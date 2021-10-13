@@ -16,7 +16,7 @@ static AstExpression CastExpression(Type ty, AstExpression expr)
 {
 	AstExpression cast;
 	if (expr->op == OP_CONST && ty->categ != VOID)
-		return NULL;
+		return FoldCast(ty, expr);
 	CREATE_AST_NODE(cast, Expression);
 	cast->op = OP_CAST;
 	cast->ty = ty;

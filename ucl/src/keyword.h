@@ -90,6 +90,7 @@ static struct keyword keywordsR[] =
 };
 static struct keyword keywordsS[] =
 {
+	{"signed", 6, TK_SIGNED},
 	{"sizeof", 6, TK_SIZEOF},
 	{"static", 6, TK_STATIC},
 	{"struct", 6, TK_STRUCT},
@@ -103,6 +104,7 @@ static struct keyword keywordsT[] =
 };
 static struct keyword keywordsU[] =
 {
+	{"unsigned", 8, TK_UNSIGNED},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsV[] = 

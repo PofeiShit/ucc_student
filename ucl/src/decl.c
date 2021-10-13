@@ -171,9 +171,12 @@ next_specifiers:
 	case TK_VOID:
 	case TK_CHAR:
 	case TK_INT:
+	case TK_UNSIGNED:
+	case TK_SIGNED:
 		CREATE_AST_NODE(tok, Token);
 		tok->token = CurrentToken;
-		specs->tySpecs = (AstNode)tok;
+		*tsTail = (AstNode)tok;
+		tsTail = &tok->next;
 		seeTy = 1;
 		NEXT_TOKEN;
 		break;

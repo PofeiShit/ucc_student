@@ -230,7 +230,8 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	AstToken tok;
 	AstNode p;
 	Type ty;
-	int tyCnt = 0;
+	int sign = 0;
+	int tyCnt = 0, signCnt = 0;
 	int qual = 0;
 	//storage-class-specifier:		extern	, auto,	static, register, ... 
 	tok = (AstToken)specs->stgClasses;
@@ -260,6 +261,12 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		} else {
 			tok = (AstToken)p;
 			switch(tok->token) {
+				case TK_SIGNED:
+				case TK_UNSIGNED:
+					sign = tok->token;
+					signCnt++;
+					break;
+
 				case TK_CHAR:
 					ty = T(CHAR);
 					tyCnt++;
@@ -272,8 +279,27 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		}
 		p = p->next;
 	}
+
 	ty = tyCnt == 0 ? T(INT) : ty;
+	if (signCnt > 1)
+		goto err;
+
+	if (ty == T(CHAR)) {
+		sign = (sign == TK_UNSIGNED);
+		ty = T(CHAR + sign);
+		sign = 0;
+	} 
+	if (ty == T(INT)) {
+		sign = (sign == TK_UNSIGNED);
+		ty = T(INT + sign);
+	} else if (sign != 0)
+		goto err;
+
 	specs->ty = Qualify(qual, ty);
+	return ;
+err:
+	Error(NULL, "Illegal type specifier.");
+	specs->ty = T(INT);
 	return ;
 }
 
