@@ -21,7 +21,7 @@ enum
     struct symbol *next; \
 
 typedef struct bblock *BBlock;
-
+typedef struct initData *InitData;
 typedef struct symbol
 {
 	SYMBOL_COMMON
@@ -30,7 +30,7 @@ typedef struct symbol
 typedef struct variableSymbol
 {
 	SYMBOL_COMMON
-	// InitData idata;
+	InitData idata;
 	// ValueDef def;
 	// ValueUse uses;
 	int offset;

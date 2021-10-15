@@ -78,6 +78,11 @@ static char* GetAccessName(Symbol p)
 
 void DefineGlobal(Symbol p)
 {
+	// Align(p);
+	if (p->sclass != TK_STATIC)
+	{
+		Export(p);
+	}
 	Print("%s:\t", GetAccessName(p));
 }
 void Export(Symbol p)
@@ -257,6 +262,24 @@ void DefineCommData(Symbol p)
 void DefineAddress(Symbol p)
 {
 	Print(".long\t%s", GetAccessName(p));
+}
+void DefineValue(Type ty, union value val)
+{
+	int tcode = TypeCode(ty);
+
+	switch(tcode) {
+	case I1:
+	case U1:
+		Print(".byte\t%d\n", val.i[0] & 0xff);
+		break;
+	case I4:
+	case U4:
+		// a: .long 3
+		Print(".long\t%d\n", val.i[0]);
+		break;
+	default:
+		;
+	}
 }
 void EndProgram(void)
 {

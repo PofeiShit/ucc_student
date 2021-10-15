@@ -57,9 +57,9 @@ static void PreCheckTypedef(AstDeclaration decl)
 	if (decl->specs->stgClasses != NULL) {
 		sclass = ((AstToken)decl->specs->stgClasses)->token;
 	}
-	p = decl->dec;
+	p = decl->initDecs;
 	while (p != NULL) {
-		CheckTypedefName(sclass, GetOutermostID((AstDeclarator)p));
+		CheckTypedefName(sclass, GetOutermostID(((AstInitDeclarator)p)->dec));
 		p = p->next;
 	}
 }
@@ -198,6 +198,7 @@ next_specifiers:
 		tsTail = &(*tsTail)->next;		
 		break;
 	case TK_CONST:
+	case TK_VOLATILE:
 		// type qualifiers
 		CREATE_AST_NODE(tok, Token);
 		tok->token = CurrentToken;
@@ -319,7 +320,25 @@ static AstDeclarator ParseDeclarator()
 	}
 	return ParsePostfixDeclarator();
 }
-
+static AstInitializer ParseInitializer()
+{
+	AstInitializer init;
+	CREATE_AST_NODE(init, Initializer);
+	init->lbrace = 0;
+	init->expr = ParseAssignmentExpression();
+	return init;
+}
+static AstInitDeclarator ParseInitDeclarator()
+{
+	AstInitDeclarator initDec;
+	CREATE_AST_NODE(initDec, InitDeclarator);
+	initDec->dec = ParseDeclarator();
+	if (CurrentToken == TK_ASSIGN) {
+		NEXT_TOKEN;
+		initDec->init = ParseInitializer();
+	}
+	return initDec;
+}
 static AstDeclaration ParseCommonHeader(void)
 {
 	AstDeclaration decl;
@@ -330,11 +349,11 @@ static AstDeclaration ParseCommonHeader(void)
 	decl->specs = ParseDeclarationSpecifiers();
 		// f(int a, int b);		
 	if (CurrentToken != TK_SEMICOLON) {
-		decl->dec = (AstNode)ParseDeclarator();
-		tail = &decl->dec->next;
+		decl->initDecs = (AstNode)ParseInitDeclarator();
+		tail = &decl->initDecs->next;
 		while (CurrentToken == TK_COMMA) {
 			NEXT_TOKEN;
-			*tail = (AstNode)ParseDeclarator();
+			*tail = (AstNode)ParseInitDeclarator();
 			tail = &(*tail)->next;
 		}
 	}
@@ -342,10 +361,13 @@ static AstDeclaration ParseCommonHeader(void)
 	return decl;
 }
 
-static AstFunctionDeclarator GetFunctionDeclarator(AstDeclarator dec)
+static AstFunctionDeclarator GetFunctionDeclarator(AstInitDeclarator initDec)
 {
-	if (dec == NULL || dec->next != NULL)
+	AstDeclarator dec;
+
+	if (initDec == NULL || initDec->next != NULL || initDec->init != NULL)
 		return NULL;
+	dec = initDec->dec;
 	while (dec) {
 		if (dec->kind == NK_FunctionDeclarator &&
 				dec->dec && dec->dec->kind == NK_NameDeclarator) {
@@ -386,17 +408,15 @@ AstDeclaration ParseDeclaration(void)
 static AstNode ParseExternalDeclaration(void)
 {
 	AstDeclaration decl = NULL;
-	// AstInitDeclarator initDec = NULL;
-	AstDeclarator dec = NULL;
+	AstInitDeclarator initDec = NULL;
 	AstFunctionDeclarator fdec;
 
 	decl = ParseCommonHeader();
 	if (decl->specs->stgClasses != NULL && ((AstToken)decl->specs->stgClasses)->token == TK_TYPEDEF)
 		goto not_func;
-	// initDec = (AstInitDeclarator)decl->dec;
-	dec = (AstDeclarator)decl->dec;
+	initDec = (AstInitDeclarator)decl->initDecs;
 	//printf("%d,%d\n", fdec->kind, fdec->dec->kind);
-	fdec = GetFunctionDeclarator(dec);
+	fdec = GetFunctionDeclarator(initDec);
 
 	//printf("???fdec:%d,%d\n", fdec, dec);
 	if (fdec != NULL)
@@ -411,7 +431,7 @@ static AstNode ParseExternalDeclaration(void)
 		 astPointerDeclarator-> astPointerDeclarator ->  astFunctionDeclarator --> astDeclarator
 			(dec)									(fdec )
 		 */
-		func->dec = (AstDeclarator)decl->dec;
+		func->dec = (AstDeclarator)initDec->dec;
 		//printf("%s\n", decl->dec->dec->kind);
 		func->fdec = fdec;
 

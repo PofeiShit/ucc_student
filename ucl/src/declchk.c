@@ -350,19 +350,19 @@ void CheckFunction(AstFunction func)
 }
 static void CheckTypedef(AstDeclaration decl)
 {
-	AstDeclarator dec;
+	AstInitDeclarator initDec;
 	Type ty;
 	Symbol sym;
-	dec = (AstDeclarator)decl->dec;
-	while (dec) {
-		CheckDeclarator(dec);
-		if (dec->id == NULL)
+	initDec = (AstInitDeclarator)decl->initDecs;
+	while (initDec) {
+		CheckDeclarator(initDec->dec);
+		if (initDec->dec->id == NULL)
 			goto next;
-		ty = DeriveType(dec->tyDrvList, decl->specs->ty);
-		sym = LookupID(dec->id);
-		AddTypedefName(dec->id, ty);
+		ty = DeriveType(initDec->dec->tyDrvList, decl->specs->ty);
+		sym = LookupID(initDec->dec->id);
+		AddTypedefName(initDec->dec->id, ty);
 next:
-		dec = (AstDeclarator)dec->next;
+		initDec = (AstInitDeclarator)initDec->next;
 	}
 }
 //
@@ -372,6 +372,38 @@ Type CheckTypeName(AstTypeName tname)
 	CheckDeclarationSpecifiers(tname->specs);
 	ty = tname->specs->ty;
 	return ty;
+}
+static void CheckInitializerInternal(InitData *tail, AstInitializer init, Type ty)
+{
+	InitData initd;
+	if (IsScalarType(ty)) {
+		init->expr = Adjust(CheckExpression(init->expr), 1);
+		ALLOC(initd);
+		initd->expr = init->expr;
+		initd->next = NULL;
+		(*tail)->next = initd;
+		*tail = initd;
+	}
+	return ;
+}
+static void CheckInitializer(AstInitializer init, Type ty)
+{
+	struct initData header;
+	InitData tail = &header;
+	header.next = NULL;
+	CheckInitializerInternal(&tail, init, ty);
+	init->idata = header.next;
+}
+static void CheckInitConstant(AstInitializer init)
+{
+	InitData initd = init->idata;
+	while (initd) {
+		if (!(initd->expr->op == OP_CONST || initd->expr->op == OP_STR)) {
+			Error(NULL, "Initializer must be constant");
+		}
+		initd = initd->next;
+	}
+	return ;
 }
 void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 {
@@ -386,26 +418,37 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 		sclass = TK_AUTO;
 	}	
 	// check declarator
-	AstDeclarator dec = (AstDeclarator)decl->dec;
-	while (dec) {
-		CheckDeclarator(dec);
-
-		ty = DeriveType(dec->tyDrvList, decl->specs->ty);	
+	AstInitDeclarator initDec = (AstInitDeclarator)decl->initDecs;
+	while (initDec) {
+		CheckDeclarator(initDec->dec);
+		if (initDec->dec->id == NULL)
+			goto next;
+		ty = DeriveType(initDec->dec->tyDrvList, decl->specs->ty);	
 		if (ty == NULL)
 		{
 			// Error(&initDec->coord, "Illegal type");
 			ty = T(INT);
 		}				
-		if ((sym = LookupID(dec->id)) == NULL || sym->level < Level)
+		if ((sym = LookupID(initDec->dec->id)) == NULL || sym->level < Level)
 		{
 			VariableSymbol vsym;
-			vsym = (VariableSymbol)AddVariable(dec->id, ty, sclass);
+			vsym = (VariableSymbol)AddVariable(initDec->dec->id, ty, sclass);
+			if (initDec->init) {
+				CheckInitializer(initDec->init, ty);
+				if (sclass == TK_STATIC) {
+					CheckInitConstant(initDec->init);
+				} else {
+					INSERT_ITEM(v, vsym);
+				}
+				vsym->idata = initDec->init->idata;
+			}
 		}
 		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
 		// if (sym->sclass == TK_EXTERN){
 		// 	sym->sclass = sclass;			
-		// }		
-		dec = (AstDeclarator)dec->next;	
+		// }	
+next:	
+		initDec = (AstInitDeclarator)initDec->next;	
 	}
 }
 
@@ -423,25 +466,33 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 	ty = decl->specs->ty;
 	sclass = decl->specs->sclass;
 	// check declarator
-	AstDeclarator dec = (AstDeclarator)decl->dec;
-	while (dec) {
-		CheckDeclarator(dec);
+	AstInitDeclarator initDec = (AstInitDeclarator)decl->initDecs;
+	while (initDec) {
+		CheckDeclarator(initDec->dec);
+		if (initDec->dec->id == NULL)
+			goto next;
 
-		ty = DeriveType(dec->tyDrvList, decl->specs->ty);	
+		ty = DeriveType(initDec->dec->tyDrvList, decl->specs->ty);	
 		if (ty == NULL)
 		{
-			// Error(&initDec->coord, "Illegal type");
+			Error(NULL, "Illegal type");
 			ty = T(INT);
 		}				
-		if ((sym = LookupID(dec->id)) == NULL)
+		if ((sym = LookupID(initDec->dec->id)) == NULL)
 		{
-			sym = AddVariable(dec->id, ty, sclass);
+			sym = AddVariable(initDec->dec->id, ty, sclass);
+		}
+		if (initDec->init) {
+			CheckInitializer(initDec->init, ty);
+			CheckInitConstant(initDec->init);
+			AsVar(sym)->idata = initDec->init->idata;
 		}
 		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
 		// if (sym->sclass == TK_EXTERN){
 		// 	sym->sclass = sclass;			
-		// }		
-		dec = (AstDeclarator)dec->next;	
+		// }
+next:		
+		initDec = (AstInitDeclarator)initDec->next;	
 	}
 }
 

@@ -6,7 +6,7 @@ enum nodeKind
 { 
 	NK_TranslationUnit, NK_Specifiers, NK_Token, NK_StructSpecifier, NK_StructDeclaration, NK_StructDeclarator, 
 	NK_Function, NK_Declaration, NK_PointerDeclarator, NK_TypeName, NK_ArrayDeclarator, NK_TypedefName,
-	NK_FunctionDeclarator, NK_ParameterTypeList, NK_ParameterDeclaration, NK_NameDeclarator,
+	NK_FunctionDeclarator, NK_ParameterTypeList, NK_ParameterDeclaration, NK_NameDeclarator, NK_InitDeclarator, NK_Initializer,
 
 	NK_Expression, 
 
@@ -24,6 +24,12 @@ typedef struct astTypeName *AstTypeName;
     int kind;             \
     struct astNode *next; 
 
+struct initData
+{
+	int offset;
+	AstExpression expr;
+	InitData next;	
+};
 typedef struct astNode
 {
 	AST_NODE_COMMON

@@ -100,6 +100,19 @@ struct astTranslationUnit
 	 */
 	AstNode extDecls;
 };
+typedef struct astInitializer
+{
+	AST_NODE_COMMON
+	int lbrace;
+	AstExpression expr; // assignment-expression
+	InitData idata;
+} *AstInitializer;
+typedef struct astInitDeclarator
+{
+	AST_NODE_COMMON
+	AstDeclarator dec;
+	AstInitializer init;
+} *AstInitDeclarator;
 
 typedef struct astParameterDeclaration
 {
@@ -150,7 +163,7 @@ struct astDeclaration
 	AST_NODE_COMMON
 	// declaration-specifiers:	(static | int | const | ...) +
 	AstSpecifiers specs;
-	AstNode dec;
+	AstNode initDecs;
 };
 void CheckLocalDeclaration(AstDeclaration decl, Vector v);
 Type CheckTypeName(AstTypeName tname);

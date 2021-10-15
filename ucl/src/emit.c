@@ -1,6 +1,7 @@
 #include "ucl.h"
 #include "ast.h"
 #include "decl.h"
+#include "expr.h"
 #include "output.h"
 #include "target.h"
 int SwitchTableNum;
@@ -10,12 +11,17 @@ int SwitchTableNum;
 static void EmitGlobals(void)
 {
 	Symbol p = Globals;
+	InitData initd;
 	while (p)
 	{
-		if (p->sclass == TK_EXTERN) {
+		initd = AsVar(p)->idata;
+		if (p->sclass == TK_EXTERN && initd == NULL) {
 			;
-		} else {
+		} else if  (initd == NULL) {
 			DefineCommData(p);
+		} else {
+			DefineGlobal(p);
+			DefineValue(initd->expr->ty, initd->expr->val);
 		}
 		p = p->next;
 	}

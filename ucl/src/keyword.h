@@ -111,6 +111,7 @@ static struct keyword keywordsU[] =
 static struct keyword keywordsV[] = 
 {
 	{"void",     4, TK_VOID},
+	{"volatile", 8, TK_VOLATILE},
 	{NULL,       0, TK_ID}
 };
 static struct keyword keywordsW[] = 

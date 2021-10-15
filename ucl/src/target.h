@@ -10,6 +10,7 @@ void Segment(int seg);
 void Import(Symbol p);
 void Export(Symbol p);
 void DefineGlobal(Symbol p);
+void DefineValue(Type ty, union value val);
 void DefineCommData(Symbol p);
 void DefineString(String p, int size);
 void DefineLabel(Symbol p);
