@@ -22,6 +22,23 @@ static void TranslateCompoundStatement(AstStatement stmt)
 {
 	AstCompoundStatement compStmt = AsComp(stmt);
 	AstNode p = compStmt->stmts;
+	Vector ilocals = compStmt->ilocals;
+	Symbol v;
+	int i;
+	for (i = 0; i < LEN(ilocals); i++) {
+		InitData initd;
+		Type ty;
+		Symbol src, dst;
+		v = (Symbol)GET_ITEM(ilocals, i);
+		initd = AsVar(v)->idata;
+		while (initd) {
+			ty = initd->expr->ty;
+			src = TranslateExpression(initd->expr);
+			dst = CreateOffset(ty, v, 0);
+			GenerateMove(ty, dst, src);
+			initd = initd->next;
+		}
+	}
 	while (p) {
 		TranslateStatement((AstStatement)p);
 		p = p->next;

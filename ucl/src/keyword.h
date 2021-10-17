@@ -6,6 +6,7 @@ struct keyword
 };
 static struct keyword keywordsA[] =
 {
+	{"auto", 4, TK_AUTO},
 	{NULL, 	0, TK_ID},
 };
 static struct keyword keywordsB[] =

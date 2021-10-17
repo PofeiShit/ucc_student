@@ -158,6 +158,7 @@ next_specifiers:
 	switch(CurrentToken) 
 	{
 	case TK_EXTERN:
+	case TK_AUTO:
 	case TK_STATIC:
 	case TK_TYPEDEF:
 		// storage classes
