@@ -2402,6 +2402,8 @@ TEST_F(TestUcl, Test_Init)
                             ".data"
                             ".globl a"
                             "a: .long 1"
+                            ".globl p"
+                            "p: .long a"
                             ".text"
                             "\xff";
     std::string testcode;

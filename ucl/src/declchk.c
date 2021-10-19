@@ -394,11 +394,40 @@ static void CheckInitializer(AstInitializer init, Type ty)
 	CheckInitializerInternal(&tail, init, ty);
 	init->idata = header.next;
 }
+/**
+ * Check if the initializer expression is address constant.
+ * e.g. 
+ * int a;
+ * int b = &a;
+ */
+static AstExpression CheckAddressConstant(AstExpression expr)
+{
+	AstExpression addr;
+	AstExpression p;
+	int offset = 0;
+	if (! IsPtrType(expr->ty))
+		return NULL;
+	if (expr->op == OP_ADDRESS) {
+		addr = expr->kids[0];
+	}
+	CREATE_AST_NODE(p, Expression);
+	p->op = OP_ADD;
+	p->ty = expr->ty;
+	p->kids[0] = addr;
+	{
+		union value val;
+		val.i[0] = offset;
+		val.i[1] = 0;
+		p->kids[1] = Constant(T(INT), val);
+	}
+	return p;
+}
 static void CheckInitConstant(AstInitializer init)
 {
 	InitData initd = init->idata;
 	while (initd) {
-		if (!(initd->expr->op == OP_CONST || initd->expr->op == OP_STR)) {
+		if (!(initd->expr->op == OP_CONST || initd->expr->op == OP_STR || 
+			(initd->expr = CheckAddressConstant(initd->expr)))) {
 			Error(NULL, "Initializer must be constant");
 		}
 		initd = initd->next;
