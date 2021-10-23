@@ -64,6 +64,11 @@ static AstExpression PromoteArgument(AstExpression arg)
 
 AstExpression Adjust(AstExpression expr, int rvalue)
 {
+	int qual = 0;
+	if (rvalue) {
+		qual = expr->ty->qual;
+		expr->ty = Unqual(expr->ty);
+	}
 	if (expr->ty->categ == FUNCTION) {
 		expr->ty = PointerTo(expr->ty);
 	} else if (expr->ty->categ == ARRAY) {

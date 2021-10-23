@@ -7,16 +7,22 @@ Type DefaultFunctionType;
 
 int TypeCode(Type ty)
 {
-	static int optypes[] = {I1, U1, I4, U4};
+	static int optypes[] = {I1, U1, I4, U4, I4, I1, U4};
 	return optypes[ty->categ];
 }
-
+Type Unqual(Type ty)
+{
+	if (ty->qual)
+		ty = ty->bty;
+	return ty;
+}
 Type PointerTo(Type ty)
 {
 	Type pty;
 	ALLOC(pty);
 
 	pty->categ = POINTER;
+	pty->qual = 0;
 	pty->size = T(POINTER)->size;
 	pty->bty = ty;
 	return pty;

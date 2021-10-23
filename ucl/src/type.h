@@ -5,7 +5,7 @@ enum
 {
 	CHAR, UCHAR, INT, UINT, ENUM, LONGDOUBLE, POINTER, VOID, STRUCT, ARRAY, FUNCTION
 };
-enum {CONST=0x1};
+enum {CONST=0x1, VOLATILE=0x2};
 enum {I1, U1, I4, U4};
 
 #define TYPE_COMMON \
@@ -101,6 +101,7 @@ Type  StartRecord(char *id, int categ);
 Field AddField(Type ty, char *id, Type fty);
 void EndRecord(Type ty);
 Type PointerTo(Type ty);
+Type Unqual(Type ty);
 Type Qualify(int qual, Type ty);
 Type ArrayOf(int len, Type ty);
 Type FunctionReturn(Type ty, Signature sig);

@@ -19,7 +19,7 @@ static Type DeriveType(TypeDerivList tyDrvList, Type ty)
 		if (tyDrvList->ctor == FUNCTION_RETURN) {
 			ty = FunctionReturn(ty, tyDrvList->sig);
 		} else if (tyDrvList->ctor == POINTER_TO) {
-			ty = PointerTo(ty);
+			ty = Qualify(tyDrvList->qual, PointerTo(ty));
 		} else if (tyDrvList->ctor == ARRAY_OF) {
 			ty = ArrayOf(tyDrvList->len, ty);
 		}
@@ -94,10 +94,17 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 }
 static void CheckPointerDeclarator(AstPointerDeclarator dec)
 {
+	int qual = 0;
 	AstPointerDeclarator ptrDec = (AstPointerDeclarator)dec;
+	AstToken tok = (AstToken)ptrDec->tyQuals;
 	CheckDeclarator(ptrDec->dec);
+	while (tok) {
+		qual |= tok->token == TK_CONST ? CONST : VOLATILE;
+		tok = (AstToken)tok->next;
+	}
 	ALLOC(ptrDec->tyDrvList);
 	ptrDec->tyDrvList->ctor = POINTER_TO;
+	ptrDec->tyDrvList->qual = qual;
 	ptrDec->tyDrvList->next = ptrDec->dec->tyDrvList;
 	ptrDec->id = ptrDec->dec->id;
 

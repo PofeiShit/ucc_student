@@ -25,8 +25,9 @@ static void EmitGlobals(void)
 				int n = initd->expr->kids[1]->val.i[0];
 				DefineAddress((Symbol)initd->expr->kids[0]->val.p);
 				PutString("\n");
+			} else {
+				DefineValue(initd->expr->ty, initd->expr->val);
 			}
-			DefineValue(initd->expr->ty, initd->expr->val);
 		}
 		p = p->next;
 	}

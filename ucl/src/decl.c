@@ -314,8 +314,18 @@ static AstDeclarator ParseDeclarator()
 	if (CurrentToken == TK_MUL) {
 		// * declarator
 		AstPointerDeclarator ptrDec;
+		AstToken tok;
+		AstNode *tail;
 		CREATE_AST_NODE(ptrDec, PointerDeclarator);
+		tail = &ptrDec->tyQuals;
 		NEXT_TOKEN;
+		while (CurrentToken == TK_CONST) {
+			CREATE_AST_NODE(tok, Token);
+			tok->token = CurrentToken;
+			*tail = (AstNode)tok;
+			tail = &tok->next;
+			NEXT_TOKEN;
+		}
 		ptrDec->dec = ParseDeclarator();
 		return (AstDeclarator)ptrDec;
 	}

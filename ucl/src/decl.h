@@ -23,6 +23,7 @@ typedef struct typeDerivList
 	int ctor; // type construct 
 	union 
 	{
+		int qual;		// pointer qualifier
 		int len;		// array size
 		Signature sig; // function signature
 	};
@@ -66,6 +67,7 @@ struct astTypeName
 typedef struct astPointerDeclarator
 {
 	AST_DECLARATOR_COMMON
+	AstNode tyQuals;
 } *AstPointerDeclarator;
 
 typedef struct astStructSpecifier
