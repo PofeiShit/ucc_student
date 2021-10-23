@@ -66,7 +66,8 @@ static void EmitFunctions(AstTranslationUnit transUnit)
 		if (p->kind == NK_Function)
 		{
 			fsym = ((AstFunction)p)->fsym;
-			EmitFunction(fsym);
+			if (fsym->sclass != TK_STATIC || fsym->ref > 0)
+				EmitFunction(fsym);
 		}
 		p = p->next;
 	}

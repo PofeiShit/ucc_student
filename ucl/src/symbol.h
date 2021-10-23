@@ -15,6 +15,7 @@ enum
 	Type ty;			 \
     int level;           \
 	int sclass;			 \
+	int ref;			 \
     union value val;     \
     struct symbol *reg;  \
     struct symbol *link; \

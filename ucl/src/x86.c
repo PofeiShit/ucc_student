@@ -484,7 +484,8 @@ void EmitFunction(FunctionSymbol fsym)
 	int stksize;
 
 	FSYM = fsym;
-	Export((Symbol)fsym);	
+	if (fsym->sclass != TK_STATIC)
+		Export((Symbol)fsym);
 
 	DefineLabel((Symbol)fsym);
 

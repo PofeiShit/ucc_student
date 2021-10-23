@@ -170,7 +170,7 @@ void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, Vector args)
 {
 	ILArg p;
 	IRInst inst;
-
+	faddr->ref++;
 	ALLOC(inst);
 	inst->ty = ty;
 	inst->opcode = CALL;
