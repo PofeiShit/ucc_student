@@ -147,3 +147,59 @@ p2 = &i // error
 
 **OK**: *p2同样在CheckUnaryExpression中的Adjust去除Unqual之后将expr->kids[0]指向Pointer，然后判断是指针类型，expr->kids[0]指向INT类型，可以赋值！
 
+### 例子4: 修饰函数形参
+```
+int add(const int a, const int b)
+{
+    // a = 1; error
+    return a + b;
+}
+void main()
+{
+    int c;
+    c = add(3, 4);
+}
+```
+const作用到语义检查就结束，和汇编没什么关系,生成代码如下:
+```
+.globl add
+add:
+    pushl %ebp
+    pushl %ebx
+    pushl %esi
+    pushl %edi
+    movl %esp, %ebp
+    subl $4, %esp
+.BB0:
+    movl 20(%ebp), %eax
+    addl 24(%bp), %eax
+    .jmp .BB2
+.BB1:
+.BB2:
+    movl %ebp, %esp
+    popl %edi
+    popl %esi
+    popl %ebx
+    popl %ebp
+.globl main
+main:
+    pushl %ebp
+    pushl %ebx
+    pushl %esi
+    pushl %edi
+    movl %esp, %ebp
+    subl $8, %esp
+.BB2:
+    pushl $4
+    pushl $3
+    call add
+    addl $8, %esp
+    movl %eax, -4(%ebp)
+.BB3:
+    movl %ebp, %esp
+    popl %edi
+    popl %esi
+    popl %ebx
+    popl %ebp
+```
+

@@ -126,7 +126,9 @@ static void EmitReturn(IRInst inst)
 		Move(X86_MOVI1, X86ByteRegs[EAX], DST);
 		break;
 	case 4:
-		Move(X86_MOVI4, X86Regs[EAX], DST);	
+		if (DST->reg != X86Regs[EAX]) {
+			Move(X86_MOVI4, X86Regs[EAX], DST);	
+		}
 		break;
 	default:
 		;

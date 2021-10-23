@@ -237,7 +237,7 @@ static AstDeclarator ParseDirectDeclarator()
 
 int IsTypeName(int tok)
 {
-	return tok == TK_ID ? IsTypedefName((char*)TokenValue.p) : (tok >= TK_CHAR && tok <= TK_VOID);
+	return tok == TK_ID ? IsTypedefName((char*)TokenValue.p) : (tok >= TK_AUTO && tok <= TK_VOID);
 }
 AstTypeName ParseTypeName(void)
 {

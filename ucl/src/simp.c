@@ -7,7 +7,8 @@ Symbol Simplify(Type ty, int opcode, Symbol src1, Symbol src2)
 {
     Symbol p1, p2;
     int c1, c2;
-    if (src2 == NULL) 
+    // src2 为空，或者为常量,或者a-a三种情况可以简化
+    if (src2 == NULL || (src2->kind != SK_Constant && opcode != SUB)) 
         goto add_value;
     switch(opcode)
     {
