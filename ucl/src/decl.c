@@ -368,7 +368,7 @@ static AstDeclaration ParseCommonHeader(void)
 			tail = &(*tail)->next;
 		}
 	}
-	
+
 	return decl;
 }
 

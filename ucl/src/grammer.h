@@ -2,8 +2,8 @@
 #define __GRAMMER_H_
 //  tokens that may be first token in a declaration
 #define FIRST_DECLARATION   \
-    TK_AUTO, TK_EXTERN, TK_STATIC, \
-    TK_CHAR, TK_INT,  \
+    TK_AUTO, TK_EXTERN, TK_STATIC, TK_TYPEDEF, \
+    TK_CONST, TK_SIGNED, TK_UNSIGNED, TK_CHAR, TK_INT, \
     TK_STRUCT, TK_VOID, TK_ID
 // fisrt token of an expression
 #define FIRST_EXPRESSION  \
