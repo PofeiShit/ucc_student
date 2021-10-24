@@ -196,7 +196,8 @@ next_specifiers:
 	
 	case TK_STRUCT:
 		*tsTail = (AstNode)ParseStructOrUnionSpecifier();
-		tsTail = &(*tsTail)->next;		
+		tsTail = &(*tsTail)->next;	
+		seeTy = 1;	
 		break;
 	case TK_CONST:
 	case TK_VOLATILE:

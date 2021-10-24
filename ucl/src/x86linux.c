@@ -237,7 +237,10 @@ void PutASMCode(int code, Symbol opds[])
 	}
 	PutChar('\n');		
 }
-
+void Space(int size)
+{
+	Print(".space\t%d\n", size);
+}
 void DefineLabel(Symbol p)
 {
 	Print("%s:\n", GetAccessName(p));

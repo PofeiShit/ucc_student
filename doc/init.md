@@ -170,3 +170,35 @@ offset:8	val:8
 offset:12	val:9
 ```
 缺少数组的维度,以及超出声明的大小，之后都进行相应的检查
+
+# 添加结构体初始化
+---
+```
+struct Data
+{
+	int a, b;
+	int c;
+} dt = {20, 30};
+```
+语法分析后的语法树如下图:
+![](img/init_struct.jpg)
+
+## 语义分析
+---
+CheckInitializerInternal 函数增加 if (ty->categ == STRUCT) 分支，对结构体中的各个成员域，递归地调用 CheckInitializerInternal()函数来处理
+
+```
+void main()
+{
+	struct Data
+	{
+		int a;
+		int c;
+	} dt = {20, 30};
+}
+```
+生成的汇编代码中20分配是-8的偏移，30是-4的偏移。这是因为符号dt的结构体占了8个字节，在栈上相对于ebp偏移了8,然后符号a相对于dt是偏移了0的，所以20的偏移是8，c相对于dt的偏移是4，所以-8+4=-4相对于ebp基址。
+```
+	movl $20, -8(%ebp)
+	movl $30, -4(%ebp)
+```

@@ -423,6 +423,31 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 			return (AstInitializer)init->next;
 		}
 		return p;
+	} else if (ty->categ == STRUCT) {
+		int start = *offset;
+		Field fld = ((RecordType)ty)->flds;
+		p = init->lbrace ? (AstInitializer)init->initials : init;
+
+		while (fld && p) {
+			*offset = start + fld->offset;
+
+			/* TODO: struct
+			if ( (IsRecordType(fld->ty) && fld->id == NULL)) {
+				*offset = start;
+			}
+			*/
+			// printf("*offset = %d , start = %d , fld->offset = %d\n",*offset, start, fld->offset);
+			p = CheckInitializerInternal(tail, p, fld->ty, offset, error);
+			fld = fld->next;
+		}
+		*offset = start + ty->size;
+		if (init->lbrace) {
+			if (p != NULL) {
+				Warning(NULL, "excess elements in struct initializer");
+			}
+			return (AstInitializer)init->next;
+		}
+		return (AstInitializer)p;
 	}
 	return init;
 }

@@ -45,6 +45,12 @@ static void EmitGlobals(void)
 				size = initd->offset + initd->expr->ty->size;
 				initd = initd->next;
 			}
+			if (size < p->ty->size) {
+				LeftAlign(ASMFile, len);
+				PutString("\t");
+				Space(p->ty->size - size);
+			}
+			PutString("\n");
 		}
 		p = p->next;
 	}
