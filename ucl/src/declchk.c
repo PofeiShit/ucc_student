@@ -380,25 +380,69 @@ Type CheckTypeName(AstTypeName tname)
 	ty = tname->specs->ty;
 	return ty;
 }
-static void CheckInitializerInternal(InitData *tail, AstInitializer init, Type ty)
+static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer init, Type ty, int *offset, int *error)
 {
+	AstInitializer p;
+	int size = 0;
 	InitData initd;
 	if (IsScalarType(ty)) {
-		init->expr = Adjust(CheckExpression(init->expr), 1);
+		p = init;
+		p->expr = Adjust(CheckExpression(p->expr), 1);
 		ALLOC(initd);
-		initd->expr = init->expr;
+		initd->offset = *offset;
+		initd->expr = p->expr;
 		initd->next = NULL;
 		(*tail)->next = initd;
 		*tail = initd;
+		return (AstInitializer)init->next;
+	} else if (ty->categ == ARRAY) {
+		int start = *offset;
+		// printf("Check%d-%d-%d\n", init->lbrace, start, ty->categ);
+		p = init->lbrace ? (AstInitializer)init->initials : init;
+		// TODO char buf[] = "abcdef"
+		while (p) {
+			p = CheckInitializerInternal(tail, p, ty->bty, offset, error);
+			size += ty->bty->size;
+			*offset = start + size;
+			if (ty->size == size)
+				break;
+		}
+		if (ty->size == 0) {
+			// calculate the len of array int arr[] = {1, 2, 3};
+			ArrayType aty = (ArrayType)ty;
+			if (aty->bty->size != 0 && aty->len == 0) {
+				aty->len = size / aty->bty->size;
+			}
+			ty->size = size;
+		}
+		// printf("size:%d\n", ty->size);
+		if (init->lbrace) {
+			if (p) { // int arr2[3] = {1, 2, 3, 4};
+				Warning(NULL, "excess elements in array initializer");
+			}
+			return (AstInitializer)init->next;
+		}
+		return p;
 	}
-	return ;
+	return init;
 }
 static void CheckInitializer(AstInitializer init, Type ty)
 {
+	int offset = 0, error = 0;
 	struct initData header;
 	InitData tail = &header;
 	header.next = NULL;
-	CheckInitializerInternal(&tail, init, ty);
+
+	if (ty->categ == ARRAY && !init->lbrace) {
+		// TODO:char arr[] = "abcdfe";
+		// if (!CheckArrayInit(init->expr, ty->bty)) {
+		// 	return ;
+		// }
+		return ;
+	}
+	CheckInitializerInternal(&tail, init, ty, &offset, &error);
+	if (error)
+		return ;
 	init->idata = header.next;
 }
 /**

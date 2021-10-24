@@ -29,12 +29,16 @@ static void TranslateCompoundStatement(AstStatement stmt)
 		InitData initd;
 		Type ty;
 		Symbol src, dst;
+		int size;
+
 		v = (Symbol)GET_ITEM(ilocals, i);
 		initd = AsVar(v)->idata;
+		size = 0;
+
 		while (initd) {
 			ty = initd->expr->ty;
 			src = TranslateExpression(initd->expr);
-			dst = CreateOffset(ty, v, 0);
+			dst = CreateOffset(ty, v, initd->offset);
 			GenerateMove(ty, dst, src);
 			initd = initd->next;
 		}

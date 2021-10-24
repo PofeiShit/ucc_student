@@ -119,3 +119,54 @@ EmitGlobals函数对Globals中的符号在有带初始赋值的代码块中继�
 				PutString("\n");
 			}
 ```
+
+# 添加数组初始化
+---
+```
+int arr[] = {1, 2, 3};
+int a[2] = {4, 5};
+int b[][2] = {{6, 7}, {8, 9}};
+int c[2][2] = {{10, 11}, {12, 13}};
+```
+## 语法分析
+---
+```
+static AstInitializer ParseInitializer()
+{
+	AstInitializer init;
+	AstNode *tail;
+
+	CREATE_AST_NODE(init, Initializer);
+	if (CurrentToken == TK_LBRACE) {
+		init->lbrace = 1;
+		NEXT_TOKEN;
+		init->initials = (AstNode)ParseInitializer();
+		tail = &init->initials->next;
+		while (CurrentToken == TK_COMMA) {
+			NEXT_TOKEN;
+			if (CurrentToken == TK_RBRACE) 
+				break;
+			*tail = (AstNode)ParseInitializer();
+			tail = &(*tail)->next;
+		}
+		Expect(TK_RBRACE);
+	} else {
+		init->lbrace = 0;
+		init->expr = ParseAssignmentExpression();
+	}
+	return init;
+}
+```
+decl.c需要添加解析{}列表初始化部分,得到语法树如下
+![img](img/init_array.jpg)
+
+## 语义分析
+---
+在 CheckInitializerInternal 中添加if (ty->categ == ARRAY)分支检查数组， while 循环中递归地调用函数 CheckInitializerInternal() 检查{ }中的每一项，Type参数为ArrayType->ArrayType->T(INT)，对应的size为0，8，4,符号{{递归完后，具体的元素值会递归进入IsScalarType(ty)分支进行标量检查,每一个具体的元素都创建一个InitData记录其offset以及对应的expr(具体的值),通过next指针链接在一起。最后将链首记录在init的idata成员	init->idata = header.next;
+```
+offset:0	val:6
+offset:4	val:7
+offset:8	val:8
+offset:12	val:9
+```
+缺少数组的维度,以及超出声明的大小，之后都进行相应的检查

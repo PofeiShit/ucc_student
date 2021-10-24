@@ -297,7 +297,7 @@ static AstDeclarator ParsePostfixDeclarator()
 			CREATE_AST_NODE(arrDec, ArrayDeclarator);
 			arrDec->dec = dec;
 			NEXT_TOKEN;
-			if (CurrentToken != TK_LBRACKET) {
+			if (CurrentToken != TK_RBRACKET) {
 				arrDec->expr = ParseConstantExpression();
 			}
 			Expect(TK_RBRACKET);
@@ -334,9 +334,26 @@ static AstDeclarator ParseDeclarator()
 static AstInitializer ParseInitializer()
 {
 	AstInitializer init;
+	AstNode *tail;
+
 	CREATE_AST_NODE(init, Initializer);
-	init->lbrace = 0;
-	init->expr = ParseAssignmentExpression();
+	if (CurrentToken == TK_LBRACE) {
+		init->lbrace = 1;
+		NEXT_TOKEN;
+		init->initials = (AstNode)ParseInitializer();
+		tail = &init->initials->next;
+		while (CurrentToken == TK_COMMA) {
+			NEXT_TOKEN;
+			if (CurrentToken == TK_RBRACE) 
+				break;
+			*tail = (AstNode)ParseInitializer();
+			tail = &(*tail)->next;
+		}
+		Expect(TK_RBRACE);
+	} else {
+		init->lbrace = 0;
+		init->expr = ParseAssignmentExpression();
+	}
 	return init;
 }
 static AstInitDeclarator ParseInitDeclarator()

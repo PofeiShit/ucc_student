@@ -12,6 +12,7 @@ static void EmitGlobals(void)
 {
 	Symbol p = Globals;
 	InitData initd;
+	int size, len;
 	while (p)
 	{
 		initd = AsVar(p)->idata;
@@ -21,12 +22,28 @@ static void EmitGlobals(void)
 			DefineCommData(p);
 		} else {
 			DefineGlobal(p);
-			if (initd->expr->op == OP_ADD) {
-				int n = initd->expr->kids[1]->val.i[0];
-				DefineAddress((Symbol)initd->expr->kids[0]->val.p);
-				PutString("\n");
-			} else {
-				DefineValue(initd->expr->ty, initd->expr->val);
+			len = strlen(p->aname);
+			size = 0;
+			while (initd) {
+				// printf("offset = %d ,size =  %d, val = %d\n",initd->offset,size, initd->expr->val.i[0]);
+				// if (initd->offset != size) {
+				// 	LeftAlign(ASMFile, len);
+				// 	PutString("\t");
+				// 	Space(initd->offset - size);
+				// }
+				if (initd->offset != 0) {
+					LeftAlign(ASMFile, len);
+					PutString("\t");
+				}
+				if (initd->expr->op == OP_ADD) {
+					int n = initd->expr->kids[1]->val.i[0];
+					DefineAddress((Symbol)initd->expr->kids[0]->val.p);
+					PutString("\n");
+				} else {
+					DefineValue(initd->expr->ty, initd->expr->val);
+				}
+				size = initd->offset + initd->expr->ty->size;
+				initd = initd->next;
 			}
 		}
 		p = p->next;

@@ -106,7 +106,10 @@ typedef struct astInitializer
 {
 	AST_NODE_COMMON
 	int lbrace;
-	AstExpression expr; // assignment-expression
+	union {
+		AstNode initials;
+		AstExpression expr; // assignment-expression
+	};
 	InitData idata;
 } *AstInitializer;
 typedef struct astInitDeclarator
