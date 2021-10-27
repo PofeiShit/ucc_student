@@ -249,6 +249,16 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 	case OP_ADDRESS: // &a
 		expr->kids[0] = CheckExpression(expr->kids[0]);
 		ty = expr->kids[0]->ty;
+		/*
+			int a[3];
+			&a[3];  ---------->   pointer arithmetic operation
+			Pointer(INT)    +  3
+		*/
+		if (expr->kids[0]->op == OP_INDEX) {
+			expr->kids[0]->op = OP_ADD;
+			expr->kids[0]->ty = PointerTo(ty);
+			return expr->kids[0];
+		}
 		expr->ty = PointerTo(ty);
 		return expr;
 	case OP_DEREF: // *a

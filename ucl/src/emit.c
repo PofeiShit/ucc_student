@@ -38,6 +38,9 @@ static void EmitGlobals(void)
 				if (initd->expr->op == OP_ADD) {
 					int n = initd->expr->kids[1]->val.i[0];
 					DefineAddress((Symbol)initd->expr->kids[0]->val.p);
+					if (n != 0) {
+						Print("%s%d", n > 0 ? " + " : " - ", n);
+					}
 					PutString("\n");
 				} else {
 					DefineValue(initd->expr->ty, initd->expr->val);

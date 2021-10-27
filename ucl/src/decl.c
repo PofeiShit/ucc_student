@@ -226,7 +226,21 @@ next_specifiers:
 static AstDeclarator ParseDirectDeclarator()
 {
 	AstDeclarator dec;
-
+	if (CurrentToken == TK_LPAREN) {
+		int t;
+		BeginPeekToken();
+		t = GetNextToken();
+		if (t != TK_ID && t != TK_LPAREN && t != TK_MUL) {
+			EndPeekToken();
+			CREATE_AST_NODE(dec, NameDeclarator);
+		} else {
+			EndPeekToken();
+			NEXT_TOKEN;
+			dec = ParseDeclarator();
+			Expect(TK_RPAREN);
+		}
+		return dec;
+	}
 	CREATE_AST_NODE(dec, NameDeclarator);
 	if (CurrentToken == TK_ID)
 	{

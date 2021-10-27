@@ -15,7 +15,7 @@ A a;
 .comm a,4
 .text
 ```
-```
+
 ## 词法分析
 ---
 在keyword.h加入typedef关键词，token.h增加TK_TYPEDEF。
@@ -26,7 +26,7 @@ decl.c:
 
 .typedef 在语法分析阶段作为stgClass看待, int还是type specifier节点，解析int时设置seeTy=1表示已经有类型限定符了，否则A会作为TK_ID也在这个阶段被解析。 A是TK_ID应该解析在ParseDirectDeclarator; 
 
-.lex.c的ParseDeclarationSpecifiers函数添加TK_TYPEDEF分支和TK_STATIC相同的处理。解析完后，通过CheckTypedefName函数将符号A添加到TypedefNames，用于保存typedef的新类型。之后碰到TK_ID就会通过IsTypedefName函数判断是否在TypedefNames的向量中
+.ParseDeclarationSpecifiers函数添加TK_TYPEDEF分支和TK_STATIC相同的处理。解析完后，通过CheckTypedefName函数将符号A添加到TypedefNames，用于保存typedef的新类型。之后碰到TK_ID就会通过IsTypedefName函数判断是否在TypedefNames的向量中
 
 .A a;全局声明中的A在ParseDeclarationSpecifers作为TK_ID解析，因此添加TK_ID分支,创建AstTypedefName节点，成员id=A,设置seeTy=1
 
@@ -43,3 +43,35 @@ declchk.c:
 
 ## 汇编代码生成
 ---
+
+# 添加 typedef 用法
+---
+
+```
+int arr[3][4];
+typedef int (*ArrPtr)[4];
+ArrPtr ptr = &arr[0];
+```
+## 语法分析
+---
+decl.c需要在ParseDirectDeclarator添加解析(*Dec)格式的代码
+
+typdef声明的语法结构如下图:
+
+![](img/typedef.jpg)
+
+从叶节点往根节点读,ArrPtr is pointer to an array which has 4 int elements.也就是说ArrPtr是一个指针而已。
+
+
+```
+ArrPtr ptr = &arr[1];
+```
+![](img/typedef_init.jpg)
+
+## 语义分析
+---
+![](img/typedef_init_check.jpg)
+语义检查后，ArrPtr的类型T(Pointer)->T(ARRAY)->T(INT)，也就是左边ptr的类型
+
+等号右边&arr[1].在checkPostfixExpression中arr的type调整为T(Pointer)->T(ArrayType)->T(INT);
+CheckUnaryExpression后,expr指向[]语法节点，该节点type=T(Pointer)->T(ArrayType)->T(INT)。等号两边类型形容
