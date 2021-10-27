@@ -12,7 +12,7 @@ static Symbol TranslatePrimaryExpression(AstExpression expr)
 		return AddConstant(expr->ty, expr->val);
 	/// if the expression is adjusted from an array or a function,
 	/// returns the address of the symbol for this identifier
-	if (expr->op == OP_STR){
+	if (expr->op == OP_STR || expr->isarray) {
 		//#if  1	// added
 		//assert(expr->op != OP_STR);
 		//#endif
@@ -137,10 +137,10 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 
 	} while (p->op == OP_INDEX);
 	tmp = TranslateExpression(p);
-	addr = AddressOf(tmp);
+	// addr = AddressOf(tmp);
 	// dst = Offset(expr->ty, addr, voff, coff);
-	dst = CreateOffset(expr->ty, tmp, coff);
-	return dst;
+	dst = CreateOffset(expr->ty, (Symbol)p->val.p, coff);
+	return expr->isarray ? AddressOf(dst) : dst;
 }
 
 static Symbol TranslatePostfixExpression(AstExpression expr)

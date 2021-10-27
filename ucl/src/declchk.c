@@ -484,6 +484,7 @@ static AstExpression CheckAddressConstant(AstExpression expr)
 	if (! IsPtrType(expr->ty))
 		return NULL;
 	if (expr->op == OP_ADD) {
+		// to deal (ptr+n)+k
 		addr = CheckAddressConstant(expr->kids[0]);
 		if (addr == NULL || expr->kids[1]->op != OP_CONST)
 			return NULL;
@@ -496,6 +497,18 @@ static AstExpression CheckAddressConstant(AstExpression expr)
 	} else {
 		addr = expr;
 	}
+	while (addr->op == OP_INDEX) {
+		// arr[3][4]
+		if (addr->op == OP_INDEX) {
+			if (addr->kids[1]->op != OP_CONST) {
+				return NULL;
+			}
+		}
+		offset += addr->kids[1]->val.i[0];
+		addr = addr->kids[0];
+	}
+	if (addr->op != OP_ID)
+		return NULL;
 	CREATE_AST_NODE(p, Expression);
 	p->op = OP_ADD;
 	p->ty = expr->ty;

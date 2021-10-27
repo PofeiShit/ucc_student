@@ -11,6 +11,7 @@ struct Data
     int c;
 } dt = {20, 30};
 
+int *ptr2 = arr4[2];
 void main()
 {
     int arr5[] = {1, 2, 3};
@@ -23,4 +24,5 @@ void main()
         int a;
         int c;
     } dt = {20, 30};
+    int *ptr3 = arr4[2];
 }

@@ -202,3 +202,41 @@ void main()
 	movl $20, -8(%ebp)
 	movl $30, -4(%ebp)
 ```
+
+# 继续添加指针初始化
+---
+## 全局变量
+```
+int arr4[2][2] = {{10, 11}, {12, 13}};
+int *ptr2 = arr4[2];
+```
+在CheckGlobalDeclaration确定等式左边的ty=T(Pointer)->T(INT)
+右边在CheckInitializerInternal 调用CheckExpression根据op=OP_INDEX 调用CheckPostfixExpression后 []节点的ty=T(Array)->T(INT), arr4节点ty=T(Pointer)->T(array)->T(INT), 最后对 []节点进行Adjust ty=T(Pointer)->T(INT)。
+
+在CheckInitializer完成对初值的检查后，对于全局变量和静态变量，还需要检查一下是否为常量，CheckInitConstant 调用CheckAdressConstant检查地址常量
+形如a[2]或者a.b.c地址常量，最终需要简化成addr+k的形式， while需要获取addr和offset，最后再构建OP_ADD语法树，返回树根节点
+
+## 局部变量
+```
+int arr4[2][2] = {{10, 11}, {12, 13}};
+void main()
+{
+	int *ptr2 = arr4[2];
+}
+```
+
+由于局部变量的存储空间是运行时在栈中动态分配的，编译器需要在编译时产生中间代码来实现对局部变量的初始化，而在对应的汇编代码中，由于无法预知相应的存储单元的具体地址，我们只能采用“ebp 寄存器+常量偏移”的模式来对其寻址。程序运行时，我们会在栈中为被调用的函数分配一块内存，用于存放其形参、局部变量、函数返回地址等 信息，这块内存通常被称为“活动记录(activation record)”或者“帧(frame)”。在 x86 平 台上，我们会使用 x86 的 ebp 寄存器来指向当前函数的活动记录;而“常量偏移”则可由 C 编译器在编译时，根据局部变量声明在函数中出现的先后顺序和所占内存大小来确定。
+
+TranslateCompoundStatement 完成局部变量初始化生成汇编代码。
+```
+		while (initd) {
+			ty = initd->expr->ty;
+			src = TranslateExpression(initd->expr); 检查 arr4[2]
+			dst = CreateOffset(ty, v, initd->offset);
+			GenerateMove(ty, dst, src);
+			initd = initd->next;
+		}
+```
+TranslateExpression 根据op调用TranslateArrayIndex 用于翻译数组索引，dst = CreateOffset(expr->ty, (Symbol)p->val.p, coff);产生访问数组元素的中间代码，最后根据expr->isarray是否为数组，生成取arr4[2]地址的中间指令,leal arr4+16, %ecx
+
+最后通过GenerateMove(ty, dst, src) 将arr4[2]赋值给ptr2: movl %ecx, %-4(%ebp)

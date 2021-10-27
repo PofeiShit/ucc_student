@@ -65,8 +65,12 @@ static char* GetAccessName(Symbol p)
 		{
 			Symbol base = p->link;
 			int n = AsVar(p)->offset;
-			n += AsVar(base)->offset;
-			p->aname = FormatName("%d(%%ebp)", n);
+			if (base->level == 0) {
+            	p->aname = FormatName("%s%s%d", GetAccessName(base), n >= 0 ? "+" : "", n);
+			} else {
+				n += AsVar(base)->offset;
+				p->aname = FormatName("%d(%%ebp)", n);
+			}
 		}
 		break;
 
