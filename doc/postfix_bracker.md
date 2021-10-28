@@ -99,3 +99,28 @@ TranslateArrayIndex()用于翻译数组索引，do 循环对常量偏移和可�
 
 ## 汇编代码生成
 ---
+
+# 添加例子
+```
+int arr[3][4];
+int *ptr1 = &arr[1][2];
+```
+## 语法分析
+---
+全局变量arr[3][4]，语法树和上面例子一样。
+
+&arr[1][2]的语法树类似，根节点是&符号，左子树是arr[1][2]
+
+## 语义检查
+---
+生成的DeriveList也是T(Aarray-4)->T(Array-3)->T(INT-arr).和Declaration Specifiers的type结合后符号arr的Type就是T(array-48)->T(array-16)->T(INT)
+
+
+&arr[1][2] 先进入 CheckUnaryExpression 函数，然后check arr[1][2] 理所当然进入CheckPostfixExpression此时根节点为[]，左子树为[], 右子树为2，
+然后递归CheckPostfixExpression，此时根节点为[], 左子树节点为arr, 右子树为1，最后CheckPrimaryExpression得到arr的Type：T(array-48)->T(array-16)->T(INT). Adjust调整左子树节点arr的Type为T(Pointer-48)->T(array-16)->T(INT),然后[]节点的Type=T(array-16)->T(INT), 右子树调用 ScalePointerOffset 生成新节点值为1\*16, 然后返回[]跳出CheckPostfixExpression递归，调整左子树[]的Type为T(Pointer-16)->T(INT), 然后根节点[]的Type=T(INT),右子树2继续调用 ScalePointerOffset 生成新节点值为2\*4. 返回根节点[]，继续执行CheckUnaryExpression函数, &节点的ty等于左子树[]节点的Type,根据左子树[]的op进入OP_INDEX分支，修改左子树op=OP_ADD,左子树Type=T(Pointer)->T(INT),最终返回的是[]节点。
+
+CheckAddressConstant 检查是否为地址常量,根节点[]的op=OP_ADD,递归CheckAddressionConstant, 根节点[]的op=OP_INDEX,左子树为arr,右子树为16,进入while循环累加所有offset，最后部分生成新的节点[]，左子树为arr,右子树为offset。然后返回新建根节点。递归跳出后[]根节点的左子树为addr,右子树为8+16。最终返回[]节点，由initd->expr保存该节点
+
+## 汇编代码生成
+---
+EmitGlobals 链表遍历所有全局声明符号(variableSymbol)，如果该符号的成员initd不为空，则生成init->expr代码,根据init->expr->op是否为op_ADD，生成。.long arr+40代码

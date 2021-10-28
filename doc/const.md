@@ -203,3 +203,17 @@ main:
     popl %ebp
 ```
 
+## 继续例子
+```
+typedef int ARRAY[4];
+const ARRAY arr = {11, 12, 13, 14};
+void main()
+{
+    arr[3] = 5;
+}
+```
+ARRAY在语义检查生成类型T(array)->T(INT), size = 4 * 4, 符号ARRAY添加到符号表中
+
+arr在语义检查生成类型T(Qualify,array)->T(array)->T(INT)
+
+arr[3] = 5; 等式左边在CheckPostfixExpression 的Adjust后T(Pointer)->T(Qualify, array)->T(array)->T(INT),之后返回的是T(Qualify,array)->T(array)->T(INT),然后在CanAssign报错无法修改const
