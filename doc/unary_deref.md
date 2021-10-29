@@ -57,3 +57,20 @@ main:
 EmitDeref()函数用来处理形如“t2: *ptr”的中间指令，对应的四元式为<DEREF, t2, ptr, NULL>,  PutInReg先把ptr加载到寄存器中，不妨设其为eax
 之后两行会把中间指令<DEREF, t2, ptr, NULL>改为<MOV，t2，(%eax)， NULL>，之后通过EmitMove()函数产生以下汇编代码:
 movl (%eax), %ecx ; //临时变量t2对应的寄存器为ecx
+
+# deref 例子补充
+---
+```
+int *ptr1;
+int **ptr2 = &ptr1;
+```
+## 语法分析
+---
+等号左边 *->*->ptr2 语法树， 等号右边 &->ptr1语法树
+
+## 语义分析
+---
+符号ptr1的Type为T(Pointer)->T(INT);
+符号ptr2的Type为T(Pointer)->T(Pointer)->T(INT); 等号右边调用CheckUnaryExpression，检查左子树节点ptr1，获取其Type，&节点的type为ptr1的bty，也就是T(INT)。因为是取地址的符号,最后再生成指针类型:expr->ty = PointerTo(ty);
+
+CheckAddressConstant 函数统一将根节点op调整为op_ADD, 左子树为地址，右子树为offset。用于EmitGlobals生成.long base_address + offset格式
