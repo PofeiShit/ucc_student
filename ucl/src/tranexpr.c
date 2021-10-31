@@ -113,7 +113,7 @@ static Symbol TranslateMemberAccess(AstExpression expr)
 		coff = fld->offset;
 		addr = TranslateExpression(expr->kids[0]);
 		dst = Deref(expr->ty, Simplify(T(POINTER), ADD, addr, IntConstant(coff)));
-		return addr;
+		return dst;
 	}
 	// dst = Offset(expr->ty, addr, NULL, coff);
 	return dst;
@@ -136,7 +136,12 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 		p = p->kids[0];
 
 	} while (p->op == OP_INDEX);
-	tmp = TranslateExpression(p);
+	// printf("coff:%d-%d-%d\n", coff, p->ty->categ, p->isarray);
+	if (!p->isarray) {
+		expr->op = OP_DEREF;
+		return Deref(expr->ty, Simplify(T(POINTER), ADD, (Symbol)p->val.p, IntConstant(coff)));
+	}
+	// tmp = TranslateExpression(p);
 	// addr = AddressOf(tmp);
 	// dst = Offset(expr->ty, addr, voff, coff);
 	dst = CreateOffset(expr->ty, (Symbol)p->val.p, coff);
@@ -272,9 +277,9 @@ static Symbol TranslateAssignmentExpression(AstExpression expr)
 	Symbol dst, src;
 	dst = TranslateExpression(expr->kids[0]);
 	src = TranslateExpression(expr->kids[1]);
-	if (expr->kids[0]->op == OP_PTR_MEMBER) {
+	if (expr->kids[0]->op == OP_PTR_MEMBER || expr->kids[0]->op == OP_DEREF) {
 		GenerateIndirectMove(expr->ty, dst, src); // dst is base address
-		dst = Deref(expr->ty, dst);
+		// dst = Deref(expr->ty, dst);
 	} else {
 		GenerateMove(expr->ty, dst, src);
 	}

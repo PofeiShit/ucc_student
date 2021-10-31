@@ -30,8 +30,9 @@ main:
 	movl %esp, %ebp
 	subl $8, %esp
 .BB0:
-	leal -4(%ebp), %eax
-	movl $1, -4(%ebp)
+	movl -4(%ebp), %eax
+	movl (%eax), %ecx
+	movl $10, (%ecx)
 .BB1:
 	movl %ebp, %esp
 	popl %edi
@@ -46,17 +47,18 @@ main:
 ---
 在expr.c的ParsePostfixExpression()添加TK_POINTER分支和TK_DOT共用
 
-创建Expression节点，设置节点op为OP_PTR_MEMBER,可以确定->操作符后面是a,所以直接赋值给p->val='a'
+创建Expression节点，设置根节点op为OP_PTR_MEMBER,可以确定->操作符后面是a,所以根节点的成员变量val='a'，左子树指向节点p
 
 ## 语义分析
 ---
+0.符号p的type为T(Pointer)->T(RecordType)
+
 1.在exprchk.c的CheckPostfixExpression()添加OP_PTR_MEMBER分支，分支调用 CheckMemberAccess()进行语义检查，
-在表达式 p->a 中，p 和 a 相当于是 运算符->的两个操作数，dt 对应语法树结点的类型应是记录类型
-expr->kids[0] = CheckExpression(expr->kids[0]);对成员选择运算符的左操作数进行语义检查
+expr->kids[0] = CheckExpression(expr->kids[0]); 对成员选择运算符的左操作数p进行语义检查, 得到p的类型:T(Pointer)->T(RecordType),然后获取根节点->的类型为T(RecordType)
 
-2.LookupField()检查一下结构体 p 中是否有名字为 a 的域成员, 如果在结构体的定义中找不到成员 a，则说明 dt->a 是非法的表达式
+2.LookupField()检查一下结构体 p 中是否有名字为 a 的域成员, 如果在结构体的定义中找不到成员 a，则说明 p->a 是非法的表达式,存在则得到符号a的信息
 
-3.最后把查询得到的关于域成员 a 的类型信息，通过expr->val.p = fld存放到 dt->a 表达式对应的语法树结点上。 结构体 struct filed 描述了域成员的相关信息
+3.最后把查询得到的关于域成员 a 的类型信息，通过expr->val.p = fld存放到 p->a 表达式对应的语法树结点上，最后节点->的类型为符号a的类型T(INT)。合理
 
 4.在语义检查后，域成员a在结构体struct test中的偏移量等信息由struct filed对象保存即expr->val.p = fld;而结构体对象test对应的符号则由 struct symbol 对象来存放.
 
@@ -79,19 +81,14 @@ t7: *t6;
 ```
     fld = p->val.p;
     coff = fld->offset;
-    tmp = TranslateExpression(expr->kids[0]);  // tmp就是基地址
+    addr = TranslateExpression(expr->kids[0]);  // addr 就是基地址
 ```
 
-3.Offset函数：调用Deref来产生，Deref 是 Dereference 的缩写，表示“提领操作”，也有译为“解引用”，实际上进行的操作是“间接寻址”。
+3.dst = Deref(expr->ty, Simplify(T(POINTER), ADD, addr, IntConstant(coff))); Simplify 作用把a的地址加载到寄存器中, movl -4(%ebp), %eax; 如果有偏置的话:addl offset, %eax; offset=0则编译器会simplify的，就是这个函数的作用,
+然后就是 Deref 解引用。也即是说10要赋值给的是%eax寄存器保存的地址里去，而不是赋值给%eax, 因此在这里，我们粗糙的再增加一条指令 movl (%eax), %ecx;
 
-4.Deref()主要用来生成一条形如“t3:\*t2” 的间接寻址指令，其中t2中存放一个地址，\*t2表示取“这个地址对应内存单元中的内容”，并把该内容存于临时变量t3中，符号t3就作为“间接寻址”的结果返回.
-
-5.Offset返回的就是符号a，实际上TranslateMemberAccess返回就是p->a或者p->b对应的域成员的符号，但是这里先稍作修改，当是PTR_MEMBER就返回基地址
-生成完p->a,接着生成=1赋值表达式
-
-TranslateAssignmentExpression根据expr->op==PTR_MEMBER生成IndirectMove中间指令
-通过GenerateIndirectMove(expr->ty, dst, src);产生一条 IMOV 指令(形如“*t = val;”)来实现赋值.这里的dst其实t6
-，这需要进行dst=Deref(expr->ty, dst)间接寻址。
+4.最后TranslateAssignmentExpression根据 expr->op==PTR_MEMBER 生成IndirectMove中间指令
+通过GenerateIndirectMove(expr->ty, dst, src);产生一条 IMOV 指令(形如“*t = val;”)来实现赋值.也就是 movl $10, (%ecx)
 
 ## 汇编代码生成
 ---

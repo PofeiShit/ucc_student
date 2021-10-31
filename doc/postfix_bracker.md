@@ -124,3 +124,40 @@ CheckAddressConstant 检查是否为地址常量,根节点[]的op=OP_ADD,递归C
 ## 汇编代码生成
 ---
 EmitGlobals 链表遍历所有全局声明符号(variableSymbol)，如果该符号的成员initd不为空，则生成init->expr代码,根据init->expr->op是否为op_ADD，生成。.long arr+40代码
+
+# 例子
+---
+```
+int arr[3][4];
+typedef int (*ArrPtr)[4];
+ArrPtr ptr = &arr[0];
+void main()
+{
+    ptr[1][2] = 1;
+}
+```
+## 语法分析
+---
+根节点[]的左子树[]，右子树2,左子树[]的左子树为[]，右子树为1，
+
+## 语义分析
+---
+CheckPostfixExpression->CheckPostfixExpression->CheckPrimaryExpression,最终得到ptr的type为T(Pointer)->T(Array)->T(INT)。节点[]的type等于T(Pointer)->bty也就是T(Array)->T(INT), []的右子树的offset更新为1*16，返回到根节点[]，[]的type=T(INT),[]的右子树的offset更新为2*4=8,
+
+## 中间代码生成
+---
+TranslateArrayIndex 类似CheckAddressConstant，统一把offset累加完，得到ptr节点和offset值。然后判断ptr是数组还是指针，
+
+如果是指针，调用 Deref 解引用。先调用 Simplify(T(POINTER), ADD, (Symbol)p->val.p, IntConstant(coff)) 将 ptr 的地址movl到寄存器中,DST=ptr+offset,  GenerateAssign(T(Pointer), ADD, DST, SRC1, SRC2), DST:%eax, SRC1:ptr, SRC2:offset
+
+tmp = CreateTemp(ty);
+GenerateAssign(ty, tmp, DEREF, addr, NULL); //addr就是DST
+
+## 汇编代码生成
+---
+EmitAssign 先调用 Move(X86_MOVI4, DST, SRC1); 生成 movl ptr, %eax, 再调用 PutASMCode(code, inst->opds); 生成addl 24, %eax,
+
+EmitDeref 这行reg = PutInReg(SRC1); 生成movl (%eax), %ecx 取到地址
+
+然后
+
