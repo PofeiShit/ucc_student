@@ -465,7 +465,12 @@ static AstNode ParseExternalDeclaration(void)
 	if (fdec != NULL)
 	{
 		AstFunction func;
-
+		if (CurrentToken == TK_SEMICOLON) {
+			NEXT_TOKEN;
+			if (CurrentToken != TK_LBRACE) 
+				return (AstNode)decl;
+			Error(NULL, "add the ;");
+		}
 		CREATE_AST_NODE(func, Function);
 		// the function declaration's coord and specs are treated as the whole function's.
 		func->specs = decl->specs;

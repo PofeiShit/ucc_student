@@ -36,7 +36,7 @@ main:
 	popl %ebp
 	ret
 ```
-```
+
 ## 词法分析
 ---
 在keyword.h加入extern关键词，token.h增加TK_EXTERN
@@ -56,3 +56,16 @@ decl.c:
 ## 汇编代码生成
 ---
 符号表虽然保存了变量a，但是extern声明的全局变量在其他c文件生成对应的汇编文件中,所以EmitGlobals添加判断,不在汇编文件生成.comm a,4代码
+
+# extern函数
+---
+```
+extern void malloc(int n);
+```
+## 语法分析
+---
+语法上整个属于GlobalDeclaration，而不是Function
+
+## 语义检查
+---
+CheckGlobalDeclaration 得到符号malloc 的类型，然后添加到符号表即可
