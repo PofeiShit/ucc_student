@@ -269,9 +269,9 @@ static void EmitMove(IRInst inst)
 						So we have to move from mem1 to register , and 
 						then from register to mem2.
 					**/
-					// reg = GetReg();
-					// Move(X86_MOVI4, reg, SRC1);
-					// Move(X86_MOVI4, DST, reg);
+					reg = GetReg();
+					Move(X86_MOVI4, reg, SRC1);
+					Move(X86_MOVI4, DST, reg);
 				}
 				else
 				{

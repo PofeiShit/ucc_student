@@ -141,8 +141,7 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 		expr->op = OP_DEREF;
 		return Deref(expr->ty, Simplify(T(POINTER), ADD, (Symbol)p->val.p, IntConstant(coff)));
 	}
-	// tmp = TranslateExpression(p);
-	// addr = AddressOf(tmp);
+	// adddr = TranslateExpression(p);
 	// dst = Offset(expr->ty, addr, voff, coff);
 	dst = CreateOffset(expr->ty, (Symbol)p->val.p, coff);
 	return expr->isarray ? AddressOf(dst) : dst;

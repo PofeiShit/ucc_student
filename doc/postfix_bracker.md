@@ -131,6 +131,9 @@ EmitGlobals 链表遍历所有全局声明符号(variableSymbol)，如果该符�
 int arr[3][4];
 typedef int (*ArrPtr)[4];
 ArrPtr ptr = &arr[0];
+int *ptr3 = &arr[1][2];
+int *ptr1 = &arr[0][0];
+int ** ptr2 = &ptr1;
 void main()
 {
     ptr[1][2] = 1;
@@ -157,7 +160,22 @@ GenerateAssign(ty, tmp, DEREF, addr, NULL); //addr就是DST
 ---
 EmitAssign 先调用 Move(X86_MOVI4, DST, SRC1); 生成 movl ptr, %eax, 再调用 PutASMCode(code, inst->opds); 生成addl 24, %eax,
 
-EmitDeref 这行reg = PutInReg(SRC1); 生成movl (%eax), %ecx 取到地址
+EmitDeref 这行reg = PutInReg(SRC1); 生成movl (%eax), %ecx 取到地址，然后 movl $1, (%ecx)完成赋值
 
-然后
+# 例子1
+```
+void main()
+{
+    arr[1][2] = 1;
+}
+```
+符号arr的类型T(Array)->T(Array)->T(INT), 但是arr[1][2]表达式的Type是T(INT), isarray=0, 等式左边 dst=arr[24], 等式右边 src1 = 1, GenerateMove(ty, mov, dst, src);
+
+# 例子2
+```
+void main()
+{
+    ptr2[0][0] = 5;
+}
+符号ptr2的类型T(Pointer)->T(Pointer)->T(INT), ptr2[0][0] 先将 ptr2 地址放到寄存器%eax, 然后addl offset %eax, 然后解引用 movl (%eax), %ecx, 然后IndirectMove, movl $5, (%ecx);
 
