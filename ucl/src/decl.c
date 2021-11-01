@@ -6,7 +6,7 @@ static Vector TypedefNames, OverloadNames;
 
 int FIRST_Declaration[] = { FIRST_DECLARATION, 0};
 
-static AstDeclarator ParseDeclarator();
+static AstDeclarator ParseDeclarator(int kind);
 static AstSpecifiers ParseDeclarationSpecifiers(void);
 
 static char* GetOutermostID(AstDeclarator dec)
@@ -93,13 +93,13 @@ static AstStructDeclaration ParseStructDeclaration(void)
 		NEXT_TOKEN;
 		return stDecl;		
 	}	
-	stDecl->stDecs = (AstNode)ParseDeclarator();	
+	stDecl->stDecs = (AstNode)ParseDeclarator(DEC_CONCRETE);	
 	tail = &stDecl->stDecs->next;	
 	while (CurrentToken == TK_COMMA)
 	{
 		NEXT_TOKEN;
 		// TODO: support a:4
-		*tail = (AstNode)ParseDeclarator();
+		*tail = (AstNode)ParseDeclarator(DEC_CONCRETE);
 		tail = &(*tail)->next;
 	}
 	// printf("CurrentToken:%d\t%d\n", CurrentToken, TK_SEMICOLON);
@@ -223,7 +223,7 @@ next_specifiers:
  *		( abstract-declarator)
  *		nil
  */
-static AstDeclarator ParseDirectDeclarator()
+static AstDeclarator ParseDirectDeclarator(int kind)
 {
 	AstDeclarator dec;
 	if (CurrentToken == TK_LPAREN) {
@@ -236,7 +236,7 @@ static AstDeclarator ParseDirectDeclarator()
 		} else {
 			EndPeekToken();
 			NEXT_TOKEN;
-			dec = ParseDeclarator();
+			dec = ParseDeclarator(kind);
 			Expect(TK_RPAREN);
 		}
 		return dec;
@@ -246,6 +246,8 @@ static AstDeclarator ParseDirectDeclarator()
 	{
 		dec->id = (char*)TokenValue.p;  
 		NEXT_TOKEN;
+	} else if (kind == DEC_CONCRETE) {
+		Error(NULL, "Expect identifier");
 	}
 	return dec;
 }
@@ -259,6 +261,7 @@ AstTypeName ParseTypeName(void)
 	AstTypeName tyName;
 	CREATE_AST_NODE(tyName, TypeName);
 	tyName->specs = ParseDeclarationSpecifiers();
+	tyName->dec = (AstDeclarator)ParseDeclarator(DEC_ABSTRACT);
 	return tyName;
 }
 static AstParameterDeclaration ParseParameterDeclaration(void)
@@ -266,7 +269,7 @@ static AstParameterDeclaration ParseParameterDeclaration(void)
 	AstParameterDeclaration paramDecl;
 	CREATE_AST_NODE(paramDecl, ParameterDeclaration);
 	paramDecl->specs = ParseDeclarationSpecifiers();
-	paramDecl->dec = ParseDeclarator();
+	paramDecl->dec = (AstDeclarator)ParseDeclarator(DEC_CONCRETE);
 	return paramDecl;
 }
 
@@ -291,9 +294,9 @@ AstParameterTypeList ParseParameterTypeList(void)
 	return paramTyList;
 }
 
-static AstDeclarator ParsePostfixDeclarator()
+static AstDeclarator ParsePostfixDeclarator(int kind)
 {
-	AstDeclarator dec = ParseDirectDeclarator();
+	AstDeclarator dec = ParseDirectDeclarator(kind);
 	while (1) {
 		if (CurrentToken == TK_LPAREN) {
 			AstFunctionDeclarator funcDec;
@@ -324,7 +327,7 @@ static AstDeclarator ParsePostfixDeclarator()
 		}
 	}
 }
-static AstDeclarator ParseDeclarator()
+static AstDeclarator ParseDeclarator(int kind)
 {
 	if (CurrentToken == TK_MUL) {
 		// * declarator
@@ -341,10 +344,10 @@ static AstDeclarator ParseDeclarator()
 			tail = &tok->next;
 			NEXT_TOKEN;
 		}
-		ptrDec->dec = ParseDeclarator();
+		ptrDec->dec = ParseDeclarator(kind);
 		return (AstDeclarator)ptrDec;
 	}
-	return ParsePostfixDeclarator();
+	return ParsePostfixDeclarator(kind);
 }
 static AstInitializer ParseInitializer()
 {
@@ -375,7 +378,7 @@ static AstInitDeclarator ParseInitDeclarator()
 {
 	AstInitDeclarator initDec;
 	CREATE_AST_NODE(initDec, InitDeclarator);
-	initDec->dec = ParseDeclarator();
+	initDec->dec = ParseDeclarator(DEC_CONCRETE);
 	if (CurrentToken == TK_ASSIGN) {
 		NEXT_TOKEN;
 		initDec->init = ParseInitializer();

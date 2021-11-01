@@ -377,7 +377,13 @@ Type CheckTypeName(AstTypeName tname)
 {
 	Type ty;
 	CheckDeclarationSpecifiers(tname->specs);
-	ty = tname->specs->ty;
+	CheckDeclarator(tname->dec);
+	ty = DeriveType(tname->dec->tyDrvList, tname->specs->ty);
+
+	if (ty == NULL) {
+		Error(NULL, "Illegal type");
+		ty = T(INT);
+	}
 	return ty;
 }
 static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer init, Type ty, int *offset, int *error)
