@@ -340,7 +340,7 @@ static void TranslateFunction(AstFunction func)
 	BBlock bb;
 
 	FSYM = func->fsym;
-	//TempNum = 0;
+	TempNum = 0;
 	FSYM->entryBB = CreateBBlock();
 	FSYM->exitBB = CreateBBlock();
 	

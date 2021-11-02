@@ -263,7 +263,6 @@ static void EmitMove(IRInst inst)
 				AllocateReg(inst, 0);
 				if (SRC1->reg == NULL && DST->reg == NULL)
 				{
-					;
 					/**
 						On X86, we can't move from mem1 to mem2.
 						So we have to move from mem1 to register , and 

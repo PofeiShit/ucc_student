@@ -152,6 +152,7 @@ void BeginProgram(void)
 	int i;
 
 	//ORG = 0;
+	TempNum = 0;
 	for (i = EAX; i <= EDI; ++i)
 	{
 		// Initialize register symbols to

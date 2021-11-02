@@ -52,7 +52,7 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 		return expr;
 	}
 	if (expr->op == OP_STR) {
-		//expr->op = OP_ID;
+		expr->op = OP_ID;
 		expr->val.p = AddString(expr->ty, (String)expr->val.p);
 		return expr;
 	}	
@@ -126,7 +126,7 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	Type ty;
 	AstNode *tail;
 	int argNo, argFull;
-	
+
 	if (expr->kids[0]->op == OP_ID && LookupID((char*)expr->kids[0]->val.p) == NULL) {
 		expr->kids[0]->ty = DefaultFunctionType;
 		expr->kids[0]->val.p = AddFunction((char*)expr->kids[0]->val.p, DefaultFunctionType, TK_EXTERN);

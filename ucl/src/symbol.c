@@ -289,6 +289,7 @@ Symbol AddString(Type ty, String str)
 	p->name = FormatName("str%d", StringNum++);
 	p->val.p = str;
 	p->ty = ty;	
+	p->sclass = TK_STATIC;
 	
 	*StringTail = p;
 	StringTail = &p->next;

@@ -282,6 +282,10 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 					ty = T(INT);
 					tyCnt++;
 					break;
+				case TK_VOID:
+					ty = T(VOID);
+					tyCnt++;
+					break;
 			}
 		}
 		p = p->next;
