@@ -29,7 +29,16 @@ static void Move(int code, Symbol dst, Symbol src)
 	opds[1] = src;	
 	PutASMCode(code, opds);
 }
-
+static Symbol PutInReg(Symbol p)
+{
+	Symbol reg;
+	if (p->reg != NULL) {
+		return p->reg;
+	}
+	reg = GetReg();
+	Move(X86_MOVI4, reg, p);
+	return reg;
+}
 static void EmitNOP(IRInst inst)
 {
 	;
@@ -40,6 +49,10 @@ static void EmitBranch(IRInst inst)
 	BBlock p = (BBlock)DST;
 
 	DST = p->sym;
+	if (SRC2) {
+		if (SRC2->kind != SK_Constant) 
+			SRC1 = PutInReg(SRC1);
+	}
 	ClearRegs();
 	PutASMCode(ASM_CODE(inst->opcode, tcode), inst->opds);
 
@@ -355,16 +368,7 @@ static void EmitCast(IRInst inst)
 	}
 
 }
-static Symbol PutInReg(Symbol p)
-{
-	Symbol reg;
-	if (p->reg != NULL) {
-		return p->reg;
-	}
-	reg = GetReg();
-	Move(X86_MOVI4, reg, p);
-	return reg;
-}
+
 static void EmitIndirectJump(IRInst inst)
 {
 	BBlock *p;

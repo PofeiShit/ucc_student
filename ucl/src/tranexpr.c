@@ -302,7 +302,7 @@ static Symbol (* ExprTrans[])(AstExpression) =
 };
 AstExpression Not(AstExpression expr)
 {
-	static int rops[] = {OP_UNEQUAL};
+	static int rops[] = {OP_UNEQUAL, OP_EQUAL, OP_LESS_EQ, OP_GREAT_EQ, OP_LESS, OP_GREAT};
 	AstExpression t;
 	switch(expr->op)
 	{
@@ -312,8 +312,16 @@ AstExpression Not(AstExpression expr)
 		expr->kids[1] = Not(expr->kids[1]);
 		return expr;
 	case OP_EQUAL:
+	case OP_UNEQUAL:
+	case OP_GREAT:
+	case OP_LESS:
+	case OP_GREAT_EQ:
+	case OP_LESS_EQ:
 		expr->op = rops[expr->op - OP_EQUAL];
 		return expr;
+	
+	case OP_NOT:
+		return expr->kids[0];
 
 	default:
 		CREATE_AST_NODE(t, Expression);
