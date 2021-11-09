@@ -309,13 +309,26 @@ static int ScanIntLiteral(unsigned char *start, int len, int base)
 
 	while (p != end) {
 		if (base == 16) {
-			// TODO: ADD hex scan
-			;
+			if ((*p >= 'A' && *p <= 'F') ||
+				(*p >= 'a' && *p <= 'f'))
+			{
+				d = ToUpper(*p) - 'A' + 10;
+			}
+			else
+			{
+				d = *p - '0';
+			}
 		} else {
 			d = *p - '0';
 		}
 		switch(base) 
 		{
+			case 16:
+				carry0 = HIGH_4BIT(i[0]);
+				carry1 = HIGH_4BIT(i[1]);
+				i[0] = i[0] << 4;
+				i[1] = i[1] << 4;
+				break;
 			case 10:
 			{
 				unsigned int t1, t2;
@@ -341,11 +354,25 @@ static int ScanNumericLiteral(void)
 {
 	unsigned char *start = CURSOR;
 	int base = 10;
-	// now support decimal
-	CURSOR++;
-	while (IsDigit(*CURSOR))
-	{
+	if (*CURSOR == '0' && (CURSOR[1] == 'x' || CURSOR[1] == 'X')) {
+		CURSOR += 2;
+		start = CURSOR;
+		base = 16;
+		if (!IsHexDigit(*CURSOR)) {
+			Error(NULL, "Expect hex digit");
+			TokenValue.i[0] = 0;
+			return TK_INTCONST;
+		}
+		while (IsHexDigit(*CURSOR)) {
+			CURSOR++;
+		}
+	} else {
+		// now support decimal
 		CURSOR++;
+		while (IsDigit(*CURSOR))
+		{
+			CURSOR++;
+		}
 	}
 	if (base == 16 || (*CURSOR != '.' && *CURSOR != 'e' && *CURSOR != 'E')) {
 		return ScanIntLiteral(start, (int)(CURSOR - start), base);

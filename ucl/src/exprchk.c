@@ -32,6 +32,9 @@ AstExpression Cast(Type ty, AstExpression expr)
 	if (scode / 2 == dcode / 2) {
 		int scateg = expr->ty->categ;
         int dcateg = ty->categ;
+		if (scateg != dcateg && scateg >= INT && scateg <= UINT) {
+			return CastExpression(ty, expr); // I4 与 U4 之间
+		}
 		// I1 和 U1 之间, I2 和 U2 之间
 		expr->ty = ty;
 		return expr;
@@ -425,7 +428,15 @@ static AstExpression CheckEqualityOP(AstExpression expr)
 }
 static AstExpression CheckRelationalOP(AstExpression expr)
 {
+	Type ty1, ty2;
 	expr->ty = T(INT);
+	ty1 = expr->kids[0]->ty;
+	ty2 = expr->kids[1]->ty;
+	if (BothIntegType(ty1, ty2)) {
+		PERFORM_ARITH_CONVERSION(expr);
+		expr->ty = T(INT);
+		return FoldConstant(expr);
+	}
 	return expr;
 }
 static AstExpression (* BinaryOPCheckers[])(AstExpression) = 

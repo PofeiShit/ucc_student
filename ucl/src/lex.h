@@ -18,11 +18,13 @@ union value
 };
 
 #define IsDigit(c)         (c >= '0' && c <= '9')
+#define IsHexDigit(c)	   (IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
 #define IsLetter(c)        ((c >= 'a' && c <= 'z') || (c == '_') || (c >= 'A' && c <= 'Z'))
 #define IsLetterOrDigit(c) (IsLetter(c) || IsDigit(c))
 #define ToUpper(c) 		   (c & ~0x20)
 #define HIGH_3BIT(v)       ((v) >> (8 * sizeof(int) - 3) & 0x07)
 #define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
+#define HIGH_4BIT(v)       ((v) >> (8 * sizeof(int) - 4) & 0x0f)     
 int  GetNextToken(void);
 void SetupLexer(void);
 void BeginPeekToken(void);

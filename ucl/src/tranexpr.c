@@ -201,6 +201,11 @@ static Symbol TranslateCast(Type ty, Type sty, Symbol src)
 	case I4:
 		if (dcode <= I1) 
 			opcode = TRUI1;
+		else {
+			Symbol temp = CreateTemp(ty);
+			GenerateMove(ty, temp, src);
+			return temp;
+		}
 		break;
 	default:
 		;

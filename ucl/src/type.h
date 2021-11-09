@@ -3,10 +3,10 @@
 
 enum 
 {
-	CHAR, UCHAR, INT, UINT, ENUM, LONGDOUBLE, POINTER, VOID, STRUCT, ARRAY, FUNCTION
+	CHAR, UCHAR, SHORT, USHORT, INT, UINT, ENUM, LONGDOUBLE, POINTER, VOID, STRUCT, ARRAY, FUNCTION
 };
 enum {CONST=0x1, VOLATILE=0x2};
-enum {I1, U1, I4, U4};
+enum {I1, U1, I2, U2, I4, U4};
 
 #define TYPE_COMMON \
 	int categ : 8; \
@@ -89,6 +89,7 @@ typedef struct functionType
 #define T(categ) (Types + categ)
 
 #define IsIntegType(ty) (ty->categ <= ENUM)
+#define IsUnsigned(ty) (ty->categ & 0x1)
 #define IsScalarType(ty) (ty->categ <= POINTER)
 #define IsPtrType(ty) (ty->categ == POINTER)
 #define IsFunctionType(ty) (ty->categ == FUNCTION)

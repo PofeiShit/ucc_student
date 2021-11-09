@@ -7,7 +7,7 @@ Type DefaultFunctionType;
 
 int TypeCode(Type ty)
 {
-	static int optypes[] = {I1, U1, I4, U4, I4, I1, U4};
+	static int optypes[] = {I1, U1, I2, U2, I4, U4, I4, I1, U4};
 	return optypes[ty->categ];
 }
 Type Unqual(Type ty)
@@ -212,19 +212,19 @@ Type CommonRealType(Type ty1, Type ty2)
 	if (ty1->categ == ty2->categ)
 		return ty1;
 	// ty1 and ty2 have the same sign
-	// if ((IsUnsigned(ty1) ^ IsUnsigned(ty2)) == 0)
-	// 	return ty1->categ > ty2->categ ? ty1 : ty2;
+	if ((IsUnsigned(ty1) ^ IsUnsigned(ty2)) == 0)
+		return ty1->categ > ty2->categ ? ty1 : ty2;
 
 	// Their signs are different.
 	// Swap ty1 and ty2, then we treat ty1 as Unsigned, ty2 as signed later.
-	// if (IsUnsigned(ty2))
-	// {
-	// 	Type ty;
+	if (IsUnsigned(ty2))
+	{
+		Type ty;
 
-	// 	ty = ty1;
-	// 	ty1 = ty2;
-	// 	ty2 = ty;
-	// }		
+		ty = ty1;
+		ty1 = ty2;
+		ty2 = ty;
+	}		
 	// fg: (ty1,ty2) : ( ULONG,INT)
 	if (ty1->categ  >= ty2->categ)
 		return ty1;
