@@ -33,6 +33,11 @@ AstExpression FoldConstant(AstExpression expr)
 	case OP_MUL:
 		EXECUTE_BOP(*);
 		break;
+	case OP_NEG:
+		if (tcode == I4 || tcode == U4) {
+			val.i[0] = -expr1->val.i[0];
+		}
+		break;
 	default:
 		return expr;
 	}
