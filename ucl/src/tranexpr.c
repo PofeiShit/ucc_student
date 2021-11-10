@@ -106,7 +106,7 @@ static Symbol TranslateMemberAccess(AstExpression expr)
 			p = p->kids[0];
 		}
 		tmp = TranslateExpression(p);
-		addr = AddressOf(tmp);
+		// addr = AddressOf(tmp);
 		dst = CreateOffset(expr->ty, tmp, coff);
 	} else {
 		fld = (Field)p->val.p;

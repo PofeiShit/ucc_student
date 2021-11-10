@@ -52,7 +52,7 @@ void GenerateReturn(Type ty, Symbol src);
 void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, Vector args);
 void GenerateBranch(Type ty, BBlock dstBB, int opcode, Symbol src1, Symbol src2);
 void GenerateIndirectJump(BBlock *dstBBs, int len, Symbol index);
-
+void GenerateClear(Symbol dst, int size);
 BBlock CreateBBlock(void);
 void   StartBBlock(BBlock bb);
 extern BBlock CurrentBB;

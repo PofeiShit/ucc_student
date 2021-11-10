@@ -423,6 +423,26 @@ static void EmitDeref(IRInst inst)
 	// ModifyVar(DST);
 	return;
 }
+static void EmitClear(IRInst inst)
+{
+	int size = SRC1->val.i[0];
+	Symbol p = IntConstant(0);
+
+	switch(size) {
+	case 1:
+		Move(X86_MOVI1, DST, p);
+		break;
+
+	case 4:
+		Move(X86_MOVI4, DST, p);
+		break;
+
+	default:
+		SpillReg(X86Regs[EAX]);
+		PutASMCode(X86_CLEAR, inst->opds);
+		break;
+	}
+}
 static void (* Emitter[])(IRInst inst) = 
 {
 #define OPCODE(code, name, func) Emit##func, 

@@ -17,6 +17,16 @@ static void TranslateExpressionStatement(AstStatement stmt)
 		TranslateExpression(exprStmt->expr);
 	}
 }
+static int HasPaddingSpace(VariableSymbol v)
+{
+	int initedSize = 0;
+	InitData initd = v->idata;
+	while (initd) {
+		initedSize += initd->expr->ty->size;
+		initd = initd->next;
+	}
+	return initedSize != v->ty->size;
+}
 
 static void TranslateCompoundStatement(AstStatement stmt)
 {
@@ -34,7 +44,9 @@ static void TranslateCompoundStatement(AstStatement stmt)
 		v = (Symbol)GET_ITEM(ilocals, i);
 		initd = AsVar(v)->idata;
 		size = 0;
-
+		if (HasPaddingSpace(AsVar(v))) {
+			GenerateClear(v, v->ty->size);
+		}
 		while (initd) {
 			ty = initd->expr->ty;
 			src = TranslateExpression(initd->expr);

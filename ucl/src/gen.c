@@ -72,7 +72,17 @@ Symbol TryAddValue(Type ty, int op, Symbol src1, Symbol src2)
 	GenerateAssign(ty, t, op, src1, src2);
 	return t;
 }
-
+void GenerateClear(Symbol dst, int size)
+{
+	IRInst inst;
+	ALLOC(inst);
+	inst->ty = T(UCHAR);
+	inst->opcode = CLR;
+	inst->opds[0] = dst;
+	inst->opds[1] = IntConstant(size);
+	inst->opds[2] = NULL;
+	AppendInst(inst);
+}
 Symbol AddressOf(Symbol p)
 {
 	//assert(p->kind != SK_Temp);
