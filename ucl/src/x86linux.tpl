@@ -113,10 +113,13 @@ TEMPLATE(X86_PROLOGUE, "pushl %%ebp;pushl %%ebx;pushl %%esi;pushl %%edi;movl %%e
 TEMPLATE(X86_PUSH,     "pushl %0")
 TEMPLATE(X86_EXPANDF,  "subl %0, %%esp")
 TEMPLATE(X86_CALL,     "call %1")
+TEMPLATE(X86_ICALL,     "call *%1")
 TEMPLATE(X86_REDUCEF,  "addl %0, %%esp")
 TEMPLATE(X86_EPILOGUE, "movl %%ebp, %%esp;popl %%edi;popl %%esi;popl %%ebx;popl %%ebp;ret")
 TEMPLATE(X86_CLEAR,   "pushl %1;pushl $0;leal %0, %%eax;pushl %%eax;call memset;addl $12, %%esp")
 TEMPLATE(X86_MOVI1,   "movb %1, %0")
 TEMPLATE(X86_MOVI4,   "movl %1, %0")
+TEMPLATE(X86_MOVB,    "leal %0, %%edi;leal %1, %%esi;movl %2, %%ecx;rep movsb")             
+
 TEMPLATE(X86_JMP, "jmp %0")
 TEMPLATE(X86_IJMP, "jmp *%0(,%1,4)")

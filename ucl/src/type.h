@@ -3,10 +3,10 @@
 
 enum 
 {
-	CHAR, UCHAR, SHORT, USHORT, INT, UINT, ENUM, LONGDOUBLE, POINTER, VOID, STRUCT, ARRAY, FUNCTION
+	CHAR, UCHAR, SHORT, USHORT, INT, UINT, ENUM, POINTER, VOID, STRUCT, ARRAY, FUNCTION
 };
 enum {CONST=0x1, VOLATILE=0x2};
-enum {I1, U1, I2, U2, I4, U4};
+enum {I1, U1, I2, U2, I4, U4, V, B};
 
 #define TYPE_COMMON \
 	int categ : 8; \
@@ -94,7 +94,7 @@ typedef struct functionType
 #define IsPtrType(ty) (ty->categ == POINTER)
 #define IsFunctionType(ty) (ty->categ == FUNCTION)
 #define IsObjectPtr(ty) (ty->categ == POINTER && ty->bty->categ != FUNCTION)
-#define IsArithType(ty)    (ty->categ <= LONGDOUBLE)
+#define IsArithType(ty)    (ty->categ <= ENUM)
 #define BothIntegType(ty1, ty2)   (IsIntegType(ty1) && IsIntegType(ty2))
 #define BothArithType(ty1, ty2)   (IsArithType(ty1) && IsArithType(ty2))
 Field LookupField(Type ty, char *id);

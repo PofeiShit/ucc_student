@@ -277,6 +277,9 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 		ty = expr->kids[0]->ty;
 		if (IsPtrType(ty)) {
 			expr->ty = ty->bty;
+			if (IsFunctionType(expr->ty)) {
+				return expr->kids[0];
+			}
 			return expr;
 		}
 

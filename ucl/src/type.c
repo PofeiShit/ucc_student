@@ -7,7 +7,8 @@ Type DefaultFunctionType;
 
 int TypeCode(Type ty)
 {
-	static int optypes[] = {I1, U1, I2, U2, I4, U4, I4, I1, U4};
+	// CHAR, UCHAR, SHORT, USHORT, INT, UINT, ENUM, POINTER, VOID, STRUCT, ARRAY, FUNCTION
+	static int optypes[] = {I1, U1, I2, U2, I4, U4, I4, U4, V, B, B, B};
 	return optypes[ty->categ];
 }
 Type Unqual(Type ty)

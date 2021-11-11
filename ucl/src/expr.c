@@ -60,6 +60,11 @@ static AstExpression ParsePrimaryExpression(void)
 		NEXT_TOKEN;
 		return expr;
 
+	case TK_LPAREN:
+		NEXT_TOKEN;
+		expr = ParseExpression();
+		Expect(TK_RPAREN);
+		return expr;
 
 	default:
 		// Error(&TokenCoord, "Expect identifier, string, constant or (");

@@ -186,7 +186,7 @@ static void EmitCall(IRInst inst)
 	SpillReg(X86Regs[ECX]);
 	SpillReg(X86Regs[EDX]);
 
-	PutASMCode(X86_CALL, inst->opds);
+	PutASMCode(SRC1->kind == SK_Function ? X86_CALL : X86_ICALL, inst->opds);
 
 	if(stksize != 0){
 		Symbol p;
@@ -250,6 +250,17 @@ static void EmitAddress(IRInst inst)
 	PutASMCode(X86_ADDR, inst->opds);
 	//ModifyVar(DST);
 }
+static void EmitMoveBBlock(IRInst inst)
+{
+	if (inst->ty->size == 0)
+		return ;
+	SpillReg(X86Regs[EDI]);
+	SpillReg(X86Regs[ESI]);
+	SpillReg(X86Regs[ECX]);
+	
+	SRC2 = IntConstant(inst->ty->size);
+	PutASMCode(X86_MOVB, inst->opds);
+}
 /**
  * Emit assembly code for move
  */
@@ -257,6 +268,10 @@ static void EmitMove(IRInst inst)
 {
 	int tcode = TypeCode(inst->ty);
 	Symbol reg;
+	if (tcode == B) {
+		EmitMoveBBlock(inst);
+		return ;
+	}
 	switch (tcode)
 	{
 		case I1:

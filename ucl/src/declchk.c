@@ -615,7 +615,14 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 		{
 			Error(NULL, "Illegal type");
 			ty = T(INT);
-		}				
+		}		
+		if (IsFunctionType(ty)) {
+			if ((sym = LookupID(initDec->dec->id)) == NULL )
+			{
+				sym = AddFunction(initDec->dec->id, ty, sclass == 0 ? TK_EXTERN : sclass);
+			}
+			goto next;
+		}		
 		if ((sym = LookupID(initDec->dec->id)) == NULL)
 		{
 			sym = AddVariable(initDec->dec->id, ty, sclass);
