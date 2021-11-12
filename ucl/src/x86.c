@@ -365,9 +365,20 @@ static void EmitCast(IRInst inst)
 	int code;
 	dst = DST;
 	reg = NULL;
-	code = inst->opcode + X86_TRUI1 - TRUI1;
+	code = inst->opcode + X86_EXTI1 - EXTI1;
 	switch(code) 
 	{
+	case X86_EXTI1:
+		AllocateReg(inst, 0);
+		if (DST->reg == NULL) {
+			DST = GetReg();
+		}
+		PutASMCode(code, inst->opds);
+		if (dst != DST) {
+			Move(X86_MOVI4, dst, DST);
+		}
+		break;
+
 	case X86_TRUI1:
 		if (SRC1->reg != NULL) {
 			reg = X86ByteRegs[SRC1->reg->val.i[0]];

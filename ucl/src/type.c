@@ -24,6 +24,7 @@ Type PointerTo(Type ty)
 
 	pty->categ = POINTER;
 	pty->qual = 0;
+	pty->align = T(POINTER)->align;
 	pty->size = T(POINTER)->size;
 	pty->bty = ty;
 	return pty;
@@ -60,6 +61,7 @@ Type ArrayOf(int len, Type ty)
 	CALLOC(aty);
 	aty->categ = ARRAY;
 	aty->size = len * ty->size;
+	aty->align = ty->align;
 	aty->bty = ty;
 	return (Type)aty;
 }
@@ -70,6 +72,7 @@ Type FunctionReturn(Type ty, Signature sig)
 
 	fty->categ = FUNCTION;
 	fty->size = T(POINTER)->size;
+	fty->align = T(POINTER)->align;
 	fty->sig = sig;
 	fty->bty = ty;
 	return (Type)fty;
@@ -92,7 +95,7 @@ void SetupTypeSystem(void)
 
 	ALLOC(fty);
 	fty->categ = FUNCTION;
-	fty->size = T(POINTER)->size;
+	fty->align = fty->size = T(POINTER)->size;
 	fty->bty = T(INT);
 
 	ALLOC(fty->sig);

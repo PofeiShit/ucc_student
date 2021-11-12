@@ -198,6 +198,8 @@ static Symbol TranslateCast(Type ty, Type sty, Symbol src)
 	}
 	switch(scode) 
 	{
+	case I1:
+		opcode = EXTI1; break;
 	case I4:
 		if (dcode <= I1) 
 			opcode = TRUI1;

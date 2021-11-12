@@ -398,6 +398,12 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 	if (IsScalarType(ty)) {
 		p = init;
 		p->expr = Adjust(CheckExpression(p->expr), 1);
+		// CanAssign
+		{
+			Type lty = ty, rty = p->expr->ty;
+			if ( !((IsPtrType(lty) && IsIntegType(rty) || IsPtrType(rty) && IsIntegType(lty)) && (lty->size == rty->size)) )
+				p->expr = Cast(ty, p->expr);
+		}
 		ALLOC(initd);
 		initd->offset = *offset;
 		initd->expr = p->expr;

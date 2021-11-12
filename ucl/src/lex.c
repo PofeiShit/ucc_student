@@ -378,6 +378,17 @@ static int ScanNumericLiteral(void)
 		return ScanIntLiteral(start, (int)(CURSOR - start), base);
 	}
 }
+static char ScanEscapeChar()
+{
+	CURSOR++;
+	switch (*CURSOR++) {
+		case 'n':
+			return '\n';
+		default:
+			Warning(NULL, "Unrecognized escape character:\\%c", *CURSOR);
+			return *CURSOR;
+	}
+}
 
 static int ScanStringLiteral(void)	// "abc"  or L"abc"
 {
@@ -397,7 +408,9 @@ static int ScanStringLiteral(void)	// "abc"  or L"abc"
 	{
 		if (*CURSOR == '\n' || IS_EOF(CURSOR))
 			break;
-		else{
+		if (*CURSOR == '\\') {
+			ch = ScanEscapeChar();
+		} else {
             ch = *CURSOR;
             CURSOR++;
 		}

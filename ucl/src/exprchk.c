@@ -109,7 +109,7 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 	// TODO:delete old style
 	if (!fty->sig->hasProto) 
 	{
-		// arg = PromoteArgument(arg);
+		arg = PromoteArgument(arg);
 		*argFull = 0;
 		return arg;
 	} else if (argNo <= parLen) {

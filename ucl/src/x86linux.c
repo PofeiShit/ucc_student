@@ -2,7 +2,7 @@
 #include "target.h"
 #include "reg.h"
 #include "output.h"
-
+static int ORG;
 static char *ASMTemplate[] =
 {
 #define TEMPLATE(code, str) str, 
@@ -80,9 +80,18 @@ static char* GetAccessName(Symbol p)
 	return p->aname;
 }
 
+static void Align(Symbol p)
+{
+	int align = p->ty->align;
+	if (ORG % align != 0) {
+		Print(".align %d\n", align);
+		ORG = ALIGN(ORG, align);
+	}
+	ORG += p->ty->size;
+}
 void DefineGlobal(Symbol p)
 {
-	// Align(p);
+	Align(p);
 	if (p->sclass != TK_STATIC)
 	{
 		Export(p);

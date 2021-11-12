@@ -43,6 +43,7 @@ static void EmitGlobals(void)
 					}
 					PutString("\n");
 				} else {
+					// printf("%d-%d\n", initd->expr->ty->categ, initd->expr->val.i[0]);
 					DefineValue(initd->expr->ty, initd->expr->val);
 				}
 				size = initd->offset + initd->expr->ty->size;
