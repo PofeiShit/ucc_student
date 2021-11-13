@@ -4,7 +4,7 @@
 enum 
 { 
 	SK_Tag, SK_TypedefName, SK_Temp, SK_String, SK_Label, SK_Constant, SK_Variable, 
-	SK_Function, SK_Register, SK_IRegister, SK_Offset
+	SK_Function, SK_Register, SK_IRegister, SK_Offset, SK_EnumConstant,
 };
 
 #define SYM_HASH_MASK 127
@@ -61,6 +61,7 @@ void ExitScope(void);
 #define AsVar(sym) ((VariableSymbol)sym)
 #define AsFunc(sym) ((FunctionSymbol)sym)
 
+Symbol AddEnumConstant(char *id, Type ty, int val);
 Symbol AddConstant(Type ty, union value val);
 Symbol AddVariable(char *id, Type ty, int sclass);
 Symbol AddFunction(char *id, Type ty, int sclass);

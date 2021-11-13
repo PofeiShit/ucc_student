@@ -14,6 +14,7 @@ TOKEN(TK_SHORT,		"short")
 
 TOKEN(TK_INT, 		"int")
 TOKEN(TK_VOID,      "void")
+TOKEN(TK_ENUM,      "enum")
 TOKEN(TK_STRUCT,    "struct")
 TOKEN(TK_RETURN, 	"return")
 TOKEN(TK_SIZEOF,    "sizeof")

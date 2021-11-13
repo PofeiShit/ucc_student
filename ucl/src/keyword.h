@@ -31,6 +31,7 @@ static struct keyword keywordsD[] =
 static struct keyword keywordsE[] =
 {
 	{"else", 4, TK_ELSE},
+	{"enum", 4, TK_ENUM},
 	{"extern", 6, TK_EXTERN},
 	{NULL, 	0, TK_ID},
 };

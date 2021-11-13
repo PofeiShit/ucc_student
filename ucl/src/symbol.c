@@ -240,6 +240,16 @@ Symbol AddFunction(char *name, Type ty, int sclass)
 
 }
 
+Symbol AddEnumConstant(char *name, Type ty, int val)
+{
+	Symbol p;
+	CALLOC(p);
+	p->kind = SK_EnumConstant;
+	p->name = name;
+	p->ty = ty;
+	p->val.i[0] = val;
+	return AddSymbol(Identifiers, p);
+}
 Symbol AddConstant(Type ty, union value val)
 {
 	// unsigned h = (unsigned)val.i[0] & SYM_HASH_MASK;

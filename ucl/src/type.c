@@ -77,7 +77,19 @@ Type FunctionReturn(Type ty, Signature sig)
 	fty->bty = ty;
 	return (Type)fty;
 }
+Type Enum(char *id)
+{
+	EnumType ety;
+	ALLOC(ety);
+	ety->categ = ENUM;
+	ety->id = id;
 
+	ety->bty = T(INT);
+	ety->size = ety->bty->size;
+	ety->align = ety->bty->align;
+	ety->qual = 0;
+	return (Type)ety;
+}
 void SetupTypeSystem(void)
 {
 	int i;

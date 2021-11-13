@@ -72,6 +72,20 @@ typedef struct astPointerDeclarator
 	AstNode tyQuals;
 } *AstPointerDeclarator;
 
+typedef struct astEnumerator
+{
+	AST_NODE_COMMON
+	char *id;
+	AstExpression expr;
+} *AstEnumerator;
+
+typedef struct astEnumSpecifier
+{
+	AST_NODE_COMMON
+	char *id;
+	AstNode enumers;
+} *AstEnumSpecifier;
+
 typedef struct astStructSpecifier
 {
 	AST_NODE_COMMON

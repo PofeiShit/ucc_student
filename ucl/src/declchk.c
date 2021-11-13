@@ -231,7 +231,62 @@ chk_decls:
 	EndRecord(ty);
 	return ty;	
 }
-
+static void CheckEnumRedeclaration(AstEnumerator enumer)
+{
+	Symbol sym;
+	sym = LookupID(enumer->id);
+	if (sym && sym->level == Level) {
+		if(sym->kind != SK_EnumConstant) {
+			Error(NULL, "\'%s\'redeclared as different kind of symbol", enumer->id);
+		} else {
+			Error(NULL, "redeclaration of enumerator \'%s\'", enumer->id);
+		}
+    }
+}
+static int CheckEnumerator(AstEnumerator enumer, int last, Type ty)
+{
+	CheckEnumRedeclaration(enumer);
+	if (enumer->expr == NULL) {
+		AddEnumConstant(enumer->id, ty, last + 1);
+		return last + 1;
+	} else {
+		enumer->expr = CheckConstantExpression(enumer->expr);
+		AddEnumConstant(enumer->id, ty, enumer->expr->val.i[0]);
+		return enumer->expr->val.i[0];
+	}
+}
+static Type CheckEnumSpecifier(AstEnumSpecifier enumSpec)
+{
+	AstEnumerator enumer;
+	Symbol tag;
+	Type ty;
+	int last;
+	if (enumSpec->id == NULL && enumSpec->enumers == NULL)
+		return T(INT);
+	if (enumSpec->id != NULL && enumSpec->enumers == NULL) {
+		tag = LookupTag(enumSpec->id);
+		if (tag == NULL)
+			tag = AddTag(enumSpec->id, Enum(enumSpec->id));
+		return tag->ty;
+	} else if (enumSpec->id == NULL && enumSpec->enumers != NULL) {
+		ty = T(INT);
+	} else {
+		EnumType ety;
+		tag = LookupTag(enumSpec->id);
+		if (tag == NULL || tag->level < Level) {
+			tag = AddTag(enumSpec->id, Enum(enumSpec->id));
+		}
+		ety = (EnumType)tag->ty;
+		ty = tag->ty;
+	}
+	enumer = (AstEnumerator)enumSpec->enumers;
+	last = -1;
+	while (enumer) {
+		last = CheckEnumerator(enumer, last, ty);
+		enumer = (AstEnumerator)enumer->next;
+	}
+	return ty;
+}
 static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
 	AstToken tok;
@@ -256,6 +311,9 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		if (p->kind == NK_StructSpecifier)
 		{
 			ty = CheckStructOrUnionSpecifier((AstStructSpecifier)p);
+			tyCnt++;
+		} else if (p->kind == NK_EnumSpecifier) {
+			ty = CheckEnumSpecifier((AstEnumSpecifier)p);
 			tyCnt++;
 		} else if (p->kind == NK_TypedefName) {
 			Symbol sym = LookupID(((AstTypedefName)p)->id);

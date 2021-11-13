@@ -20,6 +20,13 @@ typedef struct type
 	TYPE_COMMON
 } *Type;
 
+typedef struct enumType
+{
+	TYPE_COMMON
+	char *id;
+	int complete;
+} *EnumType;
+
 typedef struct arrayType
 {
 	TYPE_COMMON
@@ -107,7 +114,7 @@ Type Qualify(int qual, Type ty);
 Type ArrayOf(int len, Type ty);
 Type FunctionReturn(Type ty, Signature sig);
 Type Promote(Type ty);
-
+Type Enum(char *id);
 Type CommonRealType(Type ty1, Type ty2);
 int TypeCode(Type ty);
 Type AdjustParameter(Type ty);

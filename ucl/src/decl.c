@@ -144,6 +144,57 @@ lbrace:
 			return stSpec;
 	}
 }
+static AstEnumerator ParseEnumerators()
+{
+	AstEnumerator enumer;
+	CREATE_AST_NODE(enumer, Enumerator);
+	if (CurrentToken != TK_ID) {
+		Error(NULL, "The enumeration constant must be identifer");
+		return enumer;
+	}
+	enumer->id = (char*)TokenValue.p;
+	NEXT_TOKEN;
+	if (CurrentToken == TK_ASSIGN) {
+		NEXT_TOKEN;
+		enumer->expr = ParseConstantExpression();
+	}
+	return enumer;
+}	
+static AstEnumSpecifier ParseEnumSpecifiers()
+{
+	AstEnumSpecifier enumSpec;
+	AstNode *tail;
+	CREATE_AST_NODE(enumSpec, EnumSpecifier);
+	NEXT_TOKEN;
+	if (CurrentToken == TK_ID) {
+		enumSpec->id = (char*)TokenValue.p;
+		NEXT_TOKEN;
+		if (CurrentToken == TK_LBRACE) 
+			goto enumerator_list;
+	} else if (CurrentToken == TK_LBRACE) {
+enumerator_list:
+		NEXT_TOKEN;
+		if (CurrentToken == TK_RBRACE) {
+			NEXT_TOKEN;
+			Error(NULL, "Expect identifiers before '}' token");
+			return enumSpec;
+		}
+		enumSpec->enumers = (AstNode)ParseEnumerators();
+		tail = &enumSpec->enumers->next;
+		while (CurrentToken == TK_COMMA) {
+			NEXT_TOKEN;
+			if (CurrentToken == TK_RBRACE)
+				break;
+			*tail = (AstNode)ParseEnumerators();
+			tail = &(*tail)->next;
+		}
+		Expect(TK_RBRACE);
+	}
+	else {
+		Error(NULL, "Expect identifers or { after enum");
+	}
+	return enumSpec;
+}
 static AstSpecifiers ParseDeclarationSpecifiers(void)
 {
 	AstSpecifiers specs;
@@ -193,7 +244,7 @@ next_specifiers:
 			break;
 		}
 		return specs;
-	
+
 	case TK_STRUCT:
 		*tsTail = (AstNode)ParseStructOrUnionSpecifier();
 		tsTail = &(*tsTail)->next;	
@@ -208,7 +259,12 @@ next_specifiers:
 		tqTail = &tok->next;
 		NEXT_TOKEN;
 		break;
-		
+	case TK_ENUM:
+		*tsTail = (AstNode)ParseEnumSpecifiers();
+		tsTail = &(*tsTail)->next;
+		seeTy = 1;
+		break;
+
 	default:
 		return specs;
 	}
