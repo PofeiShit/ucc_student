@@ -2,7 +2,11 @@
 #include "target.h"
 #include "reg.h"
 #include "output.h"
+#ifdef __cplusplus
+int ORG;
+#else
 static int ORG;
+#endif
 static char *ASMTemplate[] =
 {
 #define TEMPLATE(code, str) str, 
