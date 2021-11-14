@@ -47,4 +47,5 @@ AstExpression Adjust(AstExpression expr, int rvalue);
 Symbol TranslateExpression(AstExpression expr);
 AstExpression Not(AstExpression expr);
 void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB);
+extern char *OPNames[];
 #endif

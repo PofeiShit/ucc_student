@@ -118,7 +118,7 @@ Type Enum(char *id);
 Type CommonRealType(Type ty1, Type ty2);
 int TypeCode(Type ty);
 Type AdjustParameter(Type ty);
-
+int IsCompatibleType(Type ty1, Type ty2);
 void SetupTypeSystem(void);
 extern struct type Types[VOID - CHAR + 1];
 extern Type DefaultFunctionType;

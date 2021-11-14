@@ -256,3 +256,26 @@ Type CommonRealType(Type ty1, Type ty2)
 
 	return T(ty2->categ + 1);
 }
+int IsCompatibleType(Type ty1, Type ty2)
+{
+	if (ty1 == ty2)
+		return 1;
+	if (ty1->qual != ty2->qual)
+		return 0;
+	ty1 = Unqual(ty1);
+	ty2 = Unqual(ty2);
+	if (ty1->categ != ty2->categ)
+		return 0;
+	
+	switch(ty1->categ)
+	{
+		case POINTER:
+			return IsCompatibleType(ty1->bty, ty2->bty);
+		case ARRAY:
+			return IsCompatibleType(ty1->bty, ty2->bty) && (ty1->size == ty2->size || ty1->size == 0 || ty2->size == 0);
+		case FUNCTION:
+			return 1;
+		default:
+			return ty1 == ty2;
+	}
+}

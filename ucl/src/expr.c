@@ -21,6 +21,13 @@ static int Prec[] =
 
 AstExpression Constant0;
 
+char *OPNames[] = 
+{
+	#define OPINFO(op, prec, name, func, opcode) name,
+	#include "opinfo.h"
+	NULL
+	#undef OPINFO
+};
 /**
  *  primary-expression:
  *		ID

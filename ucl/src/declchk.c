@@ -700,6 +700,10 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 		// if (sym->sclass == TK_EXTERN){
 		// 	sym->sclass = sclass;			
 		// }
+		if (! IsCompatibleType(ty, sym->ty)) {
+			Error(NULL, "Incompatiable with previous definition", initDec->dec->id);
+			goto next;
+		}
 next:		
 		initDec = (AstInitDeclarator)initDec->next;	
 	}

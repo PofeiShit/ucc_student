@@ -3,10 +3,22 @@
 #include "expr.h"
 #include "decl.h"
 
+#define SWAP_KIDS(expr)					\
+{										\
+     AstExpression t = expr->kids[0]; 	\
+     expr->kids[0] = expr->kids[1];   	\
+     expr->kids[1] = t;   				\
+}
+
 #define PERFORM_ARITH_CONVERSION(expr)                                 \
     expr->ty = CommonRealType(expr->kids[0]->ty, expr->kids[1]->ty);   \
     expr->kids[0] = Cast(expr->ty, expr->kids[0]);                     \
     expr->kids[1] = Cast(expr->ty, expr->kids[1]);
+
+#define REPORT_OP_ERROR											\
+	Error(NULL, "Invalid operands to %s", OPNames[expr->op]);	\
+	expr->ty = T(INT);											\
+	return expr;
 
 static int CanModify(AstExpression expr)
 {
@@ -411,8 +423,17 @@ static AstExpression CheckMultiplicativeOP(AstExpression expr)
 }
 static AstExpression CheckAddOP(AstExpression expr)
 {
-	PERFORM_ARITH_CONVERSION(expr);
-	return expr;
+	Type ty1, ty2;
+	if (expr->kids[0]->op == OP_CONST) {
+		SWAP_KIDS(expr);
+	}
+	ty1 = expr->kids[0]->ty;
+	ty2 = expr->kids[1]->ty;
+	if (BothArithType(ty1, ty2)) {
+		PERFORM_ARITH_CONVERSION(expr);
+		return FoldConstant(expr);
+	}
+	REPORT_OP_ERROR;
 }
 static AstExpression CheckSubOP(AstExpression expr)
 {
