@@ -30,4 +30,5 @@ void SetupLexer(void);
 void BeginPeekToken(void);
 void EndPeekToken(void);
 extern union value TokenValue;
+extern char* TokenStrings[];
 #endif

@@ -14,6 +14,6 @@ mkdir -p build
 pushd build
 cmake .. -DBUILD_LLT=$1
 make -j4
-popd build
+popd
 
-cp ./ucl/ucl ../output/
+cp ./build/ucl/ucl ./output/

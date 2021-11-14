@@ -11,7 +11,7 @@ void Do_Expect(int tok)
 		NEXT_TOKEN;
 		return ;
 	}
-	fprintf(stderr, "Do_Expect(%s %d,%d):", CurFileName, CurFileLineNo, tok);
+	fprintf(stderr, "Do_Expect(%s %d):[%s]\n", CurFileName, CurFileLineNo, TokenStrings[tok - 1]);
 }
 /**
  * Check if current token is in a token set

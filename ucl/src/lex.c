@@ -8,7 +8,12 @@ typedef int (*Scanner)(void);
 static unsigned char  *PeekPoint;
 static union value    PeekValue;
 static Scanner        Scanners[256];
-
+char *TokenStrings[] = 
+{
+	#define TOKEN(k, s) s,
+	#include "token.h"
+	#undef TOKEN
+};
 union value TokenValue;
 #define IS_EOF(cur) (*(cur) == END_OF_FILE && ((cur) - Input.base) == Input.size)
 static void SkipWhiteSpace(void)
