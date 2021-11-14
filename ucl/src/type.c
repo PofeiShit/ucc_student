@@ -34,6 +34,11 @@ static Type DoTypeClone(Type ty)
 	int categ = ty->categ;
 	if (categ == STRUCT) {
 		;
+	} else if (categ == ARRAY) {
+		ArrayType aty;
+		CALLOC(aty);
+		*aty = *((ArrayType)ty);
+		return (Type)aty;
 	} else {
 		Type qty;
 		CALLOC(qty);
