@@ -28,4 +28,5 @@ extern char *ASMFileName;
 extern struct heap ProgramHeap;
 extern struct heap FileHeap;
 extern struct heap StringHeap;
+extern int ErrorCount;
 #endif

@@ -23,11 +23,13 @@ HEAP(FileHeap);
 FILE *ASMFile;
 char *ExtName = ".s";
 char *ASMFileName = NULL;
+int ErrorCount;
 namespace {
 
     void Initialize(void)
     {
         CurrentHeap = &FileHeap;
+        ErrorCount = 0;
         InitSymbolTable();
         ASMFile = NULL;
     }
@@ -2380,7 +2382,23 @@ TEST_F(TestUcl, Test_Typedef)
                             ".comm arr, 48"
                             ".globl ptr"
                             "ptr: .long arr + 32"
-                            ".text\xff";
+                            ".comm c, 4"
+                            ".text"
+                            ".globl g"
+                            "g:"
+                            "   pushl %ebp"
+                            "   pushl %ebx"
+                            "   pushl %esi"
+                            "   pushl %edi"
+                            "   movl %esp, %ebp"
+                            ".BB0:"
+                            ".BB1:"
+                            "   movl %ebp, %esp"
+                            "   popl %edi"
+                            "   popl %esi"
+                            "   popl %ebx"
+                            "   popl %ebp"
+                            "ret\xff";
     std::string testcode;
 
     std::ifstream asmFile(output, std::ifstream::in);

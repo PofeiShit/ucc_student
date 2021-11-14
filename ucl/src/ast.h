@@ -48,7 +48,7 @@ AstDeclaration     ParseDeclaration(void);
 AstExpression      ParseAssignmentExpression(void);
 AstTranslationUnit ParseTranslationUnit(char *file);
 AstTypeName        ParseTypeName(void);
-
+void PostCheckTypedef(void);
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void Translate(AstTranslationUnit transUnit);
 void EmitTranslationUnit(AstTranslationUnit transUnit);

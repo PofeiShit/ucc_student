@@ -149,7 +149,7 @@ AstStatement ParseCompoundStatement(void)
 	while (CurrentTokenIn(FIRST_Declaration))
 	{
 		// for example, 	"f(20,30);",  f is an id;  but f(20,30) is a statement, not declaration.
-		if (CurrentToken == TK_ID)
+		if (CurrentToken == TK_ID && !IsTypeName(CurrentToken))
 			break;
 
 		*tail = (AstNode)ParseDeclaration();
@@ -165,6 +165,7 @@ AstStatement ParseCompoundStatement(void)
 			break;
 	}
 	Expect(TK_RBRACE);
+	PostCheckTypedef();
 	Level--;
 		
 	return (AstStatement)compStmt;

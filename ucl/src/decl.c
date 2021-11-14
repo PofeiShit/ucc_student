@@ -46,8 +46,14 @@ static void CheckTypedefName(int sclass, char *id)
 		tn->overload = 0;
 		INSERT_ITEM(v, tn);
 	} else {
-		// TODO overload
-		;
+		FOR_EACH_ITEM(TDName, tn, v)
+			if (tn->id == id && Level > tn->level) {
+				tn->overload = 1;
+				tn->overloadLevel = Level;
+				INSERT_ITEM(OverloadNames, tn);
+				return ;
+			}
+		ENDFOR
 	}
 }
 static void PreCheckTypedef(AstDeclaration decl)
@@ -63,7 +69,21 @@ static void PreCheckTypedef(AstDeclaration decl)
 		p = p->next;
 	}
 }
+void PostCheckTypedef(void)
+{
+	TDName tn;
+	int overloadCount = 0;
 
+	FOR_EACH_ITEM(TDName, tn, OverloadNames)
+		if (Level <= (tn->overloadLevel)) {
+			tn->overload = 0;
+		} else if (tn->overload != 0) {
+			overloadCount++;
+		}
+	ENDFOR
+	if (overloadCount == 0)
+		OverloadNames->len = 0;
+}
 static AstStructDeclaration ParseStructDeclaration(void)
 {
 	AstStructDeclaration stDecl;
@@ -489,7 +509,7 @@ AstDeclaration ParseDeclaration(void)
 
 	decl = ParseCommonHeader();
 	Expect(TK_SEMICOLON);
-
+	PreCheckTypedef(decl);
 	return decl;
 }
 /**
@@ -541,15 +561,17 @@ static AstNode ParseExternalDeclaration(void)
 		func->dec = (AstDeclarator)initDec->dec;
 		//printf("%s\n", decl->dec->dec->kind);
 		func->fdec = fdec;
-
+		Level++;
 		if (func->fdec->paramTyList) {
 			AstNode p = func->fdec->paramTyList->paramDecls;
 			while (p)
 			{
+				CheckTypedefName(0, GetOutermostID(((AstParameterDeclaration)p)->dec));
 				p = p->next;
 			}
 
 		}
+		Level--;
 		func->stmt = ParseCompoundStatement();
 		return (AstNode)func;
 	}

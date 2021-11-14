@@ -4,7 +4,7 @@ void Do_Error(Coord coord, const char *format, ...)
 {
 	va_list ap;
 
-	//ErrorCount++;
+	ErrorCount++;
 	if (coord)
 	{
 		fprintf(stderr, "(%s,%d):", coord->filename, coord->ppline);

@@ -9,8 +9,10 @@ HEAP(FileHeap);
 FILE *ASMFile;
 char *ExtName = ".s";
 char *ASMFileName = NULL;
+int ErrorCount;
 static void Initialize(void)
 {
+	ErrorCount = 0;
 	CurrentHeap = &FileHeap;
 	InitSymbolTable();
 	ASMFile = NULL;
@@ -26,8 +28,11 @@ static void Compile(char *file)
 
     // parse preprocessed C file, generate an abstract syntax tree
 	transUnit = ParseTranslationUnit(file);
-
+	if (ErrorCount)
+		goto exit;
 	CheckTranslationUnit(transUnit);
+	if (ErrorCount)
+		goto exit;
 	// translate the abstract synatx tree into intermediate code
 	Translate(transUnit);
 
@@ -35,6 +40,7 @@ static void Compile(char *file)
 	// The kernel function is EmitIRInst(inst).
 	// for example, see function EmitAssign(IRInst inst) 
 	EmitTranslationUnit(transUnit);
+exit:
 	Finalize();
 }
 
