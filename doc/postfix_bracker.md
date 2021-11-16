@@ -179,3 +179,65 @@ void main()
 }
 符号ptr2的类型T(Pointer)->T(Pointer)->T(INT), ptr2[0][0] 先将 ptr2 地址放到寄存器%eax, 然后addl offset %eax, 然后解引用 movl (%eax), %ecx, 然后IndirectMove, movl $5, (%ecx);
 
+# 例子3
+```
+int arr[3][4][5][6];
+int *ptr1 = &arr[0][0][0][0];
+int ** ptr2 = &ptr1;
+int *** ptr3 = &ptr2;
+int **** ptr4 = &ptr3;
+void main()
+{
+    ptr4[0][0][0][0] = 1;
+}
+```
+1.符号ptr4的类型T(Pointer)->T(Pointer)->T(Pointer)->T(Pointer)->T(INT); 符号ptr3的类型 T(Pointer)->T(Pointer)->T(Pointer)->T(INT);
+
+2.ptr[0][0][0][0]的语法树如下
+```
+                []
+                /\
+               [] 0
+               /\
+              [] 0
+              /\
+            []  0
+            /\
+        ptr4  0
+```
+在做语义检查的时候，一致递归到ptr4，获得ptr4的类型，返回第四层节点[]的类型T(Pointer)->T(Pointer)->T(Pointer)->T(INT)。判断 if (!expr->kids[0]->isarray && expr-ty->categ != ARRAY) 也就是说ptr4不是数组类型，ptr4[0]也不是数组类型，所以条件成立。构造出如下语法树:
+```
+        *(ty:T(Pointer)->T(Pointer)->T(Pointer)->T(INT))
+       / \
+      +(ty:T(Pointer)->T(Pointer)->T(Pointer)->T(Pointer)->T(INT))
+     / \
+  ptr4  0
+```
+最终语法树转换成如下:
+```
+                      *
+                     / \
+                    +   0
+                   / \
+                  *   0
+                 / \
+                +   0
+               / \
+              *   0
+             / \
+            +   0
+           / \
+          *   0
+         / \
+        +   0
+       / \
+    ptr4  0
+```
+然后中间代码生成递归Deref，生成汇编代码:
+```
+	movl ptr4, %eax
+	movl (%eax), %ecx
+	movl (%ecx), %eax
+	movl (%eax), %edx
+    mvol $1, (%edx)
+```

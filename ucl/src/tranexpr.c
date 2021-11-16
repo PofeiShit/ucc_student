@@ -138,8 +138,22 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 	} while (p->op == OP_INDEX);
 	// printf("coff:%d-%d-%d\n", coff, p->ty->categ, p->isarray);
 	if (!p->isarray) {
-		expr->op = OP_DEREF;
-		return Deref(expr->ty, Simplify(T(POINTER), ADD, (Symbol)p->val.p, IntConstant(coff)));
+		/*
+			int arr[3][4];
+			typedef int (*ArrPtr)[4];
+			ArrPtr ptr = &arr[0];
+			void main()
+			{
+				ptr[1][2] = 1; // get here
+			}
+		*/
+		addr = Simplify(T(POINTER), ADD, (Symbol)p->val.p, IntConstant(coff));
+		printf("%d\n", expr->lvalue);
+		if (expr->lvalue) {
+			expr->op = OP_DEREF;
+			return addr;
+		}
+		return Deref(expr->ty, addr);
 	}
 	// adddr = TranslateExpression(p);
 	// dst = Offset(expr->ty, addr, voff, coff);
@@ -233,7 +247,11 @@ static Symbol TranslateUnaryExpression(AstExpression expr)
 	case OP_ADDRESS:
 		return AddressOf(src);
 	case OP_DEREF: // *a
-		return Deref(expr->ty, src);
+		/*
+		case *a = 1 is a left value, Deref is done by TranslateAssignment without duplicate.
+		case c = *a is Deref below;
+		*/
+		return expr->lvalue ? src : Deref(expr->ty, src);
 	case OP_NEG:
 	case OP_COMP:
 		return Simplify(expr->ty, OPMap[expr->op], src, NULL);

@@ -91,12 +91,14 @@ AstExpression Adjust(AstExpression expr, int rvalue)
 	if (rvalue) {
 		qual = expr->ty->qual;
 		expr->ty = Unqual(expr->ty);
+		expr->lvalue = 0;
 	}
 	if (expr->ty->categ == FUNCTION) {
 		expr->ty = PointerTo(expr->ty);
 	} else if (expr->ty->categ == ARRAY) {
 		expr->ty = PointerTo(Qualify(qual, expr->ty->bty));
 		expr->isarray = 1;
+		expr->lvalue = 0;
 	}
 	return expr;
 }
@@ -233,8 +235,30 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 			expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
 			if (IsObjectPtr(expr->kids[0]->ty) && IsIntegType(expr->kids[1]->ty)) {
 				expr->ty = expr->kids[0]->ty->bty;
-				// printf("cpe:%d\n", expr->ty->size);
+				/*
+					int arr[2][1];
+					arr[1]  is considered a left value here(not accurate)                                
+					arr[1] is an array, not a left value.                                                
+					Later, jump out recursive, upper Adjust(...) will set lvalue to 0. 
+					And arr[1][1] can be a left value
+				*/
+				expr->lvalue = 1;
 				expr->kids[1] = ScalePointerOffset(expr->kids[1], expr->ty->size);	
+				if (!expr->kids[0]->isarray && expr->ty->categ != ARRAY) {
+					AstExpression deref, addExpr;
+					CREATE_AST_NODE(deref, Expression);
+					CREATE_AST_NODE(addExpr, Expression);
+					deref->op = OP_DEREF;
+					deref->ty = expr->kids[0]->ty->bty;
+					deref->kids[0] = addExpr;
+
+					addExpr->op = OP_ADD;
+					addExpr->ty = expr->kids[0]->ty;
+					addExpr->kids[0] = expr->kids[0];
+					addExpr->kids[1] = expr->kids[1];
+					deref->lvalue = 1;
+					return deref;
+				}
 			}
 			return expr;
 

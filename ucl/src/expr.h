@@ -25,7 +25,7 @@ struct astExpression
 	int op : 16;
 	int isarray : 1;
 	// int isfunc  : 1;
-	// int lvalue  : 1;
+	int lvalue  : 1;
 	// int bitfld  : 1;
 	// int inreg   : 1;
 	// int unused  : 11;
