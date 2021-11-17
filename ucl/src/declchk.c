@@ -473,7 +473,31 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 		int start = *offset;
 		// printf("Check%d-%d-%d\n", init->lbrace, start, ty->categ);
 		p = init->lbrace ? (AstInitializer)init->initials : init;
-		// TODO char buf[] = "abcdef"
+		// char buf[] = "abcdef" || char buf[] = {"abcdef"};
+		if (((init->lbrace && !p->lbrace && p->next == NULL) || !init->lbrace)
+			&&  p->expr->op == OP_STR
+			&& ty->bty->categ / 2 == p->expr->ty->bty->categ / 2
+			&& ty->bty->categ != ARRAY) {
+			size = p->expr->ty->size;
+			if (ty->size == 0) { // char buf[] = "abcdef";
+				ArrayType aty = (ArrayType)ty;
+				aty->size = size;
+				if (aty->bty->size != 0)
+					aty->len = size / aty->bty->size;
+			} else if (ty->size == size - p->expr->ty->bty->size) // char buf[6] = "abcdef";
+				p->expr->ty->size = size - p->expr->ty->bty->size;
+			else if (ty->size < size) { // char buf[3] = "abcdef"
+				p->expr->ty->size = ty->size;
+				Warning(NULL, "initialize-string for char array is too long");
+			}
+			ALLOC(initd);
+			initd->offset = *offset;
+			initd->expr = p->expr;
+			initd->next = NULL;
+			(*tail)->next = initd;
+			*tail = initd;
+			return (AstInitializer)init->next;
+		}
 		while (p) {
 			p = CheckInitializerInternal(tail, p, ty->bty, offset, error);
 			size += ty->bty->size;
@@ -525,6 +549,16 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 	}
 	return init;
 }
+static int CheckCharArrayInit(AstExpression expr, Type bty)
+{
+	if (expr->op == OP_STR) {
+		if ( (bty->categ == CHAR || bty->categ == UCHAR) && expr->ty->bty->categ == CHAR) {
+			return 1;
+		}
+	}
+	Error(NULL, "array initializer must be an initializer list");
+	return 0;
+}
 static void CheckInitializer(AstInitializer init, Type ty)
 {
 	int offset = 0, error = 0;
@@ -533,11 +567,9 @@ static void CheckInitializer(AstInitializer init, Type ty)
 	header.next = NULL;
 
 	if (ty->categ == ARRAY && !init->lbrace) {
-		// TODO:char arr[] = "abcdfe";
-		// if (!CheckArrayInit(init->expr, ty->bty)) {
-		// 	return ;
-		// }
-		return ;
+		if (!CheckCharArrayInit(init->expr, ty->bty)) {
+			return ;
+		}
 	}
 	CheckInitializerInternal(&tail, init, ty, &offset, &error);
 	if (error)

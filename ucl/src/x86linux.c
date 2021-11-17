@@ -87,6 +87,7 @@ static char* GetAccessName(Symbol p)
 static void Align(Symbol p)
 {
 	int align = p->ty->align;
+	// printf("align:%s-%d-%d-%d\n", p->name, ORG, align, p->ty->size);
 	if (ORG % align != 0) {
 		Print(".align %d\n", align);
 		ORG = ALIGN(ORG, align);

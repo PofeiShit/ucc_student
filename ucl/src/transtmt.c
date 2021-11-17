@@ -49,7 +49,12 @@ static void TranslateCompoundStatement(AstStatement stmt)
 		}
 		while (initd) {
 			ty = initd->expr->ty;
-			src = TranslateExpression(initd->expr);
+			if (initd->expr->op == OP_STR) {
+				String str = (String)initd->expr->val.p;
+				src = AddString(ArrayOf(str->len + 1, ty->bty), str);
+			} else {
+				src = TranslateExpression(initd->expr);
+			}
 			dst = CreateOffset(ty, v, initd->offset);
 			GenerateMove(ty, dst, src);
 			initd = initd->next;

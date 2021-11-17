@@ -42,7 +42,11 @@ static void EmitGlobals(void)
 						Print("%s%d", n > 0 ? " + " : " - ", n);
 					}
 					PutString("\n");
-				} else {
+				} else if (initd->expr->op == OP_STR) {
+					String str = (String)initd->expr->val.p;
+					size = initd->expr->ty->size / initd->expr->ty->bty->size;
+					DefineString(str, size);
+				}  else {
 					// printf("%d-%d\n", initd->expr->ty->categ, initd->expr->val.i[0]);
 					DefineValue(initd->expr->ty, initd->expr->val);
 				}
