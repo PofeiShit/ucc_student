@@ -93,6 +93,7 @@ static struct keyword keywordsR[] =
 };
 static struct keyword keywordsS[] =
 {
+	{"short", 5, TK_SHORT},
 	{"signed", 6, TK_SIGNED},
 	{"sizeof", 6, TK_SIZEOF},
 	{"static", 6, TK_STATIC},

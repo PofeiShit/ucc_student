@@ -243,6 +243,7 @@ next_specifiers:
 	case TK_VOID:
 	case TK_CHAR:
 	case TK_INT:
+	case TK_SHORT:
 	case TK_UNSIGNED:
 	case TK_SIGNED:
 		CREATE_AST_NODE(tok, Token);

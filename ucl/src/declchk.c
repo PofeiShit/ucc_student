@@ -292,8 +292,8 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	AstToken tok;
 	AstNode p;
 	Type ty;
-	int sign = 0;
-	int tyCnt = 0, signCnt = 0;
+	int sign = 0, size = 0;
+	int tyCnt = 0, signCnt = 0, sizeCnt = 0;
 	int qual = 0;
 	//storage-class-specifier:		extern	, auto,	static, register, ... 
 	tok = (AstToken)specs->stgClasses;
@@ -331,6 +331,10 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 					sign = tok->token;
 					signCnt++;
 					break;
+				case TK_SHORT:
+					size = tok->token;
+					sizeCnt++;
+					break;
 
 				case TK_CHAR:
 					ty = T(CHAR);
@@ -360,7 +364,13 @@ static void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	} 
 	if (ty == T(INT)) {
 		sign = (sign == TK_UNSIGNED);
-		ty = T(INT + sign);
+		switch (size) {
+			case TK_SHORT:
+				ty = T(SHORT + sign);
+				break;
+			default:
+				ty = T(INT + sign);
+		}
 	} else if (sign != 0)
 		goto err;
 

@@ -340,7 +340,9 @@ static void EmitAssign(IRInst inst)
 			AddVarToReg(X86Regs[EAX], DST);
 		break;
 	case X86_LSHI4:
+	case X86_LSHU4:
 	case X86_RSHI4:
+	case X86_RSHU4:
 		goto put_code;
 	case X86_NEGI4:
 	case X86_COMPI4:
@@ -369,6 +371,7 @@ static void EmitCast(IRInst inst)
 	switch(code) 
 	{
 	case X86_EXTI1:
+	case X86_EXTI2:
 		AllocateReg(inst, 0);
 		if (DST->reg == NULL) {
 			DST = GetReg();

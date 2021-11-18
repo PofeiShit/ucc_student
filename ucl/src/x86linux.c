@@ -294,6 +294,10 @@ void DefineValue(Type ty, union value val)
 	case U1:
 		Print(".byte\t%d\n", val.i[0] & 0xff);
 		break;
+	case I2:
+	case U2:
+		Print(".word\t%d\n", val.i[0] & 0xffff);
+		break;
 	case I4:
 	case U4:
 		// a: .long 3

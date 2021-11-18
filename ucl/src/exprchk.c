@@ -51,6 +51,10 @@ AstExpression Cast(Type ty, AstExpression expr)
 		expr->ty = ty;
 		return expr;
 	}
+	if (scode < I4) {
+		expr = CastExpression(T(INT), expr);
+		scode = I4;
+	}
 	if (scode != dcode) {
 		if (dcode < I4) {
 			expr = CastExpression(T(INT), expr);

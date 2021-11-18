@@ -100,6 +100,7 @@ void SetupTypeSystem(void)
 	int i;
 	FunctionType fty;
 	T(CHAR)->size = T(UCHAR)->size = CHAR_SIZE;
+	T(SHORT)->size = T(SHORT)->size = SHORT_SIZE;
 	T(INT)->size = T(UINT)->size = INT_SIZE;
 	T(POINTER)->size = INT_SIZE;
 	T(POINTER)->bty = T(INT);

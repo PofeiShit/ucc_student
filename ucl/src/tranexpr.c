@@ -214,10 +214,20 @@ static Symbol TranslateCast(Type ty, Type sty, Symbol src)
 	{
 	case I1:
 		opcode = EXTI1; break;
+	case I2:
+		opcode = EXTI2; break;
 	case I4:
 		if (dcode <= I1) 
 			opcode = TRUI1;
 		else {
+			Symbol temp = CreateTemp(ty);
+			GenerateMove(ty, temp, src);
+			return temp;
+		}
+		break;
+
+	case U4:
+		{
 			Symbol temp = CreateTemp(ty);
 			GenerateMove(ty, temp, src);
 			return temp;
