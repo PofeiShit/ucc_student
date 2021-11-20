@@ -673,6 +673,12 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 			// Error(&initDec->coord, "Illegal type");
 			ty = T(INT);
 		}				
+		if (IsFunctionType(ty)) {
+			if ((sym == LookupID(initDec->dec->id)) == NULL) {
+				sym = AddFunction(initDec->dec->id, ty, TK_EXTERN);
+			}
+			goto next;
+		}
 		if ((sym = LookupID(initDec->dec->id)) == NULL || sym->level < Level)
 		{
 			VariableSymbol vsym;

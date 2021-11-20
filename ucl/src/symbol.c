@@ -231,7 +231,7 @@ Symbol AddFunction(char *name, Type ty, int sclass)
 	p->lastv = &p->params;
 	*FunctionTail = (Symbol)p;
 	FunctionTail = &p->next;
-	if(Identifiers  != &GlobalIDs){
+	if(Identifiers != &GlobalIDs){
 		AddSymbol(Identifiers, (Symbol)p);		
 	}
 

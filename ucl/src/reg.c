@@ -22,6 +22,16 @@ Symbol X86ByteRegs[EDI + 1];
 int UsedRegs;
 void SpillReg(Symbol reg)
 {
+	Symbol p;
+	p = reg->link;
+	while (p) {
+		p->reg = NULL;
+		if (p->needwb && p->ref > 0) {
+			p->needwb = 0;
+			StoreVar(reg, p);
+		}
+		p = p->link;
+	}
 	reg->link = NULL;
 }
 

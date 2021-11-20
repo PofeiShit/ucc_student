@@ -346,7 +346,7 @@ static AstParameterDeclaration ParseParameterDeclaration(void)
 	AstParameterDeclaration paramDecl;
 	CREATE_AST_NODE(paramDecl, ParameterDeclaration);
 	paramDecl->specs = ParseDeclarationSpecifiers();
-	paramDecl->dec = (AstDeclarator)ParseDeclarator(DEC_CONCRETE);
+	paramDecl->dec = (AstDeclarator)ParseDeclarator(DEC_CONCRETE | DEC_ABSTRACT);
 	return paramDecl;
 }
 

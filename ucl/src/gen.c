@@ -55,6 +55,9 @@ void GenerateAssign(Type ty, Symbol dst, int opcode, Symbol src1, Symbol src2)
 	//assert(dst->kind == SK_Temp);
 
 	ALLOC(inst);
+	dst->ref++;
+	src1->ref++;
+	if (src2) src2->ref++;
 	inst->ty = ty;
 	inst->opcode = opcode;
 	inst->opds[0] = dst;
@@ -180,7 +183,11 @@ void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, Vector args)
 {
 	ILArg p;
 	IRInst inst;
+	if (recv) recv->ref++;
 	faddr->ref++;
+	FOR_EACH_ITEM(ILArg, p, args)
+		p->sym->ref++;
+	ENDFOR
 	ALLOC(inst);
 	inst->ty = ty;
 	inst->opcode = CALL;
@@ -205,9 +212,9 @@ void GenerateBranch(Type ty, BBlock dstBB, int opcode, Symbol src1, Symbol src2)
 	IRInst inst;
 
 	ALLOC(inst);
-	// dstBB->ref++;
-	// src1->ref++;
-	// if (src2) src2->ref++;
+	dstBB->ref++;
+	src1->ref++;
+	if (src2) src2->ref++;
 	// DrawCFGEdge(CurrentBB, dstBB);
 	inst->ty = ty;
 	inst->opcode  = opcode;

@@ -53,6 +53,15 @@ static void EmitBranch(IRInst inst)
 		if (SRC2->kind != SK_Constant) 
 			SRC1 = PutInReg(SRC1);
 	}
+	SRC1->ref--;
+	if (SRC1->reg != NULL)
+		SRC1 = SRC1->reg;
+	if (SRC2)
+	{
+		SRC2->ref--;
+		if (SRC2->reg != NULL)
+			SRC2 = SRC2->reg;
+	}
 	ClearRegs();
 	PutASMCode(ASM_CODE(inst->opcode, tcode), inst->opds);
 
@@ -176,6 +185,8 @@ static void EmitCall(IRInst inst)
 	{
 		arg = (ILArg)GET_ITEM(args, i);
 		PushArgument(arg->sym, arg->ty);
+		if (arg->sym->kind != SK_Function) 
+			arg->sym->ref--;
 		stksize += ALIGN(arg->ty->size, STACK_ALIGN_SIZE);
 	}
 	/**
@@ -219,14 +230,13 @@ static void EmitCall(IRInst inst)
  * otherwise, spill othere variables in this register, set the variable's
  * needWB flag.(need write back to memory)
  */
-#if 0
 static void ModifyVar(Symbol p)
 {
 	Symbol reg;
 
 	if (p->reg == NULL)
 		return;
-
+	p->needwb = 0;
 	reg = p->reg;
 	/**
 		The following assertion seems to be right.
@@ -240,15 +250,15 @@ static void ModifyVar(Symbol p)
 	SpillReg(reg);
 	
 	AddVarToReg(reg, p);
-
+	p->needwb = 1;
 }
-#endif
+
 static void EmitAddress(IRInst inst)
 {
 	//assert(DST->kind == SK_Temp && SRC1->kind != SK_Temp);
 	AllocateReg(inst, 0);
 	PutASMCode(X86_ADDR, inst->opds);
-	//ModifyVar(DST);
+	ModifyVar(DST);
 }
 static void EmitMoveBBlock(IRInst inst)
 {
@@ -493,7 +503,11 @@ static void EmitBBlock(BBlock bb)
 		UsedRegs = 0;
 		//  the kernel part of emit ASM from IR.
 		EmitIRInst(inst);
-
+		if ( !(inst->opcode >= JZ && inst->opcode <= IJMP) && (inst->opcode != CALL)) {
+			DST->ref--;
+			if (SRC1 && SRC1->kind != SK_Function) SRC1->ref--;
+			if (SRC2 && SRC2->kind != SK_Function) SRC2->ref--;
+		}
 		inst = inst->next;
 	}
 	ClearRegs();
@@ -572,4 +586,9 @@ void EmitFunction(FunctionSymbol fsym)
 	 */
 	EmitEpilogue(stksize);
 	PutString("\n");
+}
+
+void StoreVar(Symbol reg, Symbol v)
+{
+	Move(X86_MOVI4, v, reg);
 }

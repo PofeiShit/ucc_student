@@ -30,6 +30,7 @@ struct bblock
 	Symbol sym;
 	struct irinst insth;
 	int ninst;
+	int ref;
 };
 
 typedef struct ilarg

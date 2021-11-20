@@ -109,11 +109,11 @@ static AstExpression ParsePostfixExpression(void)
 				AstNode *tail;
 				/// function call expression's second kid is actually
 				/// a list of expression instead of a single expression
-				p->kids[1] = ParsePrimaryExpression();
+				p->kids[1] = ParseAssignmentExpression();
 				tail = &p->kids[1]->next;
 				while (CurrentToken == TK_COMMA) {
 					NEXT_TOKEN
-					*tail = (AstNode)ParsePrimaryExpression();
+					*tail = (AstNode)ParseAssignmentExpression();
 					tail = &(*tail)->next;
 				}
 			}
