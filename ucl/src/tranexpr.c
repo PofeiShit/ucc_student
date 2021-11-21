@@ -148,7 +148,6 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 			}
 		*/
 		addr = Simplify(T(POINTER), ADD, (Symbol)p->val.p, IntConstant(coff));
-		printf("%d\n", expr->lvalue);
 		if (expr->lvalue) {
 			expr->op = OP_DEREF;
 			return addr;
