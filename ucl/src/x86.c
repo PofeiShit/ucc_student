@@ -455,11 +455,12 @@ static void EmitDeref(IRInst inst)
 {
 	Symbol reg;
 	reg = PutInReg(SRC1);
+     printf("Before:EmitDeref:%s-%d-%d\n", DST->name, DST->needwb, DST->ref);
 
 	inst->opcode = MOV;
 	SRC1 = reg->next;
 	EmitMove(inst);
-	// ModifyVar(DST);
+	ModifyVar(DST);
 	return;
 }
 static void EmitClear(IRInst inst)

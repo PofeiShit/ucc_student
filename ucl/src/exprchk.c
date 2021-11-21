@@ -319,7 +319,14 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 			expr->ty = ty->bty;
 			if (IsFunctionType(expr->ty)) {
 				return expr->kids[0];
+			} 
+			if (expr->ty->categ == ARRAY || expr->kids[0]->isarray) {
+				union value val;
+				val.i[0] = val.i[1] = 0;
+				expr->kids[1] = Constant(T(INT), val);
+				expr->op = OP_INDEX;
 			}
+			expr->lvalue = 1;
 			return expr;
 		}
 
