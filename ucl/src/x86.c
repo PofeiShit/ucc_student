@@ -115,7 +115,9 @@ static void AllocateReg(IRInst inst, int index)
 	}
 
 	reg = GetReg();
-
+	if (index != 0) {
+		Move(X86_MOVI4, reg, p);
+	}
 	AddVarToReg(reg, p);
 }
 
@@ -315,6 +317,7 @@ static void EmitMove(IRInst inst)
 					Move(X86_MOVI4, DST, SRC1);
 				}
 			}
+         	// ModifyVar(DST);
 			break;
 		default:
 			;
@@ -455,7 +458,6 @@ static void EmitDeref(IRInst inst)
 {
 	Symbol reg;
 	reg = PutInReg(SRC1);
-     printf("Before:EmitDeref:%s-%d-%d\n", DST->name, DST->needwb, DST->ref);
 
 	inst->opcode = MOV;
 	SRC1 = reg->next;
