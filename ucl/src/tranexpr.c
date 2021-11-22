@@ -345,6 +345,11 @@ AstExpression Not(AstExpression expr)
 		expr->kids[0] = Not(expr->kids[0]);
 		expr->kids[1] = Not(expr->kids[1]);
 		return expr;
+	case OP_OR:
+		expr->op = OP_AND;
+		expr->kids[0] = Not(expr->kids[0]);
+		expr->kids[1] = Not(expr->kids[1]);
+		return expr;
 	case OP_EQUAL:
 	case OP_UNEQUAL:
 	case OP_GREAT:
