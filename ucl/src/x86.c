@@ -113,7 +113,14 @@ static void AllocateReg(IRInst inst, int index)
 		UsedRegs |= 1 << p->reg->val.i[0];
 		return;
 	}
-
+	// SRC1->ref == 1: SRC1 only used by DST
+	// SRC1->reg != NULL: SRC1 is already in register
+	if (index == 0 && SRC1->ref == 1 && SRC1->reg != NULL) {
+		reg = SRC1->reg;
+		reg->link = NULL;
+		AddVarToReg(reg, p);
+		return ;
+	}
 	reg = GetReg();
 	if (index != 0) {
 		Move(X86_MOVI4, reg, p);

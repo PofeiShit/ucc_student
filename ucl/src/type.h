@@ -95,6 +95,7 @@ typedef struct functionType
 
 #define T(categ) (Types + categ)
 
+#define IsRecordType(ty) (ty->categ == STRUCT)
 #define IsIntegType(ty) (ty->categ <= ENUM)
 #define IsUnsigned(ty) (ty->categ & 0x1)
 #define IsScalarType(ty) (ty->categ <= POINTER)

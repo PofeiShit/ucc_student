@@ -580,6 +580,14 @@ static void CheckInitializer(AstInitializer init, Type ty)
 		if (!CheckCharArrayInit(init->expr, ty->bty)) {
 			return ;
 		}
+	} else if (ty->categ == STRUCT && !init->lbrace) {
+		// Data dt1 = dt
+		init->expr = Adjust(CheckExpression(init->expr), 1);
+		ALLOC(init->idata);
+		init->idata->expr = init->expr;
+		init->idata->offset = 0;
+		init->idata->next = NULL;
+		return ;
 	}
 	CheckInitializerInternal(&tail, init, ty, &offset, &error);
 	if (error)

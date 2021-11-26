@@ -341,6 +341,11 @@ Symbol CreateOffset(Type ty, Symbol base, int coff)
 		return base;
 	}
 	CALLOC(p);
+	if (base->kind == SK_Offset) {
+		// dt.num[3] = 50
+		coff += AsVar(base)->offset;
+		base = base->link; // p->link = base, so here to get base addr
+	}
 	p->kind = SK_Offset;
 	p->ty = ty;
 	p->link = base;
