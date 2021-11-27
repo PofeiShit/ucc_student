@@ -137,12 +137,6 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 
 	} while (p->op == OP_INDEX);
 	// printf("coff:%d-%d-%d\n", coff, p->ty->categ, p->isarray);
-	if (p->op == OP_MEMBER || p->op == OP_PTR_MEMBER) {
-		// p->name[3] = 50; p.name[3] = 50;
-		addr = TranslateExpression(p);
-	} else {
-		addr = (Symbol)p->val.p;
-	}
 	if (!p->isarray) {
 		/*
 			int arr[3][4];
@@ -163,6 +157,9 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 	// dst = Offset(expr->ty, addr, voff, coff);
 	if (voff != NULL) {
 		addr = TranslateExpression(p);
+		if (p->op == OP_PTR_MEMBER || p->op == OP_MEMBER)
+			// dt->num[i] = 50
+			addr = AddressOf(addr);
 		voff = Simplify(T(POINTER), ADD, voff, IntConstant(coff));
 		addr = Simplify(T(POINTER), ADD, addr, voff);
 		if (expr->lvalue) {
@@ -171,6 +168,12 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 		}
 		dst = Deref(expr->ty, addr);
 	} else {
+		if (p->op == OP_MEMBER || p->op == OP_PTR_MEMBER) {
+			// p->name[3] = 50; p.name[3] = 50;
+			addr = TranslateExpression(p);
+		} else {
+			addr = (Symbol)p->val.p;
+		}
 		dst = CreateOffset(expr->ty, addr, coff);
 	}
 	return expr->isarray ? AddressOf(dst) : dst;
