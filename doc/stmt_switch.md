@@ -124,9 +124,9 @@ CheckDefaultStatement:
 
 ## 中间代码生成
 ---
-.struct astCaseStatement 描述一条case语句，其中的next域用于记录case语句在源代码中出现的先后顺序，nextCase域用于给case语句表达式数值从小到大排序。
+1 struct astCaseStatement 描述一条case语句，其中的next域用于记录case语句在源代码中出现的先后顺序，nextCase域用于给case语句表达式数值从小到大排序。
 
-.为了描述“段”的概念，引入了 switchBucket 结构体，Bucket是“桶”的意思，用“Bucket”来存放处于同一段中的各条 case 语句。每个段对应一个桶，多个桶构成了一条链表。而每个桶内又可包含多条 case 语句，这些case语句又可构成 一条链表，switchBucket 结构体如下所示:
+2 为了描述“段”的概念，引入了 switchBucket 结构体，Bucket是“桶”的意思，用“Bucket”来存放处于同一段中的各条 case 语句。每个段对应一个桶，多个桶构成了一条链表。而每个桶内又可包含多条 case 语句，这些case语句又可构成一条链表，switchBucket 结构体如下所示:
 ```
 typedef struct switchBucket{    //用于描述形如{0，1，4}这样的段
     int ncase;                  //桶内case语句的条数，例如3
@@ -137,11 +137,11 @@ typedef struct switchBucket{    //用于描述形如{0，1，4}这样的段
     struct switchBucket *prev;  //用于组成由各个“桶”对象构成的链
 } *SwitchBucket;
 ```
-.为了方便对各 SwitchBucket 进行二分查找，除了把各 switchBucket 对象通过上述 prev 域构成一条链表外，还会用一个数组来存放各 switchBucket 的首地址.
+3 为了方便对各 SwitchBucket 进行二分查找，除了把各 switchBucket 对象通过上述 prev 域构成一条链表外，还会用一个数组来存放各 switchBucket 的首地址.
 
-.Switch语句的翻译:
+4 Switch语句的翻译:
 
-.先翻译 switch 语句中的表达式。下面代码把case语句加入到相应的桶中，
+5 先翻译 switch 语句中的表达式。下面代码把case语句加入到相应的桶中，
 ```
 	while (p) {
 		q = p;
@@ -149,6 +149,7 @@ typedef struct switchBucket{    //用于描述形如{0，1，4}这样的段
 		q->respBB = CreateBBlock(); //由于每个case语句都是控制流的跳转目标，因此每个case语句都对应一个基本块，这行创建了这些基本块
 		val = q->expr->val.i[0];
 		if (bucket && (bucket->ncase + 1) * 2 > (val - bucket->minVal)) { // 用于判断“当前桶中的 case 语句密度是否大于 1/2”
+			// case 语句密度 = case 语句数量 / 区间大小
 			bucket->ncase++;
 			bucket->maxVal = val;
 			*bucket->tail = q;
@@ -220,7 +221,7 @@ static int MergeSwitchBucket(SwitchBucket *pBucket)
 	return count;
 }
 ```
-.主要就是TranslateSwitchBuckets函数
+6 主要就是TranslateSwitchBuckets函数,形参数讲解如下：
 ```
 static void TranslateSwitchBuckets(
     //对 bucketArray[left]至 bucketArray[right]这几个桶进行处理 
@@ -302,7 +303,8 @@ static void TranslateSwitchBuckets(SwitchBucket *bucketArray, int left, int righ
 }
 ```
 
-以{{1, 2}, {50}, {2000}}为例子,讲解比较和跳转生成过程呢
+7 以{{1, 2}, {50}, {2000}}为例子,讲解比较和跳转生成过程呢
+```
 left = 0, right = 2;
 mid = 1;
 lhalfBB = CreateBBlock(); //(0 !> 0)
@@ -311,7 +313,7 @@ len = 50 - 50 + 1;
 p = bucketArray[1]->cases
 while (p) {
     i = 5 - 5 = 0
-    dstBBs[0] = p->resBB;
+    dstBBs[0] = p->resBB; // case 50对应Block
     p = p->nextCase (p is NULL)
 }
 产生 if (a < 50) goto BB4
@@ -320,14 +322,15 @@ GenerateBranch(choice->ty, lhalfBB, JL, choice, IntConstant(bucketArray[mid]->mi
 StartBBlock(CreateBBlock()); // .BB1
 产生 if (a > 50) goto BB8
 GenerateBranch(choice->ty, rhalfBB, JG, choice, IntConstant(bucketArray[mid]->maxVal));	 
-StartBBlock(CreateBBlock()); // .BB2
+StartBBlock(CreateBBlock()); // .BB2 只剩下a = 50逻辑处理
 //当跳转表的大小为 1 时，我们只有一个跳转目标，产生一条无条件跳转指令即可
 GenerateJump(dstBBs[0]); // goto BB17
-
+```
+```
 // 
 StartBBlock(CreateBBlock()); // .BB3
 // 递归地调用TranslateSwitchBuckets()，对位于当前桶的左侧的各个桶进行处理，
-++++TranslateSwitchBuckets(bucketArray, left, mid - 1, choice, lhalfBB, defBB);
+TranslateSwitchBuckets(bucketArray, left, mid - 1, choice, lhalfBB, defBB); lhalfBB对应了curBB
 {1, 2}
 left = 0, right = 0
 mid = 0
@@ -336,11 +339,11 @@ rhalfBB = defBB; (1 > 0)
 len = (2 - 1) + 1
 p = bucketArray[0]->cases;
 
-    i = 1 - 1;
+    i = 1 - 1; // case 1
     dstBBs[0] = p->respBB;
-    i = 2 - 1;
+    i = 2 - 1; // case 2
     dstBBs[1] = p->resBB;
-StartBBlock(currBB); // .BB4
+StartBBlock(currBB); // .BB4 开始左边{1,2}
 
 // if (a < 1) goto BB19
 GenerateBranch(choice->ty, lhalfBB, JL, choice, IntConstant(bucketArray[mid]->minVal));
@@ -349,7 +352,7 @@ StartBBlock(CreateBBlock()); // .BB5
 // if (a > 2) goto BB19
 GenerateBranch(choice->ty, rhalfBB, JG, choice, IntConstant(bucketArray[mid]->maxVal));	 
 
-// BB6
+// 处理桶内到语句了。BB6
 StartBBlock(CreateBBlock());
 
     // 当桶内 case 个数大于 1 时，通过跳转表进行跳转
@@ -365,18 +368,22 @@ StartBBlock(CreateBBlock());
         // goto (BB11, BB13, )[t0]
         GenerateIndirectJump(dstBBs, len, index);
     }
-// BB7
+// BB7 开始新的桶
 StartBBlock(CreateBBlock());
 // left = 0 mid = -1
 TranslateSwitchBuckets(bucketArray, left, mid - 1, choice, lhalfBB, defBB);
+跳出
 // mid = 1, right = 0
 TranslateSwitchBuckets(bucketArray, mid + 1, right, choice, rhalfBB, defBB);
-++++跳出左递归
+同样跳出
+```
+```
+跳出左递归
 进入右递归:
 ////////////////////////////
-TranslateSwitchBuckets(bucketArray, mid + 1, right, choice, rhalfBB, defBB);
+TranslateSwitchBuckets(bucketArray, mid + 1, right, choice, rhalfBB, defBB); rhalfBB: curBB
 mid+1: 2 right : 2
-{2000}
+{20000}
 left = 2, right = 2
 mid = 2
 lhalfBB = defBB; (2 > 1)
@@ -384,7 +391,7 @@ rhalfBB = defBB; (3 > 2)
 len = 2000 - 2000 + 1
 i = 2000 - 2000
 dstBBs[0] = p->respBB
-// BB8
+// BB8 开始右边20000的BBlock
 if (currBB != NULL) {
     StartBBlock(currBB);
 }
@@ -394,7 +401,7 @@ if(len == 1 && lhalfBB == rhalfBB){
     // 例如当我们处理桶{20000}时，我们产生一条比较指令 “if (a != 20000) goto BB19;”
     GenerateBranch(choice->ty, lhalfBB, JNE, choice, IntConstant(bucketArray[mid]->minVal));
 }
-// BB9
+// BB9 a == 20000的逻辑块
 StartBBlock(CreateBBlock());
 
 //当跳转表的大小为 1 时，我们只有一个跳转目标，产生一条无条件跳转指令即可 
