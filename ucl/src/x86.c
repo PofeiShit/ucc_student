@@ -22,6 +22,7 @@ enum ASMCode
 };
 
 #define ASM_CODE(opcode, tcode) ((opcode << 2) + tcode - I4)
+#define IsNormalRecord(rty) (rty->size != 1 && rty->size != 2 && rty->size != 4 && rty->size != 8)
 static void Move(int code, Symbol dst, Symbol src)
 {
 	Symbol opds[2];
@@ -148,24 +149,6 @@ static void EmitEpilogue(int stksize)
 	PutASMCode(X86_EPILOGUE, NULL);
 }
 
-static void EmitReturn(IRInst inst)
-{
-	Type ty = inst->ty;
-	switch (ty->size) 
-	{
-	case 1:
-		Move(X86_MOVI1, X86ByteRegs[EAX], DST);
-		break;
-	case 4:
-		if (DST->reg != X86Regs[EAX]) {
-			Move(X86_MOVI4, X86Regs[EAX], DST);	
-		}
-		break;
-	default:
-		;
-	}
-}
-
 static void PushArgument(Symbol p, Type ty)
 {
 	int tcode = TypeCode(ty);
@@ -205,7 +188,15 @@ static void EmitCall(IRInst inst)
 	SpillReg(X86Regs[EAX]);
 	SpillReg(X86Regs[ECX]);
 	SpillReg(X86Regs[EDX]);
-
+	if (IsRecordType(rty) && IsNormalRecord(rty)) {
+		Symbol opds[2];
+		opds[0] = GetReg();
+		opds[1] = DST;
+		PutASMCode(X86_ADDR, opds);
+		PutASMCode(X86_PUSH, opds);
+		stksize += 4;
+		DST = NULL;
+	}
 	PutASMCode(SRC1->kind == SK_Function ? X86_CALL : X86_ICALL, inst->opds);
 
 	if(stksize != 0){
@@ -461,6 +452,32 @@ static void EmitIndirectMove(IRInst inst)
 	DST = reg->next;
 	EmitMove(inst);
 }
+
+static void EmitReturn(IRInst inst)
+{
+	Type ty = inst->ty;
+	if (IsRecordType(ty) && IsNormalRecord(ty)) {
+		inst->opcode = IMOV;
+		SRC1 = DST;
+		DST = FSYM->params;
+		EmitIndirectMove(inst);
+		return ;
+	}
+	switch (ty->size) 
+	{
+	case 1:
+		Move(X86_MOVI1, X86ByteRegs[EAX], DST);
+		break;
+	case 4:
+		if (DST->reg != X86Regs[EAX]) {
+			Move(X86_MOVI4, X86Regs[EAX], DST);	
+		}
+		break;
+	default:
+		;
+	}
+}
+
 static void EmitDeref(IRInst inst)
 {
 	Symbol reg;
@@ -566,6 +583,18 @@ void EmitFunction(FunctionSymbol fsym)
 	DefineLabel((Symbol)fsym);
 
 	rty = fsym->ty->bty;
+	if (IsRecordType(rty) && IsNormalRecord(rty)) {
+		VariableSymbol p;
+		CALLOC(p);
+		p->kind = SK_Variable;
+		p->name = "recvaddr";
+		p->ty = T(POINTER);
+		p->level = 1;
+		p->sclass = TK_AUTO;
+
+		p->next = fsym->params;
+		fsym->params = (Symbol)p;
+	}
 	stksize = LayoutFrame(fsym, PRESERVE_REGS + 1);
 	/**
 		main:
