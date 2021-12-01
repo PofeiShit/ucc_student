@@ -7,8 +7,10 @@ void SpillReg(Symbol reg);
 void ClearRegs(void);
 Symbol CreateReg(char *name, char *iname, int no);
 Symbol GetByteReg(void);
+Symbol GetWordReg(void);
 Symbol GetReg(void);
 extern Symbol X86Regs[];
+extern Symbol X86WordRegs[];
 extern Symbol X86ByteRegs[];
 extern int UsedRegs;
 #endif

@@ -201,6 +201,13 @@ void SetupRegisters(void)
 	X86Regs[ESI] = CreateReg("%esi", "(%esi)", ESI);
 	X86Regs[EDI] = CreateReg("%edi", "(%edi)", EDI);
 
+	X86WordRegs[EAX] = CreateReg("%ax", "NULL", EAX);
+	X86WordRegs[EBX] = CreateReg("%bx", "NULL", EBX);
+	X86WordRegs[ECX] = CreateReg("%cx", "NULL", ECX);
+	X86WordRegs[EDX] = CreateReg("%dx", "NULL", EDX);
+	X86WordRegs[ESI] = CreateReg("%si", "NULL", EDX);
+	X86WordRegs[EDI] = CreateReg("%di", "NULL", EDX);
+
 	X86ByteRegs[EAX] = CreateReg("%al", "NULL", EAX);
 	X86ByteRegs[EBX] = CreateReg("%bl", "NULL", EBX);
 	X86ByteRegs[ECX] = CreateReg("%cl", "NULL", ECX);

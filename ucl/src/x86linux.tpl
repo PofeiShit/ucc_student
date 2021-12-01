@@ -107,6 +107,7 @@ TEMPLATE(X86_JLEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
 TEMPLATE(X86_EXTI1,     "movsbl %1, %0")
 TEMPLATE(X86_EXTI2,     "movswl %1, %0")
 TEMPLATE(X86_TRUI1,    "movb %%al, %0")
+TEMPLATE(X86_TRUI2,    "movw %%ax, %0")
 
 TEMPLATE(X86_ADDR,     "leal %1, %0")
 
@@ -119,6 +120,7 @@ TEMPLATE(X86_REDUCEF,  "addl %0, %%esp")
 TEMPLATE(X86_EPILOGUE, "movl %%ebp, %%esp;popl %%edi;popl %%esi;popl %%ebx;popl %%ebp;ret")
 TEMPLATE(X86_CLEAR,   "pushl %1;pushl $0;leal %0, %%eax;pushl %%eax;call memset;addl $12, %%esp")
 TEMPLATE(X86_MOVI1,   "movb %1, %0")
+TEMPLATE(X86_MOVI2,   "movw %1, %0")
 TEMPLATE(X86_MOVI4,   "movl %1, %0")
 TEMPLATE(X86_MOVB,    "leal %0, %%edi;leal %1, %%esi;movl %2, %%ecx;rep movsb")             
 

@@ -288,6 +288,21 @@ static void EmitMove(IRInst inst)
 		case U1:
 			if (SRC1->kind == SK_Constant)
 				Move(X86_MOVI1, DST, SRC1);
+			else {
+				reg = GetByteReg();
+				Move(X86_MOVI1, reg, SRC1);
+				Move(X86_MOVI1, DST, reg);
+			}
+			break;
+		case I2:
+		case U2:
+			if (SRC1->kind == SK_Constant)
+				Move(X86_MOVI2, DST, SRC1);
+			else {
+				reg = GetWordReg();
+				Move(X86_MOVI2, reg, SRC1);
+				Move(X86_MOVI2, DST, reg);
+			}
 			break;
 		case I4:
 		case U4:
@@ -403,6 +418,16 @@ static void EmitCast(IRInst inst)
 		}
 		Move(X86_MOVI1, DST, reg);
 		break;
+	case X86_TRUI2:
+		if (SRC1->reg != NULL) {
+			reg = X86WordRegs[SRC1->reg->val.i[0]];
+		}
+		if (reg == NULL) {
+			reg = GetWordReg();
+			Move(X86_MOVI4, X86Regs[reg->val.i[0]], SRC1);
+		}
+		Move(X86_MOVI2, DST, reg);
+		break;		
 	default:
 		;
 	}

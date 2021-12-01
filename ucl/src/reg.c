@@ -8,6 +8,7 @@
 #include "input.h"
 
 Symbol X86Regs[EDI + 1];
+Symbol X86WordRegs[EDI + 1];
 Symbol X86ByteRegs[EDI + 1];
 /**
 	#define	b(i)	(b[i]+b[i+1])
@@ -85,6 +86,10 @@ static Symbol GetRegInternal(int width)
 			endr = EDX;
 			regs = X86ByteRegs;
 			break;
+		case 2:
+			endr = EDI;
+			regs = X86WordRegs;
+			break;
 		case 4:
 			endr = EDI;
 			regs = X86Regs;
@@ -103,7 +108,10 @@ Symbol GetReg(void)
 {
 	return GetRegInternal(4);
 }
-
+Symbol GetWordReg(void)
+{
+	return GetRegInternal(2);
+}
 Symbol GetByteReg(void)
 {
 	return GetRegInternal(1);
