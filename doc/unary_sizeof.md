@@ -54,3 +54,19 @@ main:
 ## 汇编代码生成
 ---
 a=4的汇编代码生成。在EmitMove根据SRC1的符号类型(SK_Constant)调用 Move(X86_MOVI4, DST, SRC1);
+
+# example
+```
+int arr[4];
+int a;
+typedef int bbb;
+sizeof(a);
+sizeof a;
+sizeof(int);
+sizeof(bbb);
+a = sizeof(arr);
+```
+```
+arr->size = 16;
+movl $16, a;
+```

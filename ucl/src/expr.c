@@ -182,9 +182,19 @@ AstExpression ParseUnaryExpression()
 		expr->op = OP_SIZEOF;
 		NEXT_TOKEN;
 		if (CurrentToken == TK_LPAREN) {
-			NEXT_TOKEN;
-			expr->kids[0] = ParseUnaryExpression();	
-			Expect(TK_RPAREN);
+			BeginPeekToken();
+			t = GetNextToken();
+			if (IsTypeName(t)) {
+				// sizeof(type-name)
+				EndPeekToken();
+				NEXT_TOKEN;
+				expr->kids[0] = (AstExpression)ParseTypeName();
+				Expect(TK_RPAREN);
+			} else {
+				// sizeof unary expression
+				EndPeekToken();
+				expr->kids[0] = ParseUnaryExpression();	
+			}
 		} else {
 			expr->kids[0] = ParseUnaryExpression();
 		}

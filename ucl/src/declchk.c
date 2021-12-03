@@ -663,6 +663,10 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 	Type ty;
 	int sclass;	
 	CheckDeclarationSpecifiers(decl->specs);
+	if (decl->specs->sclass == TK_TYPEDEF) {
+		CheckTypedef(decl);
+		return ;
+	}
 	ty = decl->specs->ty;
 	sclass = decl->specs->sclass;
 	if (sclass == 0)
