@@ -22,7 +22,8 @@
 
 static int CanModify(AstExpression expr)
 {
-	return (!(expr->ty->qual & CONST));
+	return (expr->lvalue && !(expr->ty->qual & CONST) &&
+		(IsRecordType(expr->ty)));
 }
 static AstExpression CastExpression(Type ty, AstExpression expr)
 {
@@ -73,12 +74,15 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 	if (expr->op == OP_STR) {
 		expr->op = OP_ID;
 		expr->val.p = AddString(expr->ty, (String)expr->val.p);
+		expr->lvalue = 1;
 		return expr;
 	}	
 	p = LookupID((char*)expr->val.p);
 	{
 		expr->ty = p->ty;
 		expr->val.p = p;
+		// an ID is a lvalue, while a function designator not
+		expr->lvalue = expr->ty->categ != FUNCTION;
 	}
 	return expr;
 }
@@ -202,12 +206,29 @@ static AstExpression CheckMemberAccess(AstExpression expr)
 	Field fld;
 	expr->kids[0] = CheckExpression(expr->kids[0]);
 	if (expr->op == OP_MEMBER) {
+			/**
+             typedef struct{
+                 int a;
+                 int b;
+             }Data;
+             Data dt;
+             dt.a = 3;           // legal        lvalue is 1
+             GetData().a = 3;    // illegal      lvalue is 0
+          */
 		expr->kids[0] = Adjust(expr->kids[0], 0);
 		ty = expr->kids[0]->ty;
+		expr->lvalue = expr->kids[0]->lvalue;
 	} else {
+		/**
+         For example:
+             Type ty;
+             ((FunctionType) ty)->sig;           // the whole expression, lvalue is 1
+             ((FunctionType) ty) is considered as a right value. //lvalue is 0
+          */
 		expr->kids[0] = Adjust(expr->kids[0], 1);
 		ty = expr->kids[0]->ty;
 		ty = ty->bty;
+		expr->lvalue = 1;
 	}
 	fld = LookupField(ty, (char*)expr->val.p);
 	if (fld == NULL) {
@@ -308,6 +329,7 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 		if (expr->kids[0]->op == OP_INDEX) {
 			expr->kids[0]->op = OP_ADD;
 			expr->kids[0]->ty = PointerTo(ty);
+			expr->kids[0]->lvalue = 0;
 			return expr->kids[0];
 		}
 		expr->ty = PointerTo(ty);
