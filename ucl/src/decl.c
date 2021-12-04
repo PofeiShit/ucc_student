@@ -582,6 +582,9 @@ static AstNode ParseExternalDeclaration(void)
 		return (AstNode)func;
 	}
 not_func:
+	if (!decl->specs->stgClasses && !decl->specs->tyQuals && !decl->specs->tySpecs) {
+		Warning(NULL, "declaratioin specifiers missing, defaulting to int");	
+	}
 	Expect(TK_SEMICOLON);
 	PreCheckTypedef(decl);
 	return (AstNode)decl;

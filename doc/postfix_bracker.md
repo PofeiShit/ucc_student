@@ -241,3 +241,11 @@ void main()
 	movl (%eax), %edx
     mvol $1, (%edx)
 ```
+
+# Wrong Example
+```
+int arr[4];
+int *ptr = arr + 1; 
+arr = 0; // expr lvalue = 0 so it will report The Left operand cannot be modified
+sizeof(arr); // do not adjust arr to int* type
+```

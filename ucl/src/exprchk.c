@@ -104,6 +104,7 @@ AstExpression Adjust(AstExpression expr, int rvalue)
 	}
 	if (expr->ty->categ == FUNCTION) {
 		expr->ty = PointerTo(expr->ty);
+		expr->isfunc = 1;
 	} else if (expr->ty->categ == ARRAY) {
 		expr->ty = PointerTo(Qualify(qual, expr->ty->bty));
 		expr->isarray = 1;

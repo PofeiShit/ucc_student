@@ -117,3 +117,24 @@ ccc c;
 2.ccc a;属于Stmt解析, 判断当前ccc不是type就直接break: if (CurrentToken == TK_ID && !IsTypeName(CurrentToken))。然后ccc a;进入ParseStatement,因为没有添加LabelStatment，直接调用ParseExpressionStatment，进入ParsePrimaryExpression解析a，CurrentToken = TK_ID,在ParseExpressionStatment的Expect(TK_SEMICOLON)报错。
 
 3.在退出函数g作用域后调用PostCheckTypedef把overloadNames全部清空，否则ccc c;和ccc a;报相同错误
+
+# Example
+```
+void f(void)
+{
+
+}
+typedef void (*FUNCPTR)(void);
+FUNCPTR ptr = f;
+```
+
+1 typedef 的语法树可知，FUNCPTR是指向返回类型为void且参数为void类型的函数的指针(函数指针).
+```
+			FunctionDeclarator
+				/  				
+	PointerDeclarator  
+			/
+		FUNCPTR
+```
+
+2 FUNCPTR ptr = f; 带初值的初始化。CheckGlobalDeclaration函数日常检查完等号左边(形成类型，以及符号添加到符号表中),对于右边调用CheckInitializer检查expr，然后Adjust将节点调整为指向函数的指针。
