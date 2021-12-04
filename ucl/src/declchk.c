@@ -76,14 +76,12 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 	CheckDeclarator(funcDec->dec);
 	EnterParameterList();
 	ALLOC(funcDec->sig);
-	funcDec->sig->hasProto = funcDec->paramTyList != NULL;
 	funcDec->sig->hasEllipsis = 0;
 	funcDec->sig->params = CreateVector(4);
 
-	if (funcDec->sig->hasProto)
-	{
+	if (funcDec->paramTyList != NULL)
 		CheckParameterTypeList(funcDec);
-	}
+
 	ALLOC(funcDec->tyDrvList);
 	funcDec->tyDrvList->ctor = FUNCTION_RETURN;
 	funcDec->tyDrvList->sig = funcDec->sig;

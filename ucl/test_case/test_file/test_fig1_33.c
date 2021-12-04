@@ -1,3 +1,4 @@
+extern int printf(const char *fmt, ...);
 int a = -1;
 unsigned int b = 0;
 int main()

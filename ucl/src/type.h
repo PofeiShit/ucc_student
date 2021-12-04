@@ -82,7 +82,6 @@ typedef struct parameter
 
 typedef struct signature
 {
-	int hasProto : 16;
 	int hasEllipsis : 16;
 	Vector params;
 } *Signature;

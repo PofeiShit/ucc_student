@@ -95,6 +95,10 @@ static int ScanCaret(void)	// ^	exclusive or
 }
 static int ScanDot(void)
 {
+	if (CURSOR[1] == '.' && CURSOR[2] == '.') {
+		CURSOR += 3;
+		return TK_ELLIPSIS;
+	}
 	CURSOR++;
 	return TK_DOT;
 }

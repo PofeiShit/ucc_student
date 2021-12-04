@@ -1,3 +1,4 @@
+extern int printf(const char *fmt, ...);
 char buf[] = "123456";
 char *ptr = "654321";
 int main(int argc,char * argv[])

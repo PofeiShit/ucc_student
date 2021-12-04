@@ -1,3 +1,4 @@
+extern int printf(const char *fmt, ...);
 int c = 3;
 char d = 'q';
 int main(int argc, char *argv[])

@@ -1,3 +1,4 @@
+extern int printf(const char *format, ...);
 int a = 10;
 int f(int num)
 {

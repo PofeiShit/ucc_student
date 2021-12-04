@@ -118,7 +118,6 @@ void SetupTypeSystem(void)
 
 	ALLOC(fty->sig);
 	CALLOC(fty->sig->params);
-	fty->sig->hasProto = 0;
 	fty->sig->hasEllipsis = 0;
 
 	DefaultFunctionType = (Type)fty;

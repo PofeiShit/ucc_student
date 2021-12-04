@@ -1,3 +1,4 @@
+extern int printf(const char *fmt, ...);
 int a,b;
 int main(int argc, char *argv[])
 {

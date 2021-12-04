@@ -1,3 +1,4 @@
+extern int printf(const char *fmt, ...);
 void f()
 {
     int h(int, int);

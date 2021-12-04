@@ -1,3 +1,4 @@
+extern int printf(const char *fmt, ...);
 int a = 0xFFFFFFFF;
 int b = 0;
 int main()

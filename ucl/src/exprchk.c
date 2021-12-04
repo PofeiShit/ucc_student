@@ -65,7 +65,19 @@ AstExpression Cast(Type ty, AstExpression expr)
 	}
 	return expr;
 }
-
+int CanAssign(Type lty, AstExpression expr)
+{
+	Type rty = expr->ty;
+	lty = Unqual(lty);
+	rty = Unqual(rty);
+	if (lty == rty || BothArithType(lty, rty)) {
+		return 1;
+	}
+	if (IsPtrType(lty) && IsPtrType(rty)) {
+		return 1;
+	}
+	return 0;
+}
 static AstExpression CheckPrimaryExpression(AstExpression expr)
 {
 	Symbol p;
@@ -79,7 +91,19 @@ static AstExpression CheckPrimaryExpression(AstExpression expr)
 		return expr;
 	}	
 	p = LookupID((char*)expr->val.p);
-	{
+	if (p == NULL) {
+		Error(NULL, "Undeclared identified: %s", expr->val.p);
+		p = AddVariable((char*)expr->val.p, T(INT), Level == 0 ? 0 : TK_AUTO);
+		expr->ty = T(INT);
+		expr->lvalue = 1;
+	} else if (p->kind == SK_TypedefName) {
+		Error(NULL, "Typedef name cannot be used as variable");
+		expr->ty = T(INT);
+	} else if (p->kind == SK_EnumConstant) {
+		expr->op = OP_CONST;
+		expr->ty = T(INT);
+		expr->val = p->val;
+	} else {
 		expr->ty = p->ty;
 		expr->val.p = p;
 		// an ID is a lvalue, while a function designator not
@@ -121,7 +145,7 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 	arg = Adjust(CheckExpression(arg), 1);
 	
 	// f(void) 
-	if (fty->sig->hasProto && parLen == 0)
+	if (parLen == 0)
 	{
 		*argFull = 1;
 		return arg;
@@ -130,21 +154,23 @@ static AstExpression CheckArgument(FunctionType fty, AstExpression arg, int argN
 	if (argNo == parLen && ! fty->sig->hasEllipsis)
 		*argFull = 1;
 
-	// TODO:delete old style
-	if (!fty->sig->hasProto) 
-	{
-		arg = PromoteArgument(arg);
-		*argFull = 0;
-		return arg;
-	} else if (argNo <= parLen) {
+	if (argNo <= parLen) {
 		param = (Parameter)GET_ITEM(fty->sig->params, argNo - 1);
 		// 
+		if (!CanAssign(param->ty, arg))
+			goto err;
 		if (param->ty->categ < INT)
 			arg = Cast(T(INT), arg);
 		else
 			arg = Cast(param->ty, arg);
 		return arg;
+	} else {
+		// variable arguments
+		return PromoteArgument(arg);
 	}
+err:
+	Error(NULL, "Incompatible argument");
+	return arg;
 }
 
 static AstExpression CheckFunctionCall(AstExpression expr)
@@ -155,6 +181,7 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	int argNo, argFull;
 
 	if (expr->kids[0]->op == OP_ID && LookupID((char*)expr->kids[0]->val.p) == NULL) {
+		Error(NULL, "Function %s not declared", expr->kids[0]->val.p);
 		expr->kids[0]->ty = DefaultFunctionType;
 		expr->kids[0]->val.p = AddFunction((char*)expr->kids[0]->val.p, DefaultFunctionType, TK_EXTERN);
 	} else {
@@ -163,7 +190,8 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 	expr->kids[0] = Adjust(expr->kids[0], 1);
 	ty = expr->kids[0]->ty; // ty is PointerType
 	if (!(IsPtrType(ty) && IsFunctionType(ty->bty))) {
-		printf("ty is ptr and base ty is not function\n");
+		Error(NULL, "ty is ptr and base ty is not function\n");
+		ty = DefaultFunctionType;
 	}
 	ty = ty->bty; // ty is FunctionType
 
@@ -178,9 +206,20 @@ static AstExpression CheckFunctionCall(AstExpression expr)
 		arg = (AstExpression)arg->next;
 		argNo++;
 	}
+	*tail = NULL;
 	while (arg != NULL) {
 		CheckExpression(expr);
 		arg = (AstExpression)arg->next;
+	}
+	argNo--;
+	if (argNo > LEN(((FunctionType)ty)->sig->params)) {
+		if (!((FunctionType)ty)->sig->hasEllipsis) {
+			Error(NULL, "Too many arguments");
+		}
+	} else if (argNo < LEN(((FunctionType)ty)->sig->params)) {
+		if (!((FunctionType)ty)->sig->hasEllipsis) {
+			Error(NULL, "Too few arguments");
+		}
 	}
 	expr->ty = ty->bty;
 	return expr;
@@ -260,6 +299,7 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 		case OP_INDEX:
 			expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
 			expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
+			// do not support 1[arr] = 2;
 			if (IsObjectPtr(expr->kids[0]->ty) && IsIntegType(expr->kids[1]->ty)) {
 				expr->ty = expr->kids[0]->ty->bty;
 				/*
@@ -270,6 +310,7 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 					And arr[1][1] can be a left value
 				*/
 				expr->lvalue = 1;
+				// expr->kids[1] = DoIntegerPromotion(epxr->kids[1]); // 把short,char提升至int类型
 				expr->kids[1] = ScalePointerOffset(expr->kids[1], expr->ty->size);	
 				if (!expr->kids[0]->isarray && expr->ty->categ != ARRAY) {
 					AstExpression deref, addExpr;
@@ -286,8 +327,9 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 					deref->lvalue = 1;
 					return deref;
 				}
+				return expr;
 			}
-			return expr;
+			REPORT_OP_ERROR;
 
 		case OP_CALL:
 			return CheckFunctionCall(expr);
@@ -302,6 +344,7 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 			//assert(0);
 			;
 	}
+	REPORT_OP_ERROR;
 }
 static AstExpression CheckTypeCast(AstExpression expr)
 {
