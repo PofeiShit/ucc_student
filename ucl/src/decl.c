@@ -97,13 +97,13 @@ static AstStructDeclaration ParseStructDeclaration(void)
 	stDecl->specs = ParseDeclarationSpecifiers();	
 	if (stDecl->specs->stgClasses != NULL)
 	{
-		//Error(&stDecl->coord, "Struct/union member should not have storage class");
+		Error(NULL, "Struct/union member should not have storage class");
 		stDecl->specs->stgClasses = NULL;
 	}	
-	// if (stDecl->specs->tyQuals == NULL && stDecl->specs->tySpecs == NULL)
-	// {
-		//Error(&stDecl->coord, "Expect type specifier or qualifier");
-	// }	
+	if (stDecl->specs->tyQuals == NULL && stDecl->specs->tySpecs == NULL)
+	{
+		Error(NULL, "Expect type specifier or qualifier");
+	}	
 	// an extension to C89, supports anonymous struct/union member in struct/union
 	// struct {
 	//		int;
@@ -118,11 +118,9 @@ static AstStructDeclaration ParseStructDeclaration(void)
 	while (CurrentToken == TK_COMMA)
 	{
 		NEXT_TOKEN;
-		// TODO: support a:4
 		*tail = (AstNode)ParseDeclarator(DEC_CONCRETE);
 		tail = &(*tail)->next;
 	}
-	// printf("CurrentToken:%d\t%d\n", CurrentToken, TK_SEMICOLON);
 	Expect(TK_SEMICOLON);
 	
 	return stDecl;	
@@ -161,6 +159,8 @@ lbrace:
 			return stSpec;
 
 		default:
+			// case: struct ;
+			Error(NULL, "Expect identifier or { after struct/union");
 			return stSpec;
 	}
 }
@@ -321,6 +321,10 @@ static AstDeclarator ParseDirectDeclarator(int kind)
 	CREATE_AST_NODE(dec, NameDeclarator);
 	if (CurrentToken == TK_ID)
 	{
+		if (kind == DEC_ABSTRACT) {
+			// case: a = (char b)c;
+			Error(NULL, "Identifier is not permitted in the abstract declarator");
+		}
 		dec->id = (char*)TokenValue.p;  
 		NEXT_TOKEN;
 	} else if (kind == DEC_CONCRETE) {
@@ -384,6 +388,7 @@ static AstDeclarator ParsePostfixDeclarator(int kind)
 			if (IsTypeName(CurrentToken)) {
 				funcDec->paramTyList = ParseParameterTypeList();
 			}
+			// do not support old style c
 			Expect(TK_RPAREN);
 			dec = (AstDeclarator)funcDec;
 		}
@@ -538,10 +543,7 @@ static AstNode ParseExternalDeclaration(void)
 	if (decl->specs->stgClasses != NULL && ((AstToken)decl->specs->stgClasses)->token == TK_TYPEDEF)
 		goto not_func;
 	initDec = (AstInitDeclarator)decl->initDecs;
-	//printf("%d,%d\n", fdec->kind, fdec->dec->kind);
 	fdec = GetFunctionDeclarator(initDec);
-
-	//printf("???fdec:%d,%d\n", fdec, dec);
 	if (fdec != NULL)
 	{
 		AstFunction func;
@@ -549,7 +551,10 @@ static AstNode ParseExternalDeclaration(void)
 			NEXT_TOKEN;
 			if (CurrentToken != TK_LBRACE) 
 				return (AstNode)decl;
-			Error(NULL, "add the ;");
+			Error(NULL, "redundant ;");
+		} else if (fdec->paramTyList && CurrentToken != TK_LBRACE) {
+			// function declaration but loses ;
+			goto not_func;
 		}
 		CREATE_AST_NODE(func, Function);
 		// the function declaration's coord and specs are treated as the whole function's.
@@ -560,7 +565,6 @@ static AstNode ParseExternalDeclaration(void)
 			(dec)									(fdec )
 		 */
 		func->dec = (AstDeclarator)initDec->dec;
-		//printf("%s\n", decl->dec->dec->kind);
 		func->fdec = fdec;
 		Level++;
 		if (func->fdec->paramTyList) {
@@ -572,6 +576,7 @@ static AstNode ParseExternalDeclaration(void)
 			}
 
 		}
+		// do not support old style c
 		Level--;
 		func->stmt = ParseCompoundStatement();
 		return (AstNode)func;

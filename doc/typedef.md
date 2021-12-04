@@ -114,6 +114,6 @@ ccc c;
 ```
 1.int ccc; 做完ParameterDeclaration后进行PreCheckTypedef,然后调用CheckTypedef，v是TypdefNames，对v里面的成员检查是否需要重载的，形参和typedef重名，将ccc的overload=1，overloadLevle=1,再将tn加入到OverloadNames中，
 
-2.ccc a;属于Stmt解析, 判断当前ccc是否type直接break: if (CurrentToken == TK_ID && !IsTypeName(CurrentToken))。然后ccc a;进入ParseStatement,因为没有添加LabelStatment，直接调用ParseExpressionStatment，进入ParsePrimaryExpression解析a，CurrentToken = TK_ID,在ParseExpressionStatment的Expect(TK_SEMICOLON)报错。
+2.ccc a;属于Stmt解析, 判断当前ccc不是type就直接break: if (CurrentToken == TK_ID && !IsTypeName(CurrentToken))。然后ccc a;进入ParseStatement,因为没有添加LabelStatment，直接调用ParseExpressionStatment，进入ParsePrimaryExpression解析a，CurrentToken = TK_ID,在ParseExpressionStatment的Expect(TK_SEMICOLON)报错。
 
 3.在退出函数g作用域后调用PostCheckTypedef把overloadNames全部清空，否则ccc c;和ccc a;报相同错误
