@@ -26,6 +26,10 @@ static int CanModify(AstExpression expr)
 	return (expr->lvalue && !(expr->ty->qual & CONST) &&
 		(IsRecordType(expr->ty) ? !((RecordType)expr->ty)->hasConstFld : 1));
 }
+ AstExpression DoIntegerPromotion(AstExpression expr)
+ {
+     return expr->ty->categ < INT ? Cast(T(INT), expr) : expr;
+ }
 static AstExpression CastExpression(Type ty, AstExpression expr)
 {
 	AstExpression cast;
@@ -42,6 +46,8 @@ AstExpression Cast(Type ty, AstExpression expr)
 {
 	int scode = TypeCode(expr->ty);
 	int dcode = TypeCode(ty);
+	if (dcode == VOID)
+		return CastExpression(ty, expr);
 	// 两个类型是否都是占用相同大小内存的整型
 	if (scode / 2 == dcode / 2) {
 		int scateg = expr->ty->categ;
@@ -65,6 +71,10 @@ AstExpression Cast(Type ty, AstExpression expr)
 	}
 	return expr;
 }
+static int IsNullConstant(AstExpression expr)
+{
+	return expr->op == OP_CONST && expr->val.i[0] == 0;
+}
 int CanAssign(Type lty, AstExpression expr)
 {
 	Type rty = expr->ty;
@@ -73,9 +83,24 @@ int CanAssign(Type lty, AstExpression expr)
 	if (lty == rty || BothArithType(lty, rty)) {
 		return 1;
 	}
+	// T1 * and T2 *
+	if (IsCompatiblePtr(lty, rty) && ((lty->bty->qual & rty->bty->qual) == rty->bty->qual)) 
+		return 1;
+	if ((NotFunctionPtr(lty) && IsVoidPtr(rty) || NotFunctionPtr(rty) && IsVoidPtr(lty)) &&
+		((lty->bty->qual & rty->bty->qual) == rty->bty->qual))
+		return 1;
+	if (IsPtrType(lty) && IsNullConstant(expr))
+		return 1;
+	
 	if (IsPtrType(lty) && IsPtrType(rty)) {
 		return 1;
 	}
+	if ((IsPtrType(lty) && IsIntegType(rty) || IsPtrType(rty) && IsIntegType(lty))&&
+         (lty->size == rty->size))
+     {
+         Warning(NULL, "conversion between pointer and integer without a cast");
+         return 1;
+     }
 	return 0;
 }
 static AstExpression CheckPrimaryExpression(AstExpression expr)
@@ -258,6 +283,9 @@ static AstExpression CheckMemberAccess(AstExpression expr)
           */
 		expr->kids[0] = Adjust(expr->kids[0], 0);
 		ty = expr->kids[0]->ty;
+		if (!IsRecordType(ty)) {
+			REPORT_OP_ERROR;
+		}
 		expr->lvalue = expr->kids[0]->lvalue;
 	} else {
 		/**
@@ -268,15 +296,19 @@ static AstExpression CheckMemberAccess(AstExpression expr)
           */
 		expr->kids[0] = Adjust(expr->kids[0], 1);
 		ty = expr->kids[0]->ty;
+		if (!IsPtrType(ty) && !IsRecordType(ty)) {
+			REPORT_OP_ERROR;
+		}
 		ty = ty->bty;
 		expr->lvalue = 1;
 	}
 	fld = LookupField(ty, (char*)expr->val.p);
 	if (fld == NULL) {
+		Error(NULL, "struct member %s doesn't exist", expr->val.p);
 		expr->ty = T(INT);
 		return expr;
 	}
-	expr->ty = fld->ty;
+	expr->ty = Qualify(ty->qual, fld->ty);
 	expr->val.p = fld;
 	return expr;
 }
@@ -310,7 +342,7 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 					And arr[1][1] can be a left value
 				*/
 				expr->lvalue = 1;
-				// expr->kids[1] = DoIntegerPromotion(epxr->kids[1]); // 把short,char提升至int类型
+				expr->kids[1] = DoIntegerPromotion(expr->kids[1]); // 把short,char提升至int类型
 				expr->kids[1] = ScalePointerOffset(expr->kids[1], expr->ty->size);	
 				if (!expr->kids[0]->isarray && expr->ty->categ != ARRAY) {
 					AstExpression deref, addExpr;
@@ -351,6 +383,10 @@ static AstExpression CheckTypeCast(AstExpression expr)
 	Type ty;
 	ty = CheckTypeName((AstTypeName)expr->kids[0]);
 	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]), 1);
+	if (! (BothScalarType(ty, expr->kids[1]->ty) || ty->categ == VOID)) {
+		Error(NULL, "Illegal type cast");
+		return expr->kids[1];
+	}
 	return Cast(ty, expr->kids[1]);
 }
 static AstExpression CheckUnaryExpression(AstExpression expr)
@@ -382,6 +418,11 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 	case OP_DEREF: // *a
 		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
 		ty = expr->kids[0]->ty;
+		if (expr->kids[0]->op == OP_ADDRESS) {
+			// *&a;
+			expr->kids[0]->kids[0]->ty = ty->bty;
+			return expr->kids[0]->kids[0];
+		}
 		if (IsPtrType(ty)) {
 			expr->ty = ty->bty;
 			if (IsFunctionType(expr->ty)) {
@@ -407,6 +448,7 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 	case OP_COMP:
 		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
 		if (IsIntegType(expr->kids[0]->ty)) {
+			expr->kids[0] = DoIntegerPromotion(expr->kids[0]);
 			expr->ty = expr->kids[0]->ty;
 			return FoldConstant(expr);
 		}
@@ -414,6 +456,7 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 	case OP_NEG:
 		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
 		if (IsIntegType(expr->kids[0]->ty)) {
+			expr->kids[0] = DoIntegerPromotion(expr->kids[0]);
 			expr->ty = expr->kids[0]->ty;
 			return expr->op == OP_POS ? expr->kids[0] : FoldConstant(expr);
 		}
@@ -424,6 +467,8 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 		} else {
 			ty = CheckTypeName((AstTypeName)expr->kids[0]);
 		}
+		if (IsFunctionType(ty)) 
+			goto err;
 		expr->ty = T(UINT);
 		expr->op = OP_CONST;
 		expr->val.i[0] = ty->size;
@@ -434,6 +479,8 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 	default:
 		break;
 	}
+err:
+	REPORT_OP_ERROR;
 }
 /**
  Syntax 

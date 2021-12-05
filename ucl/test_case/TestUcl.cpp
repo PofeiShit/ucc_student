@@ -1537,6 +1537,8 @@ TEST_F(TestUcl, Test_Unary_Deref)
                                 "movl %esp, %ebp"
                                 "subl $4, %esp"
                             ".BB0:"
+                                "movl -4(%ebp), %eax"
+                                "movl %eax, ptr1"
                             ".BB1:"
                                 "movl %ebp, %esp"
                                 "popl %edi"

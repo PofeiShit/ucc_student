@@ -261,6 +261,30 @@ Type CommonRealType(Type ty1, Type ty2)
 
 	return T(ty2->categ + 1);
 }
+static int IsCompatibleFunction(FunctionType fty1, FunctionType fty2)
+{
+	Signature sig1 = fty1->sig;
+	Signature sig2 = fty2->sig;
+	Parameter p1, p2;
+	int parLen1, parLen2;
+	int i;
+	if (!IsCompatibleType(fty1->bty, fty2->bty)) {
+		return 0;
+	}
+	parLen1 = LEN(sig1->params);
+	parLen2 = LEN(sig2->params);
+	if ((sig1->hasEllipsis ^ sig2->hasEllipsis) || parLen1 != parLen2) {
+		return 0;
+	}
+	for (i = 0; i < parLen1; i++) {
+		p1 = (Parameter)GET_ITEM(sig1->params, i);
+		p2 = (Parameter)GET_ITEM(sig2->params, i);
+		if (!IsCompatibleType(p1->ty, p2->ty)) {
+			return 0;
+		}
+	}
+	return 1;
+}
 int IsCompatibleType(Type ty1, Type ty2)
 {
 	if (ty1 == ty2)
@@ -279,8 +303,40 @@ int IsCompatibleType(Type ty1, Type ty2)
 		case ARRAY:
 			return IsCompatibleType(ty1->bty, ty2->bty) && (ty1->size == ty2->size || ty1->size == 0 || ty2->size == 0);
 		case FUNCTION:
-			return 1;
+			return IsCompatibleFunction((FunctionType)ty1, (FunctionType)ty2);
 		default:
 			return ty1 == ty2;
+	}
+}
+
+Type CompositeType(Type ty1, Type ty2)
+{
+	if (ty1->categ == ENUM) 
+		return ty1;
+	if (ty2->categ == ENUM)
+		return ty2;
+	switch(ty1->categ) {
+	case POINTER:
+		return Qualify(ty1->qual, PointerTo(CompositeType(ty1->bty, ty2->bty)));
+	case ARRAY:
+		return ty1->size != 0 ? ty1 : ty2;
+	case FUNCTION:
+		{
+			FunctionType fty1 = (FunctionType)ty1;
+			FunctionType fty2 = (FunctionType)ty2;
+			fty1->bty = CompositeType(fty1->bty, fty2->bty);
+
+			Parameter p1, p2;
+			int i, len = LEN(fty1->sig->params);
+
+			for (int i = 0; i < len; i++) {
+				p1 = (Parameter)GET_ITEM(fty1->sig->params, i);
+				p2 = (Parameter)GET_ITEM(fty2->sig->params, i);
+				p1->ty = CompositeType(p1->ty, p2->ty);
+			}
+			return ty1;
+		}
+	default:
+		return ty1;
 	}
 }

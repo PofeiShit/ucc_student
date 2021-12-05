@@ -4,4 +4,5 @@ void main()
 {
     int *a;
     *a;
+    ptr1 = *&a;
 }

@@ -102,8 +102,13 @@ typedef struct functionType
 #define IsFunctionType(ty) (ty->categ == FUNCTION)
 #define IsObjectPtr(ty) (ty->categ == POINTER && ty->bty->categ != FUNCTION)
 #define IsArithType(ty)    (ty->categ <= ENUM)
+#define IsVoidPtr(ty) (ty->categ == POINTER && ty->bty->categ == VOID)
+#define BothScalarType(ty1, ty2)  (IsScalarType(ty1) && IsScalarType(ty2))
 #define BothIntegType(ty1, ty2)   (IsIntegType(ty1) && IsIntegType(ty2))
 #define BothArithType(ty1, ty2)   (IsArithType(ty1) && IsArithType(ty2))
+#define NotFunctionPtr(ty) (ty->categ == POINTER && ty->bty->categ != FUNCTION)
+#define IsCompatiblePtr(ty1, ty2) (IsPtrType(ty1) && IsPtrType(ty2) && \
+									IsCompatibleType(Unqual(ty1->bty), Unqual(ty2->bty)))
 Field LookupField(Type ty, char *id);
 Type  StartRecord(char *id, int categ);
 Field AddField(Type ty, char *id, Type fty);
@@ -119,6 +124,7 @@ Type CommonRealType(Type ty1, Type ty2);
 int TypeCode(Type ty);
 Type AdjustParameter(Type ty);
 int IsCompatibleType(Type ty1, Type ty2);
+Type CompositeType(Type ty1, Type ty2);
 void SetupTypeSystem(void);
 extern struct type Types[VOID - CHAR + 1];
 extern Type DefaultFunctionType;
