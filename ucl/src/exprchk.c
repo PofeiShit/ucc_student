@@ -422,12 +422,21 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 			// *&a;
 			expr->kids[0]->kids[0]->ty = ty->bty;
 			return expr->kids[0]->kids[0];
+		} else if (expr->kids[0]->op == OP_ADD && (ty->bty->categ == ARRAY || expr->kids[0]->kids[0]->isarray)) {
+			// *(arr+3) -> arr[3]
+			expr->kids[0]->op = OP_INDEX;
+			expr->kids[0]->ty = ty->bty;
+			expr->kids[0]->lvalue = 1;
+			return expr->kids[0];
 		}
 		if (IsPtrType(ty)) {
 			expr->ty = ty->bty;
+			// void f(void) {}
 			if (IsFunctionType(expr->ty)) {
+				// (*f)() -> f();
 				return expr->kids[0];
 			} 
+			// *ptr -> ptr[0]
 			if (expr->ty->categ == ARRAY || expr->kids[0]->isarray) {
 				union value val;
 				val.i[0] = val.i[1] = 0;
@@ -437,6 +446,7 @@ static AstExpression CheckUnaryExpression(AstExpression expr)
 			expr->lvalue = 1;
 			return expr;
 		}
+		break;
 
 	case OP_NOT: // !a
 		expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
@@ -583,6 +593,18 @@ static AstExpression CheckAddOP(AstExpression expr)
 	if (BothArithType(ty1, ty2)) {
 		PERFORM_ARITH_CONVERSION(expr);
 		return FoldConstant(expr);
+	}
+	if (IsObjectPtr(ty2) && IsIntegType(ty1)) {
+		SWAP_KIDS(expr);
+		ty1 = expr->kids[0]->ty;
+		goto left_ptr;
+	}
+	if (IsObjectPtr(ty1) && IsIntegType(ty2)) {
+left_ptr:
+		expr->kids[1] = DoIntegerPromotion(expr->kids[1]);
+		expr->kids[1] = ScalePointerOffset(expr->kids[1], ty1->bty->size);
+		expr->ty = ty1;
+		return expr;
 	}
 	REPORT_OP_ERROR;
 }
