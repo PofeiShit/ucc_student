@@ -578,19 +578,17 @@ static AstExpression CheckShiftOP(AstExpression expr)
  */
 static AstExpression CheckMultiplicativeOP(AstExpression expr)
 {
+	if (expr->op != OP_MOD && BothArithType(expr->kids[0]->ty, expr->kids[1]->ty))
+		goto ok;
+
+	if (expr->op == OP_MOD && BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
+		goto ok;
+
+	REPORT_OP_ERROR;
+
+ok:
 	PERFORM_ARITH_CONVERSION(expr);
-	return expr;
-// 	if (expr->op != OP_MOD && BothArithType(expr->kids[0]->ty, expr->kids[1]->ty))
-// 		goto ok;
-
-// 	if (expr->op == OP_MOD && BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
-// 		goto ok;
-
-// 	REPORT_OP_ERROR;
-
-// ok:
-// 	PERFORM_ARITH_CONVERSION(expr);
-// 	return FoldConstant(expr);
+	return FoldConstant(expr);
 }
 static AstExpression CheckAddOP(AstExpression expr)
 {
@@ -625,8 +623,11 @@ static AstExpression CheckSubOP(AstExpression expr)
 }
 static AstExpression CheckLogicalOP(AstExpression expr)
 {
-	expr->ty = T(INT);
-	return expr;
+	if (BothScalarType(expr->kids[0]->ty, expr->kids[1]->ty)) { 
+		expr->ty = T(INT);
+		return FoldConstant(expr);
+	}
+	REPORT_OP_ERROR;
 }
 static AstExpression CheckEqualityOP(AstExpression expr)
 {

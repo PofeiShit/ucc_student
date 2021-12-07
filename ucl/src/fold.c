@@ -3,7 +3,8 @@
 #include "expr.h"
 
 #define EXECUTE_BOP(op)													\
-	if (tcode == I4) val.i[0] = expr1->val.i[0] op expr2->val.i[0];         
+	if (tcode == I4) val.i[0] = expr1->val.i[0] op expr2->val.i[0];     \ 
+	else if (tcode == U4) val.i[0] = (unsigned)expr1->val.i[0] op (unsigned)expr2->val.i[0]; \
 
 AstExpression FoldCast(Type ty, AstExpression expr)
 {
@@ -34,6 +35,12 @@ AstExpression FoldConstant(AstExpression expr)
 	expr2 = expr->kids[1];
 	switch(expr->op)
 	{
+	case OP_OR:
+		EXECUTE_BOP(||);
+		break;
+	case OP_AND:
+		EXECUTE_BOP(&&);
+		break;
 	case OP_BITOR:
 		val.i[0] = expr1->val.i[0] | expr2->val.i[0];
 		break;
@@ -52,6 +59,15 @@ AstExpression FoldConstant(AstExpression expr)
 		break;
 	case OP_MUL:
 		EXECUTE_BOP(*);
+		break;
+	case OP_DIV:
+		EXECUTE_BOP(/);
+		break;
+	case OP_MOD:
+		if (tcode == U4) 
+			val.i[0] = (unsigned)expr1->val.i[0] % expr2->val.i[0];
+		else
+			val.i[0] = expr1->val.i[0] % expr2->val.i[0];
 		break;
 	case OP_NEG:
 		if (tcode == I4 || tcode == U4) {
