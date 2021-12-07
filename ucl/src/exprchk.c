@@ -526,7 +526,7 @@ static AstExpression CheckBitwiseOP(AstExpression expr)
 		return FoldConstant(expr);
 	}
 
-	// REPORT_OP_ERROR;
+	REPORT_OP_ERROR;
 }
 /**
  Syntax
@@ -630,8 +630,23 @@ static AstExpression CheckLogicalOP(AstExpression expr)
 }
 static AstExpression CheckEqualityOP(AstExpression expr)
 {
+	Type ty1, ty2;
 	expr->ty = T(INT);
-	return expr;
+	ty1 = expr->kids[0]->ty;
+	ty2 = expr->kids[1]->ty;
+	if (BothArithType(ty1, ty2)) {
+		PERFORM_ARITH_CONVERSION(expr);
+		expr->ty = T(INT);
+		return FoldConstant(expr);
+	}
+	if (IsCompatiblePtr(ty1, ty2) || 
+		NotFunctionPtr(ty1) && IsVoidPtr(ty2) || 
+		NotFunctionPtr(ty2) && IsVoidPtr(ty1) ||
+		IsPtrType(ty1) && IsNullConstant(expr->kids[1]) ||
+		IsPtrType(ty2) && IsNullConstant(expr->kids[0])) {
+		return expr;
+	}
+	REPORT_OP_ERROR;
 }
 static AstExpression CheckRelationalOP(AstExpression expr)
 {

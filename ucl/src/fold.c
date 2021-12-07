@@ -22,14 +22,34 @@ AstExpression FoldConstant(AstExpression expr)
 	expr1 = expr->kids[0];
 	expr2 = expr->kids[1];
 
-	if (expr->op >= OP_BITOR && expr->op <= OP_MOD &&
+	if (expr->op >= OP_OR && expr->op <= OP_MOD &&
 	    ! (expr->kids[0]->op == OP_CONST && expr->kids[1]->op == OP_CONST))
 		return expr;
 
 	if (expr->op >= OP_POS && expr->op <= OP_NOT && expr->kids[0]->op != OP_CONST)
 		return expr;
+	val.i[1] = val.i[0] = 0;
+	tcode = TypeCode(expr->kids[0]->ty);
+	expr1 = expr->kids[0];
+	expr2 = expr->kids[1];
 	switch(expr->op)
 	{
+	case OP_BITOR:
+		val.i[0] = expr1->val.i[0] | expr2->val.i[0];
+		break;
+	case OP_BITAND:
+		val.i[0] = expr1->val.i[0] & expr2->val.i[0];
+		break;
+	case OP_BITXOR:
+		val.i[0] = expr1->val.i[0] ^ expr2->val.i[0];
+		break;
+
+	case OP_EQUAL:
+		EXECUTE_BOP(==);
+		break;
+	case OP_UNEQUAL:
+		EXECUTE_BOP(!=);
+		break;
 	case OP_MUL:
 		EXECUTE_BOP(*);
 		break;
