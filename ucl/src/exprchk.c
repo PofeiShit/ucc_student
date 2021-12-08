@@ -554,14 +554,14 @@ static AstExpression CheckShiftOP(AstExpression expr)
 {
 	if (BothIntegType(expr->kids[0]->ty, expr->kids[1]->ty))
 	{
-	// 	expr->kids[0] = DoIntegerPromotion(expr->kids[0]);
-	// 	expr->kids[1] = DoIntegerPromotion(expr->kids[1]);
+		expr->kids[0] = DoIntegerPromotion(expr->kids[0]);
+		expr->kids[1] = DoIntegerPromotion(expr->kids[1]);
 		expr->ty = expr->kids[0]->ty;
 
 		return FoldConstant(expr);
 	}
 
-	// REPORT_OP_ERROR;
+	REPORT_OP_ERROR;
 }
 /**
  Syntax

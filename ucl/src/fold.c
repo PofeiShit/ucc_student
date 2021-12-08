@@ -50,7 +50,15 @@ AstExpression FoldConstant(AstExpression expr)
 	case OP_BITXOR:
 		val.i[0] = expr1->val.i[0] ^ expr2->val.i[0];
 		break;
-
+	case OP_LSHIFT:
+		val.i[0] = expr1->val.i[0] << expr2->val.i[0];
+		break;
+	case OP_RSHIFT:
+		if (tcode == U4)
+			val.i[0] = (unsigned)expr1->val.i[0] >> expr2->val.i[0];
+		else
+			val.i[0] = expr1->val.i[0] >> expr2->val.i[0];
+		break;
 	case OP_EQUAL:
 		EXECUTE_BOP(==);
 		break;
