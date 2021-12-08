@@ -103,6 +103,21 @@ int CanAssign(Type lty, AstExpression expr)
      }
 	return 0;
 }
+// ptr2 - ptr1 => (ptr2 - ptr1) / sizeof(*ptr2);
+static AstExpression PointerDifference(AstExpression diff, int size)
+{
+	AstExpression expr;
+	union value val;
+	CREATE_AST_NODE(expr, Expression);
+
+	expr->ty = diff->ty;
+	expr->op = OP_DIV;
+	expr->kids[0] = diff;
+	val.i[1] = 0;
+	val.i[0] = size;
+	expr->kids[1] = Constant(diff->ty, val);
+	return expr;
+}
 static AstExpression CheckPrimaryExpression(AstExpression expr)
 {
 	Symbol p;
@@ -618,8 +633,27 @@ left_ptr:
 }
 static AstExpression CheckSubOP(AstExpression expr)
 {
-	PERFORM_ARITH_CONVERSION(expr);
-	return expr;
+	Type ty1, ty2;
+	ty1 = expr->kids[0]->ty;
+	ty2 = expr->kids[1]->ty;
+	// 3 + 4;
+	if (BothArithType(ty1, ty2)) {
+		PERFORM_ARITH_CONVERSION(expr);
+		return FoldConstant(expr);
+	}
+	// ptr - 3;
+	if (IsObjectPtr(ty1) && IsIntegType(ty2)) {
+		expr->kids[1] = DoIntegerPromotion(expr->kids[1]);
+		expr->kids[1] = ScalePointerOffset(expr->kids[1], ty1->bty->size);
+		expr->ty = ty1;
+		return expr;
+	}
+	if (IsCompatiblePtr(ty1, ty2)) {
+		expr->ty = T(INT);
+		expr = PointerDifference(expr, ty1->bty->size);
+		return expr;
+	}
+	REPORT_OP_ERROR;
 }
 static AstExpression CheckLogicalOP(AstExpression expr)
 {

@@ -65,6 +65,12 @@ AstExpression FoldConstant(AstExpression expr)
 	case OP_UNEQUAL:
 		EXECUTE_BOP(!=);
 		break;
+	case OP_ADD:
+		EXECUTE_BOP(+);
+		break;
+	case OP_SUB:
+		EXECUTE_BOP(-);
+		break;
 	case OP_MUL:
 		EXECUTE_BOP(*);
 		break;
