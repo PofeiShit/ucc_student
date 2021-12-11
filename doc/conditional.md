@@ -1,10 +1,12 @@
 # conditional operator
 记录下条件操作符生成汇编
 ```
+int b, c;
 void main()
 {
     int a;
     a ? 3 : 2;
+	a = 300 ? b : c;
 }
 
 ```

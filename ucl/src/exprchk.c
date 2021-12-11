@@ -734,8 +734,12 @@ static AstExpression CheckBinaryExpression(AstExpression expr)
  */
 static AstExpression CheckConditionalExpression(AstExpression expr)
 {
+	int qual;
 	Type ty1, ty2;
 	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]), 1);
+	if (! IsScalarType(expr->kids[0]->ty)) {
+		Error(NULL, "The first expression shall be scalar type");
+	}
 	expr->kids[1]->kids[0] = Adjust(CheckExpression(expr->kids[1]->kids[0]), 1);
 	expr->kids[1]->kids[1] = Adjust(CheckExpression(expr->kids[1]->kids[1]), 1);
 	ty1 = expr->kids[1]->kids[0]->ty;
@@ -744,8 +748,26 @@ static AstExpression CheckConditionalExpression(AstExpression expr)
 		expr->ty = CommonRealType(ty1, ty2);
 		expr->kids[1]->kids[0] = Cast(expr->ty, expr->kids[1]->kids[0]);
 		expr->kids[1]->kids[1] = Cast(expr->ty, expr->kids[1]->kids[1]);
-		return expr;
+		return FoldConstant(expr);
+	} else if (IsRecordType(ty1) && ty1 == ty2) {
+		expr->ty = ty1;
+	} else if (ty1->categ == VOID && ty2->categ == VOID) {
+		expr->ty = T(VOID);
+	} else if (IsCompatiblePtr(ty1, ty2)) {
+		qual = ty1->bty->qual | ty2->bty->qual;
+		expr->ty = PointerTo(Qualify(qual, CompositeType(Unqual(ty1->bty), Unqual(ty2->bty))));
+	} else if (IsPtrType(ty1) && IsNullConstant(expr->kids[1]->kids[1])) {
+		expr->ty = ty1;
+	} else if (IsPtrType(ty2) && IsNullConstant(expr->kids[1]->kids[0])) {
+		expr->ty = ty2;
+	} else if (NotFunctionPtr(ty1) && IsVoidPtr(ty2) || NotFunctionPtr(ty2) && IsVoidPtr(ty1)) {
+		qual = ty1->bty->qual | ty2->bty->qual;
+		expr->ty = PointerTo(Qualify(qual, T(VOID)));	
+	} else {
+		Error(NULL, "invalid operand for ? operator");
+		expr->ty = T(INT);
 	}
+	return expr;	
 }
 /**
  Syntax
