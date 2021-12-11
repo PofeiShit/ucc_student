@@ -125,11 +125,50 @@ void SetupTypeSystem(void)
 
 Type AdjustParameter(Type ty)
 {
+	ty = Unqual(ty);
+	if (ty->categ == ARRAY)
+		return PointerTo(ty->bty);
 	if (ty->categ == FUNCTION)
 		return PointerTo(ty);
 	return ty;
 }
-
+int IsZeroSizeArray(Type ty)
+{
+	ty = Unqual(ty);
+	return (ty->categ == ARRAY && (((ArrayType)ty)->len == 0) && ty->size == 0);
+}
+int IsIncompleteEnum(Type ty)
+{
+	ty = Unqual(ty);
+	return (ty->categ == ENUM && !((EnumType)ty)->complete);
+}
+int IsIncompleteRecord(Type ty)
+{
+	ty = Unqual(ty);
+	return (IsRecordType(ty) && !((RecordType)ty)->complete);
+}
+int IsIncompleteType(Type ty, int ignoreZeroArray) 
+{
+	ty = Unqual(ty);
+	switch(ty->categ)
+	{
+		case ENUM:
+			return IsIncompleteEnum(ty);
+		case STRUCT:
+			return IsIncompleteRecord(ty);
+		case ARRAY:
+			if (ignoreZeroArray) {
+				return IsIncompleteType(ty->bty, IGNORE_ZERO_SIZE_ARRAY);
+			} else {
+				if (IsZeroSizeArray(ty))
+					return 1;
+				else
+					return IsIncompleteType(ty->bty, !IGNORE_ZERO_SIZE_ARRAY);
+			}
+		default:
+			return 0;
+	}
+}
 Type Promote(Type ty)
 {
 	return ty->categ < INT ? T(INT) : ty;

@@ -109,6 +109,12 @@ typedef struct functionType
 #define NotFunctionPtr(ty) (ty->categ == POINTER && ty->bty->categ != FUNCTION)
 #define IsCompatiblePtr(ty1, ty2) (IsPtrType(ty1) && IsPtrType(ty2) && \
 									IsCompatibleType(Unqual(ty1->bty), Unqual(ty2->bty)))
+#define IGNORE_ZERO_SIZE_ARRAY 1
+int IsZeroSizeArray(Type ty);                                                                        
+int IsIncompleteEnum(Type ty);                                                                       
+int IsIncompleteRecord(Type ty);                                                                     
+int IsIncompleteType(Type ty, int ignoreZeroArray);    
+
 Field LookupField(Type ty, char *id);
 Type  StartRecord(char *id, int categ);
 Field AddField(Type ty, char *id, Type fty);

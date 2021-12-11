@@ -96,7 +96,7 @@ static AstStatement CheckForStatement(AstStatement stmt)
 
 	return stmt;	
 }
-static AstStatement CheckLocalStatement(AstStatement stmt)
+static AstStatement CheckLocalCompound(AstStatement stmt)
 {
 	AstStatement s;
 	EnterScope();
@@ -138,6 +138,7 @@ static AstStatement CheckCaseStatement(AstStatement stmt)
 	}
 
 	caseStmt->stmt = CheckStatement(caseStmt->stmt);
+	caseStmt->expr = FoldCast(switchStmt->expr->ty, caseStmt->expr);
 	AddCase(switchStmt, caseStmt);
 	return stmt;
 }
@@ -168,7 +169,9 @@ static AstStatement CheckSwitchStatement(AstStatement stmt)
 		Error(NULL, "The expression in a switch statement shall be integer type.");
 		switchStmt->expr->ty = T(INT);
 	}
-
+	if (switchStmt->expr->ty->categ < INT) {
+		switchStmt->expr = Cast(T(INT), switchStmt->expr);
+	}
 	switchStmt->stmt = CheckStatement(switchStmt->stmt);
 	PopStatement(CURRENTF->switches);
 	PopStatement(CURRENTF->breakable);
@@ -187,7 +190,7 @@ static AstStatement (*Stmtcheckers[])(AstStatement) =
 	CheckLoopStatement, // do {} while();
 	CheckLoopStatement, // while() {}
 	CheckForStatement,
-	CheckLocalStatement,
+	CheckLocalCompound,
 };
 
 static AstStatement CheckStatement(AstStatement stmt)

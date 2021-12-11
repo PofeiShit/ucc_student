@@ -134,7 +134,7 @@ static AstStructSpecifier ParseStructOrUnionSpecifier(void)
 	switch (CurrentToken) 
 	{
 		case TK_ID:
-			stSpec->id = (char*)TokenValue.p;		
+			stSpec->id = (char*)TokenValue.p;	
 			NEXT_TOKEN;
 			if (CurrentToken == TK_LBRACE) 
 				goto lbrace;			

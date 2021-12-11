@@ -30,6 +30,12 @@ static Type DeriveType(TypeDerivList tyDrvList, Type ty)
 static void AddParameter(Vector params, char *id, Type ty)
 {
 	Parameter param;
+	FOR_EACH_ITEM(Parameter, param, params)
+		if (param->id && param->id == id) {
+			Error(NULL, "Redefine param %s", id);
+			return ;
+		}
+	ENDFOR
 	ALLOC(param);
 	param->id = id;
 	param->ty = ty;
@@ -46,13 +52,30 @@ static void CheckParameterDeclaration(AstFunctionDeclarator funcDec, AstParamete
 	CheckDeclarator(paramDecl->dec);
 	if (paramDecl->dec->id == NULL && paramDecl->dec->tyDrvList == NULL && ty->categ == VOID && LEN(funcDec->sig->params) == 0)
 	{
+		// void f(void, int a); || void f(const void) || void f(static void)
+		if (paramDecl->next || ty->qual || paramDecl->specs->stgClasses) {
+			Error(NULL, "void must be the only paramter");
+			paramDecl->next = NULL;
+		}
 		return ;
 	}
 	ty = DeriveType(paramDecl->dec->tyDrvList, ty);
 	if (ty != NULL)
 		ty = AdjustParameter(ty);
-
+	if (ty == NULL) {
+		Error(NULL, "Illegal paramter type");
+		return ;
+	}
+	// void f(struct Data d) {}
+	if (funcDec->partOfDef && IsIncompleteType(ty, IGNORE_ZERO_SIZE_ARRAY)) {
+		Error(NULL, "parameter has incomplete type");
+	}
 	id = paramDecl->dec->id;
+	// void f(int ) {}
+	if (id == NULL && funcDec->partOfDef) {
+		Error(NULL, "Expect parameter name");
+		return ;
+	}
 	AddParameter(funcDec->sig->params, id, ty);
 }
 
@@ -74,6 +97,7 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 	AstFunctionDeclarator funcDec = (AstFunctionDeclarator)dec;
 
 	CheckDeclarator(funcDec->dec);
+
 	EnterParameterList();
 	ALLOC(funcDec->sig);
 	funcDec->sig->hasEllipsis = 0;
@@ -87,7 +111,8 @@ static void CheckFunctionDeclarator(AstFunctionDeclarator dec)
 	funcDec->tyDrvList->sig = funcDec->sig;
 	funcDec->tyDrvList->next = funcDec->dec->tyDrvList;
 	funcDec->id = funcDec->dec->id;
-	SaveParameterListTable();	
+	if (funcDec->partOfDef)
+		SaveParameterListTable();	
 	LeaveParemeterList();
 }
 static void CheckPointerDeclarator(AstPointerDeclarator dec)
@@ -112,7 +137,7 @@ static void CheckArrayDeclarator(AstArrayDeclarator arrDec)
 	CheckDeclarator(arrDec->dec);
 	if (arrDec->expr) {
 		if ((arrDec->expr = CheckConstantExpression(arrDec->expr)) == NULL) {
-			;
+			Error(NULL, "The size of the array must be integer constant.");
 		}
 	}
 	ALLOC(arrDec->tyDrvList);
@@ -389,6 +414,8 @@ void CheckFunction(AstFunction func)
 	AstNode p;
 	Vector params;
 	Parameter param;
+
+	func->fdec->partOfDef = 1;
 	CheckDeclarationSpecifiers(func->specs);
 	//The default storage-class of function definition is extern.
 	if ((sclass = func->specs->sclass) == 0)

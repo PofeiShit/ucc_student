@@ -154,6 +154,7 @@ typedef struct astFunctionDeclarator
 	AST_DECLARATOR_COMMON
 	AstParameterTypeList paramTyList;
 	Signature sig;
+	int partOfDef;	// function definition or declaration flag
 } *AstFunctionDeclarator;
 
 typedef struct astArrayDeclarator
