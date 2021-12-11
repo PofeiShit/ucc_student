@@ -330,8 +330,15 @@ static Symbol TranslateAssignmentExpression(AstExpression expr)
 {
 	Symbol dst, src;
 	dst = TranslateExpression(expr->kids[0]);
+	if (expr->op != OP_ASSIGN) {
+		// *f() += 3
+		if (expr->kids[0]->op == OP_DEREF) {
+			expr->kids[0]->val.p = Deref(expr->kids[0]->ty, dst);
+		}
+		expr->kids[0]->op = OP_ID;
+	}
 	src = TranslateExpression(expr->kids[1]);
-	if (expr->kids[0]->op == OP_PTR_MEMBER || expr->kids[0]->op == OP_DEREF) {
+	if (expr->kids[0]->op == OP_PTR_MEMBER || expr->kids[0]->op == OP_DEREF || dst->kind == SK_Temp) {
 		GenerateIndirectMove(expr->ty, dst, src); // dst is base address
 		// dst = Deref(expr->ty, dst);
 	} else {

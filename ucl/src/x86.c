@@ -155,6 +155,33 @@ static void PushArgument(Symbol p, Type ty)
 	PutASMCode(X86_PUSH, &p);
 }
 /**
+ * When a variable is modified, if it is not in a register, do nothing;
+ * otherwise, spill othere variables in this register, set the variable's
+ * needWB flag.(need write back to memory)
+ */
+static void ModifyVar(Symbol p)
+{
+	Symbol reg;
+
+	if (p->reg == NULL)
+		return;
+	p->needwb = 0;
+	reg = p->reg;
+	/**
+		The following assertion seems to be right.
+		In fact, the only thing we have to do here 
+		is set
+		p->needwb = 1; 	?
+	 */
+	// assert(GetListLen(reg) == 1);
+	// assert(p == reg->link);
+
+	SpillReg(reg);
+	
+	AddVarToReg(reg, p);
+	p->needwb = 1;
+}
+/**
 	DST:
 			return value
 	SRC1:
@@ -204,7 +231,7 @@ static void EmitCall(IRInst inst)
 		p = IntConstant(stksize);
 		PutASMCode(X86_REDUCEF, &p);
 	}
-
+	if (DST != NULL) DST->ref--;
 	if(DST == NULL){
 		/**
 			We have set X87Top to NULL in EmitReturn()
@@ -220,37 +247,11 @@ static void EmitCall(IRInst inst)
 		if (DST->reg != X86Regs[EAX]) {
 			Move(X86_MOVI4, DST, X86Regs[EAX]);
 		}
+		ModifyVar(DST);
 		break;
 	default:
 		;
 	}
-}
-/**
- * When a variable is modified, if it is not in a register, do nothing;
- * otherwise, spill othere variables in this register, set the variable's
- * needWB flag.(need write back to memory)
- */
-static void ModifyVar(Symbol p)
-{
-	Symbol reg;
-
-	if (p->reg == NULL)
-		return;
-	p->needwb = 0;
-	reg = p->reg;
-	/**
-		The following assertion seems to be right.
-		In fact, the only thing we have to do here 
-		is set
-		p->needwb = 1; 	?
-	 */
-	// assert(GetListLen(reg) == 1);
-	// assert(p == reg->link);
-
-	SpillReg(reg);
-	
-	AddVarToReg(reg, p);
-	p->needwb = 1;
 }
 
 static void EmitAddress(IRInst inst)

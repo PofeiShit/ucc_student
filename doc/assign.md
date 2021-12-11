@@ -51,3 +51,60 @@ main:
 ---
 	x86.c的EmitMove对应中间代码的MOV指令，Move(X86_MOVI4, DST, SRC1), 需要注意的局部变量a在GetAccessName是通过%ebp偏置得到的
 
+# example
+```
+int *f(void)
+{
+	static int number;
+	return &number;
+}
+int main(int argc, char *argv[])
+{
+	*f() += 3;
+	return 0;
+}
+```
+
+1 *f() += 3 语法树如下:
+```
+			+=						+=
+		   /  \						/\
+		  *    3    => 			   *<-+
+		 /						  /	   \
+		op_call			      op_call   3
+	    /  						/
+	   f    				   f
+```
+汇编代码:
+```
+call f
+movl (%eax), %ecx
+addl $3, %ecx
+movl %ecx, (%eax)
+```
+
+2 *f() += *f() + 3
+```
+		+=					+=
+		/\					/ \
+	*f()  +    => 		 *f()<-+
+		 / \				  	\
+	  *f()  3			   		 +
+	  							/ \
+	  						*f()   3
+```
+汇编代码:
+```
+subl $24, %esp // 
+call f // 函数调用返回值符号类型SK_Temp，名字t0，占用4字节
+movl (%eax), %ecx // 调用+=左侧的*f()函数产生的代码， 解引用，t1,占用4字节
+movl %eax, -4(%ebp) // 保存f()返回的地址
+movl %ecx, -8(%ebp) // 因为要第二次调用 *f()， 需要把%ecx寄存器的值回写到内存中，调用者负责eax, ecx, edx寄存器
+call f // 函数调用返回值 t2
+movl (%eax), %ecx  // 解引用 t3
+addl $3, %ecx // *f() + 3 // addl 结果 t4
+movl -8(%ebp), %edx // 把最左侧的*f()的结果从内存再加在到寄存器中，
+addl %ecx, %edx // 计算 *f() + *f() + 3. addl 结果 t5
+movl -4(%ebp), %ebx // 最后GenerateIndirectMove, t5赋值给t0。 先将t0对应的地
+movl %edx, (%ebx) // 计算的结果放到*f()中
+```

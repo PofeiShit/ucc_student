@@ -783,6 +783,7 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 	if (!CanModify(expr->kids[0])) {
 		Error(NULL, "The Left operand cannot be modified!");
 	}
+	// a += b -> a = a' + b
 	if (expr->op != OP_ASSIGN) {
 		AstExpression lopr;
 		CREATE_AST_NODE(lopr, Expression);
@@ -794,7 +795,11 @@ static AstExpression CheckAssignmentExpression(AstExpression expr)
 	}
 	// we have use CanModify() to test whether left operand is modifiable.
 	ty = expr->kids[0]->ty;
-	expr->kids[1] = Cast(ty, expr->kids[1]);	
+	if (!CanAssign(ty, expr->kids[1])) {
+		Error(NULL, "Wrong assignment");
+	} else {
+		expr->kids[1] = Cast(ty, expr->kids[1]);	
+	}
 	expr->ty = ty;	
 	return expr;
 }

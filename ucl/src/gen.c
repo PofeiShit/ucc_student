@@ -28,8 +28,8 @@ void GenerateMove(Type ty, Symbol dst, Symbol src)
 {
 	IRInst inst;
 	ALLOC(inst);
-	// dst->ref++;
-	// src->ref++;
+	dst->ref++;
+	src->ref++;
 	inst->ty = ty;
 	inst->opcode = MOV;
 	inst->opds[0] = dst;
@@ -41,6 +41,8 @@ void GenerateIndirectMove(Type ty, Symbol dst, Symbol src)
 {
 	IRInst inst;
 	ALLOC(inst);
+	dst->ref++;
+	src->ref++;
 	inst->ty = ty;
 	inst->opcode = IMOV;
 	inst->opds[0] = dst;
@@ -201,6 +203,7 @@ void GenerateReturn(Type ty, Symbol src)
 {
 	IRInst inst;
 	ALLOC(inst);
+	src->ref++;
 	inst->ty = ty;
 	inst->opcode = RET;
 	inst->opds[0] = src;
