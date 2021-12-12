@@ -267,6 +267,13 @@ Symbol AddConstant(Type ty, union value val)
 		case INT:
 			p->name = FormatName("%d", val.i[0]);
 			break;
+		case POINTER:   // name for POINTER const is 0x12345678, that is ,its address.
+			if (val.i[0] == 0)
+				p->name = "0";
+			else
+				p->name = FormatName("0x%x", val.i[0]);
+			break;
+
 		default:
 			;
 	}

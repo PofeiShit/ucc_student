@@ -16,6 +16,7 @@ enum
     int level;           \
 	int sclass;			 \
 	int ref;			 \
+	int defined : 1;	 \
 	int needwb : 1;		 \
     union value val;     \
     struct symbol *reg;  \

@@ -508,9 +508,38 @@ void CheckFunction(AstFunction func)
 			param->ty = T(INT);
 	ENDFOR
 	ty = DeriveType(func->dec->tyDrvList, func->specs->ty);
-
-	func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, sclass);
-
+	if (ty == NULL) {
+		Error(NULL, "Illegal function type");
+		ty = DefaultFunctionType;
+	}
+	sym = LookupID(func->dec->id);
+	if (sym == NULL)
+	{
+		func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, sclass);
+	} else if (sym->ty->categ != FUNCTION) {
+		Error(NULL, "Redeclaration as a function");
+		func->fsym = (FunctionSymbol)AddFunction(func->dec->id, ty, sclass);
+	} else {
+		func->fsym = (FunctionSymbol)sym;
+		if (sym->sclass == TK_EXTERN && sclass == TK_STATIC)
+		{
+			Error(NULL, "Conflict function linkage");
+		}
+		if (! IsCompatibleType(ty, sym->ty))
+		{
+			Error(NULL, "Incompatible with previous declaration");
+			sym->ty = ty;
+		}
+		else
+		{
+			sym->ty = CompositeType(ty, sym->ty);
+		}
+		if (func->fsym->defined)
+		{
+			Error(NULL, "Function redefinition");
+		}
+	}
+	func->fsym->defined = 1;
 	func->loops = CreateVector(4);
 	func->breakable = CreateVector(4);
 	func->switches = CreateVector(4);
@@ -528,7 +557,9 @@ void CheckFunction(AstFunction func)
 	}
 	CheckCompoundStatement(func->stmt);
 	ExitScope();	
-	// Referencing an undefined label is considered as an error.
+	if (ty->bty != T(VOID) && !func->hasReturn) {
+		Warning(NULL, "missing return value");
+	}
 }
 static void CheckTypedef(AstDeclaration decl)
 {
@@ -803,7 +834,7 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 		ty = DeriveType(initDec->dec->tyDrvList, decl->specs->ty);	
 		if (ty == NULL)
 		{
-			// Error(&initDec->coord, "Illegal type");
+			Error(NULL, "Illegal type");
 			ty = T(INT);
 		}				
 		if (IsFunctionType(ty)) {
@@ -812,9 +843,17 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 			}
 			goto next;
 		}
+		if (sclass == TK_EXTERN && initDec->init != NULL)
+		{
+			Error(NULL, "can't initialize extern variable");
+			initDec->init = NULL;
+		}
 		if ((sym = LookupID(initDec->dec->id)) == NULL || sym->level < Level)
 		{
 			VariableSymbol vsym;
+            if (sclass == TK_EXTERN && sym && !IsCompatibleType(sym->ty, ty)) {
+                Error(NULL, "redefinition of \'%s\' with a different type", initDec->dec->id);
+            }
 			vsym = (VariableSymbol)AddVariable(initDec->dec->id, ty, sclass);
 			if (initDec->init) {
 				CheckInitializer(initDec->init, ty);
@@ -826,11 +865,18 @@ void CheckLocalDeclaration(AstDeclaration decl, Vector v)
 				vsym->idata = initDec->init->idata;
 			}
 		}
-		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
-		// if (sym->sclass == TK_EXTERN){
-		// 	sym->sclass = sclass;			
-		// }	
-next:	
+		else if (! (sym->sclass == TK_EXTERN && sclass == TK_EXTERN && IsCompatibleType(sym->ty, ty)))
+		{
+			if (ty->categ == sym->ty->categ) {
+				Error(NULL, "redefinition of \'%s\' ", initDec->dec->id);
+			} else {
+				Error(NULL, "redefinition of \'%s\' as different kind of symbol", initDec->dec->id);
+			}
+		}
+next:		
+		if (sclass != TK_EXTERN && IsIncompleteType(ty, !IGNORE_ZERO_SIZE_ARRAY)) {
+			Error(NULL, "variable \'%s\' has incomplete type", initDec->dec->id);
+		}
 		initDec = (AstInitDeclarator)initDec->next;	
 	}
 }
@@ -848,6 +894,10 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 	}
 	ty = decl->specs->ty;
 	sclass = decl->specs->sclass;
+	if (sclass == TK_AUTO) {
+		Error(NULL, "Invalid storage class");
+		return ;
+	}
 	// check declarator
 	AstInitDeclarator initDec = (AstInitDeclarator)decl->initDecs;
 	while (initDec) {
@@ -877,13 +927,28 @@ static void CheckGlobalDeclaration(AstDeclaration decl)
 			CheckInitConstant(initDec->init);
 			AsVar(sym)->idata = initDec->init->idata;
 		}
-		// sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
-		// if (sym->sclass == TK_EXTERN){
-		// 	sym->sclass = sclass;			
-		// }
+		sclass = sclass == TK_EXTERN ? sym->sclass : sclass;	
+		if ((sclass == 0 && sym->sclass == TK_STATIC) || (sclass != 0 && sym->sclass != sclass)) {
+			Error(NULL, "Conflict linkage of %s", initDec->dec->id);
+		}
+		if (sym->sclass == TK_EXTERN){
+			sym->sclass = sclass;			
+		}
 		if (! IsCompatibleType(ty, sym->ty)) {
 			Error(NULL, "Incompatiable with previous definition", initDec->dec->id);
 			goto next;
+		} else {
+			// int *const p;
+			// *p = 1; will warning:conversion between pointer and integer without a cast
+			//sym->ty = CompositeType(sym->ty, ty);
+		}
+		if (initDec->init) {
+			if (sym->defined)
+				Error(NULL, "redefinition of %s", initDec->dec->id);
+			else {
+				AsVar(sym)->idata = initDec->init->idata;
+                sym->defined = 1;
+			}
 		}
 next:		
 		initDec = (AstInitDeclarator)initDec->next;	
