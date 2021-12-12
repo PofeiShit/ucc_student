@@ -37,6 +37,7 @@ struct Data2
 struct Data dt;
 struct Data1 dt1;
 int a;
+int *b = &dt1.d.d2;
 void main()
 {
 	a = dt.b;

@@ -568,9 +568,15 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 	InitData initd;
 	if (IsScalarType(ty)) {
 		p = init;
+		while (p->lbrace) {
+			Warning(NULL, "braces around scalar initializer");
+			p = (AstInitializer) p->initials;
+		}
 		p->expr = Adjust(CheckExpression(p->expr), 1);
-		// CanAssign
-		{
+		if (!CanAssign(ty, p->expr)) {
+			Error(NULL, "Wrong initializer");
+			*error = 1;
+		} else {
 			Type lty = ty, rty = p->expr->ty;
 			if ( !((IsPtrType(lty) && IsIntegType(rty) || IsPtrType(rty) && IsIntegType(lty)) && (lty->size == rty->size)) )
 				p->expr = Cast(ty, p->expr);
@@ -584,7 +590,6 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 		return (AstInitializer)init->next;
 	} else if (ty->categ == ARRAY) {
 		int start = *offset;
-		// printf("Check%d-%d-%d\n", init->lbrace, start, ty->categ);
 		p = init->lbrace ? (AstInitializer)init->initials : init;
 		// char buf[] = "abcdef" || char buf[] = {"abcdef"};
 		if (((init->lbrace && !p->lbrace && p->next == NULL) || !init->lbrace)
@@ -626,7 +631,6 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 			}
 			ty->size = size;
 		}
-		// printf("size:%d\n", ty->size);
 		if (init->lbrace) {
 			if (p) { // int arr2[3] = {1, 2, 3, 4};
 				Warning(NULL, "excess elements in array initializer");
@@ -641,13 +645,17 @@ static AstInitializer CheckInitializerInternal(InitData *tail, AstInitializer in
 
 		while (fld && p) {
 			*offset = start + fld->offset;
-
-			/* TODO: struct
+			/*
+				struct Data {
+					struct {
+						int a, b;
+					};
+					int c;
+				} dt = {{20}, 30};
+			*/
 			if ( (IsRecordType(fld->ty) && fld->id == NULL)) {
 				*offset = start;
 			}
-			*/
-			// printf("*offset = %d , start = %d , fld->offset = %d\n",*offset, start, fld->offset);
 			p = CheckInitializerInternal(tail, p, fld->ty, offset, error);
 			fld = fld->next;
 		}
@@ -686,16 +694,21 @@ static void CheckInitializer(AstInitializer init, Type ty)
 	} else if (ty->categ == STRUCT && !init->lbrace) {
 		// Data dt1 = dt
 		init->expr = Adjust(CheckExpression(init->expr), 1);
-		ALLOC(init->idata);
-		init->idata->expr = init->expr;
-		init->idata->offset = 0;
-		init->idata->next = NULL;
+		if (! CanAssign(ty, init->expr)) {
+			Error(NULL, "Wrong Initialize");
+		} else {
+			ALLOC(init->idata);
+			init->idata->expr = init->expr;
+			init->idata->offset = 0;
+			init->idata->next = NULL;
+		}
 		return ;
 	}
 	CheckInitializerInternal(&tail, init, ty, &offset, &error);
 	if (error)
 		return ;
 	init->idata = header.next;
+	// do not support bit
 }
 /**
  * Check if the initializer expression is address constant.
@@ -710,7 +723,7 @@ static AstExpression CheckAddressConstant(AstExpression expr)
 	int offset = 0;
 	if (! IsPtrType(expr->ty))
 		return NULL;
-	if (expr->op == OP_ADD) {
+	if (expr->op == OP_ADD || expr->op == OP_SUB) {
 		// to deal (ptr+n)+k
 		addr = CheckAddressConstant(expr->kids[0]);
 		if (addr == NULL || expr->kids[1]->op != OP_CONST)
@@ -724,18 +737,22 @@ static AstExpression CheckAddressConstant(AstExpression expr)
 	} else {
 		addr = expr;
 	}
-	while (addr->op == OP_INDEX) {
-		// arr[3][4]
+	while (addr->op == OP_INDEX || addr->op == OP_MEMBER) {
+		// arr[3][4] || a.b.c
 		if (addr->op == OP_INDEX) {
 			if (addr->kids[1]->op != OP_CONST) {
 				return NULL;
 			}
+			offset += addr->kids[1]->val.i[0];
+		} else {
+			Field fld = (Field)addr->val.p;
+			offset += fld->offset;
 		}
-		offset += addr->kids[1]->val.i[0];
 		addr = addr->kids[0];
 	}
-	if (addr->op != OP_ID)
+	if (addr->op != OP_ID || (expr->op != OP_ADDRESS && ! addr->isarray && ! addr->isfunc))
 		return NULL;
+	((Symbol)addr->val.p)->ref++;
 	CREATE_AST_NODE(p, Expression);
 	p->op = OP_ADD;
 	p->ty = expr->ty;
@@ -752,6 +769,7 @@ static void CheckInitConstant(AstInitializer init)
 {
 	InitData initd = init->idata;
 	while (initd) {
+		// global declaration: int number = f();
 		if (!(initd->expr->op == OP_CONST || initd->expr->op == OP_STR || 
 			(initd->expr = CheckAddressConstant(initd->expr)))) {
 			Error(NULL, "Initializer must be constant");

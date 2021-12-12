@@ -26,11 +26,11 @@ static void EmitGlobals(void)
 			size = 0;
 			while (initd) {
 				// printf("offset = %d ,size =  %d, val = %d\n",initd->offset,size, initd->expr->val.i[0]);
-				// if (initd->offset != size) {
-				// 	LeftAlign(ASMFile, len);
-				// 	PutString("\t");
-				// 	Space(initd->offset - size);
-				// }
+				if (initd->offset != size) {
+					LeftAlign(ASMFile, len);
+					PutString("\t");
+					Space(initd->offset - size);
+				}
 				if (initd->offset != 0) {
 					LeftAlign(ASMFile, len);
 					PutString("\t");

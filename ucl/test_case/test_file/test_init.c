@@ -10,7 +10,13 @@ struct Data
     int a, b;
     int c;
 } dt = {20, 30};
-
+struct Data1
+{
+    struct {
+        int a, b;
+    };
+    int c;
+} dt1 = {{20}, 30};
 int *ptr2 = arr4[2];
 void main()
 {
