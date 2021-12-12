@@ -114,7 +114,7 @@ int IsZeroSizeArray(Type ty);
 int IsIncompleteEnum(Type ty);                                                                       
 int IsIncompleteRecord(Type ty);                                                                     
 int IsIncompleteType(Type ty, int ignoreZeroArray);    
-
+const char * GetCategName(int categ);
 Field LookupField(Type ty, char *id);
 Type  StartRecord(char *id, int categ);
 Field AddField(Type ty, char *id, Type fty);

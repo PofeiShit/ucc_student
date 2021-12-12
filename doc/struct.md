@@ -32,26 +32,27 @@ struct test {
 .CheckStructDeclaration: checkSpecifiers + checkDeclarator. checkDeclarator需要将变量a和b关联到test符号(AddField),
 
 .重点讲解下EndRecord,计算各成员在结构体中的偏移信息offset，这些信息决定了结构体对象在内存中的布局。
-        while (fld) {
-            //计算当前成员的偏移值, 一开始rty->size = 0, fld->ty->align = 1(char), 4(int)
-            /* 
-            1. rty->size:0, fld->ty->align: 1 (char a)
-            2. fld->offset = rty->size = 0;
-            3. rty->size = 0 + 1 = 1;
-            4. rty->size:1, fld->ty->align: 4 (int b)
-            5. fld->offset = rty->size = 4;
-            6. rty->size = rty->size + fld->ty->size = 8
-            */
- 			fld->offset = rty->size = ALIGN(rty->size, fld->ty->align);
- 			rty->size = rty->size + fld->ty->size;		
- 			if (fld->ty->align > rty->align) {
- 				rty->align = fld->ty->align;
- 			}
- 			fld = fld->next;
- 		}
-        // 8, 4
-        rty->size = ALIGN(rty->size, rty->align);
-
+```
+while (fld) {
+        //计算当前成员的偏移值, 一开始rty->size = 0, fld->ty->align = 1(char), 4(int)
+        /* 
+        1. rty->size:0, fld->ty->align: 1 (char a)
+        2. fld->offset = rty->size = 0;
+        3. rty->size = 0 + 1 = 1;
+        4. rty->size:1, fld->ty->align: 4 (int b)
+        5. fld->offset = rty->size = 4;
+        6. rty->size = rty->size + fld->ty->size = 8
+        */
+                fld->offset = rty->size = ALIGN(rty->size, fld->ty->align);
+                rty->size = rty->size + fld->ty->size;		
+                if (fld->ty->align > rty->align) {
+                        rty->align = fld->ty->align;
+                }
+                fld = fld->next;
+        }
+// 8, 4
+rty->size = ALIGN(rty->size, rty->align);
+```
 .global_declaration做完specifiers后，将t变量添加到符号链表Globals
 
 ## 中间代码生成
@@ -62,4 +63,26 @@ struct test {
 ---
 .EmitGlobals生成.comm t,8
 
+# flex array
+```
+struct Packet
+{
+        int len;
+        char data[];
+};
+```
 
+```
+struct Data {
+	struct { // 若改为 struct ABC，则导致 error:struct or union member b doesn't exsist 错误
+        int a;
+ 		int b;
+ 	};
+ 	int c;
+};
+struct Data dt;
+void main()
+{
+        dt.b;
+}
+```

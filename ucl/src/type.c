@@ -11,6 +11,13 @@ int TypeCode(Type ty)
 	static int optypes[] = {I1, U1, I2, U2, I4, U4, I4, U4, V, B, B, B};
 	return optypes[ty->categ];
 }
+static const char * categNames[] = {                                                                 
+     "CHAR", "UCHAR", "SHORT", "USHORT", "INT", "UINT", "ENUM",       
+     "POINTER", "VOID", "STRUCT","ARRAY", "FUNCTION","NA"   
+};  
+const char * GetCategName(int categ){                                                                
+	return categNames[categ]; 
+}  
 Type Unqual(Type ty)
 {
 	if (ty->qual)
@@ -193,7 +200,14 @@ Field AddField(Type ty, char *id, Type fty)
 {
 	RecordType rty = (RecordType)ty;
 	Field fld;
-
+	if (fty->size == 0) {
+		if (fty->categ == ARRAY) {
+			rty->hasFlexArray = 1;
+		}
+	}
+	if (fty->qual & CONST) {
+		rty->hasConstFld = 1;
+	}
 	ALLOC(fld);
 	fld->id = id;
 	fld->ty = fty;
@@ -209,8 +223,23 @@ Field LookupField(Type ty, char *id)
 {
 	RecordType rty = (RecordType)ty;
 	Field fld = rty->flds;
-	while (fld) {
-		if (fld->id == id)
+	while (fld != NULL) {
+		// struct Data {
+		// 	struct {
+		// 		int a;
+		// 		int b;
+		// 	};
+		// 	int c;
+		// };
+		// struct Data dt;
+		// dt.b;
+		if (fld->id == NULL && IsRecordType(fld->ty)) {
+			Field p;
+			p = LookupField(fld->ty, id);
+			if (p) {
+				return p;
+			}
+		} else if (fld->id == id)
 			return fld;
 		fld = fld->next;
 	}
@@ -232,7 +261,17 @@ Type StartRecord(char *id, int categ)
 	rty->complete = 0;
 	return (Type)rty;
 }
-
+void AddOffset(RecordType rty, int offset)
+{
+	Field fld = rty->flds;
+	while (fld) {
+		fld->offset += offset;
+		if (fld->id == NULL && IsRecordType(fld->ty)) {
+			AddOffset((RecordType)fld->ty, fld->offset);
+		}
+		fld = fld->next;
+	}
+}
 /**
  * When a struct/union type's delcaration is finished, layout the struct/union.
  * Calculate each field's offset from the beginning of struct/union and the size
@@ -250,12 +289,10 @@ void EndRecord(Type ty)
 		 */
 		while (fld) {
 			fld->offset = rty->size = ALIGN(rty->size, fld->ty->align);
-			/*
 			if (fld->id == NULL && IsRecordType(fld->ty))
 			{
 				AddOffset((RecordType)fld->ty, fld->offset);
 			}	
-			*/
 			rty->size = rty->size + fld->ty->size;		
 			if (fld->ty->align > rty->align) {
 				rty->align = fld->ty->align;
@@ -263,6 +300,12 @@ void EndRecord(Type ty)
 			fld = fld->next;
 		}
 		rty->size = ALIGN(rty->size, rty->align);
+	}
+	// struct Buffer {
+		// char buf[];
+	// }
+	if (rty->categ == STRUCT && rty->size == 0 && rty->hasFlexArray) {
+		Error(NULL, "flexible array member in otherwise empty struct");
 	}
 }
 Type CommonRealType(Type ty1, Type ty2)

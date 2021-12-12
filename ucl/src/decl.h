@@ -190,4 +190,6 @@ struct astDeclaration
 void CheckLocalDeclaration(AstDeclaration decl, Vector v);
 Type CheckTypeName(AstTypeName tname);
 extern AstFunction CURRENTF;
+#define IsRecordSpecifier(spec) (spec->kind == NK_StructSpecifier)
+
 #endif

@@ -17,10 +17,36 @@ static Type DeriveType(TypeDerivList tyDrvList, Type ty)
 {
 	while (tyDrvList != NULL) {
 		if (tyDrvList->ctor == FUNCTION_RETURN) {
+			// typedef int INT_ARR[4];
+			// INT_ARR test();
+			if (ty->categ == ARRAY) {
+				Error(NULL, "function cannot return array type");
+				ty = PointerTo(ty);
+			}
+			// typedef int FUNC(void);
+			// FUNC test();
+			if (ty->categ == FUNCTION) {
+				Error(NULL, "function cannot return function type");
+				ty = PointerTo(ty);
+			}
 			ty = FunctionReturn(ty, tyDrvList->sig);
 		} else if (tyDrvList->ctor == POINTER_TO) {
 			ty = Qualify(tyDrvList->qual, PointerTo(ty));
 		} else if (tyDrvList->ctor == ARRAY_OF) {
+			// typedef int INT_ARR(void);
+			// INT_ARR test[10];
+			if (ty->categ == FUNCTION) {
+				Error(NULL, "array of function");
+			}
+			if (IsIncompleteType(ty, !IGNORE_ZERO_SIZE_ARRAY)) {
+				Error(NULL, "array has incomplete element type");
+				((ArrayType)ty)->len = 1;
+			}
+			// int a[-1];
+			if (tyDrvList->len < 0) {
+				Error(NULL, "size of array of negative");
+				((ArrayType)ty)->len = 1;
+			}
 			ty = ArrayOf(tyDrvList->len, ty);
 		}
 		tyDrvList = tyDrvList->next;
@@ -173,6 +199,29 @@ static void CheckStructDeclarator(Type rty, AstDeclarator stDec, Type fty)
 		id = stDec->id;		
 		fty = DeriveType(stDec->tyDrvList, fty);
 	}
+	// typedef int FUNC(void);
+	// struct Data {
+		// FUNC f;
+	// };
+	if (fty == NULL || fty->categ == FUNCTION || (fty->size == 0 && (IsIncompleteRecord(fty) || IsIncompleteEnum(fty)))) {
+		Error(NULL, "Illegal type");
+		return ;
+	}
+	// struct Buffer {
+		// char buf[];
+		// int a;
+	// }
+	if (((RecordType)rty)->hasFlexArray && rty->categ == STRUCT) {
+		Error(NULL, "the flexible array must be the last number");
+	}
+	// struct Buffer {
+		// int a;
+		// int a;
+	// }
+	if (id && LookupField(rty, id)) {
+		Error(NULL, "member redefinition");
+		return ;
+	}
 	AddField(rty, id, fty);	
 }
 static void CheckStructDeclaration(AstStructDeclaration stDecl, Type rty)
@@ -185,9 +234,25 @@ static void CheckStructDeclaration(AstStructDeclaration stDecl, Type rty)
 			int;		----->		anonymous struct-declaration	
 			......
 		}
+		or 
+		struct Data {
+			struct {
+				int a;
+				int b;
+			}
+			int c;
+		};
 	 */	
 	if (stDec == NULL) {
-		;
+		if (IsRecordSpecifier(stDecl->specs->tySpecs)) {
+			AstStructSpecifier spec = (AstStructSpecifier) stDecl->specs->tySpecs;
+			if (spec->id == NULL) {
+				AddField(rty, NULL, stDecl->specs->ty);
+				return ;
+			}
+		}
+		Warning(NULL, "declaration does not declara anything");
+		return ;
 	}
 	/**
 		struct Data{
@@ -217,14 +282,14 @@ static Type CheckStructOrUnionSpecifier(AstStructSpecifier stSpec)
 		} 
 		else if (tag->ty->categ != categ)
 		{
-			//Error(&stSpec->coord, "Inconsistent tag declaration.");
-			;
+			Error(NULL, "Inconsistent tag declaration.");
 		}
 		return tag->ty;
 	}
 	else if (stSpec->id == NULL && stSpec->hasLbrace) {
 		// struct-or-union	{struct-declaration-list}
 		ty = StartRecord(NULL, categ);
+		((RecordType)ty)->complete = 1;
 		goto chk_decls;
 	}
 	else if (stSpec->id != NULL && stSpec->hasLbrace) {
@@ -233,7 +298,20 @@ static Type CheckStructOrUnionSpecifier(AstStructSpecifier stSpec)
 		if (tag == NULL || tag->level < Level) {
 			// If it has not been declared yet, or has but in outer-scope.
 			ty = StartRecord(stSpec->id, categ);	
+			((RecordType)ty)->complete = 1;
 			AddTag(stSpec->id, ty);		
+		} else if (tag->ty->categ == categ && IsIncompleteRecord(tag->ty)) {
+			ty = tag->ty;
+			((RecordType)ty)->complete = 1;
+		} else {
+			if(tag->ty->categ != categ) {
+                Error(NULL, "\'%s\'defined as wrong kind of tag.", stSpec->id);
+            } else {
+				// struct Data {}; 
+				// struct Data {};
+                Error(NULL, "redefinition of \'%s %s\'.", GetCategName(categ), stSpec->id);
+			}
+			return tag->ty;
 		}
 		goto chk_decls;		
 	}
