@@ -112,6 +112,8 @@ static Symbol TranslateMemberAccess(AstExpression expr)
 		fld = (Field)p->val.p;
 		coff = fld->offset;
 		addr = TranslateExpression(expr->kids[0]);
+		if (expr->lvalue)
+			return Simplify(T(POINTER), ADD, addr, IntConstant(coff));
 		dst = Deref(expr->ty, Simplify(T(POINTER), ADD, addr, IntConstant(coff)));
 		return dst;
 	}
@@ -435,18 +437,40 @@ void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
 
 	case OP_NOT:
 		{
+			// (!!!!!a)
+			int count = 1;
 			AstExpression parent = expr;
+			AstExpression child = expr->kids[0];
+			while (child->op == OP_NOT) {
+				parent = child;
+				child = child->kids[0];
+				count++;
+			}
 			src1 = TranslateExpression(parent->kids[0]);
 			ty = parent->kids[0]->ty;
-			GenerateBranch(ty, trueBB, JZ, src1, NULL);
+			if (ty->categ < INT) {
+				src1 = TranslateCast(T(INT), ty, src1);
+				ty = T(INT);
+			}
+			if (count % 2 == 1) 
+				GenerateBranch(ty, trueBB, JZ, src1, NULL);
+			else 
+				GenerateBranch(ty, trueBB, JNZ, src1, NULL);
 		}
 		break;
 	default:
+		// a + b;
 		src1 = TranslateExpression(expr);
 		if (src1->kind == SK_Constant) {
-			// TODO
+			if (! (src1->val.i[0] == 0 && src1->val.i[1] == 0)) {
+				GenerateJump(trueBB);
+			}
 		} else {
 			ty = expr->ty;
+			if (ty->categ < INT) {
+            	src1 = TranslateCast(T(INT), ty, src1);
+				ty = T(INT);
+			}
 			GenerateBranch(ty, trueBB, JNZ, src1, NULL);
 		}
 		break;

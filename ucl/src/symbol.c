@@ -358,5 +358,6 @@ Symbol CreateOffset(Type ty, Symbol base, int coff)
 	p->link = base;
 	p->offset = coff;
 	p->name = FormatName("%s[%d]", base->name, coff);
+	base->ref++;
 	return (Symbol)p;
 }
