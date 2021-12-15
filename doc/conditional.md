@@ -100,3 +100,38 @@ int main(int argc, char *argv[])
 }
 ```
 (a ? b : c) 的?节点的lvalue=0，不是左值不能修改,所以在CheckAssignmentExpression中的CanModify返回0报Error
+
+
+# example1
+```
+int a, b, c;
+void main()
+{
+    c = a > 0 ? b + 2 : b + 3;
+}
+```
+t0 : b + 2
+t0 : b + 3
+t0会在多个基本块中被赋值，当离开基本块的时候，需要会写临时变量
+```
+.BB0:
+	cmpl $0, a
+	jle .BBx
+.BB1:
+	movl b, %eax
+	addl $2, %eax
+	movl %eax, %eax // EmitMove
+	movl %eax, -4(%ebp) 
+	/* ModifyVar先把变量的needwb=0,然后把寄存器%eax之前保存的值回写,(当前变量标志为0所以在这里是不会回写的，然后在needwb=1表示这个变量也是需要回写的，如果紧接是"无条件跳转","有条件跳转","通过跳转表进行跳转","函数调用"等情况，需要在EmitJump()、EmitBranch()、EmitIndirectJump()和 EmitCall()函数中调用对应的函数回写寄存器的值到当前函数栈中（跳转过去后，对应的BBlock也是需要使用寄存器的）。这里，是在EmitJump调用ClearRegs回写了%eax
+	*/
+	jmp .BB3
+.BB2:
+	movl b, %eax
+	addl $3, %eax
+	movl %eax, %eax
+	// 这里回写是因为当前Block已经结束了，统一会回写寄存器的值到当前函数栈中。
+	movl %eax, -4(%ebp)
+.BB3:
+	movl -4(%ebp), %eax
+	movl %eax, c
+```

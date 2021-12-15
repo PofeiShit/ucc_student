@@ -7,7 +7,7 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-
+#include <assert.h>
 #include "input.h"
 #include "error.h"
 #include "alloc.h"

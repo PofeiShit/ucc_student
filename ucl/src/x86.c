@@ -50,13 +50,17 @@ static void EmitBranch(IRInst inst)
 	BBlock p = (BBlock)DST;
 
 	DST = p->sym;
+	SRC1->ref--; // we should minus SK_Temp ref, not register
+	// SRC2存在且为常数，可以不必把SRC1的值加载到寄存器中。否则把SRC1加载到寄存器中
 	if (SRC2) {
 		if (SRC2->kind != SK_Constant) 
-			SRC1 = PutInReg(SRC1);
+			SRC1 = PutInReg(SRC1); // here SRC1 may be a register
 	}
-	SRC1->ref--;
-	if (SRC1->reg != NULL)
+	// SRC1已经在寄存器中，中间指令的源操作数SRC1改为SRC1->reg。
+	if (SRC1->reg != NULL) {
 		SRC1 = SRC1->reg;
+	}
+	// SRC2同上
 	if (SRC2)
 	{
 		SRC2->ref--;
@@ -177,7 +181,7 @@ static void ModifyVar(Symbol p)
 	// assert(p == reg->link);
 
 	SpillReg(reg);
-	
+
 	AddVarToReg(reg, p);
 	p->needwb = 1;
 }
@@ -331,7 +335,7 @@ static void EmitMove(IRInst inst)
 					Move(X86_MOVI4, DST, SRC1);
 				}
 			}
-         	// ModifyVar(DST);
+         	ModifyVar(DST);
 			break;
 		default:
 			;
@@ -655,5 +659,6 @@ void EmitFunction(FunctionSymbol fsym)
 
 void StoreVar(Symbol reg, Symbol v)
 {
+	printf("StoreVar\n");
 	Move(X86_MOVI4, v, reg);
 }

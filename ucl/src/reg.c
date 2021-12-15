@@ -25,6 +25,7 @@ void SpillReg(Symbol reg)
 {
 	Symbol p;
 	p = reg->link;
+	// only loop once
 	while (p) {
 		p->reg = NULL;
 		if (p->needwb && p->ref > 0) {
@@ -77,6 +78,33 @@ static int FindEmptyRegs(int endr)
 	}
 	return NO_REG;
 }
+static int SeclecSpillReg(int endr)
+{
+	Symbol p;
+	int i;
+	int reg = NO_REG;
+	int ref, mref = INT_MAX;
+	for (i = EAX; i <= endr; i++) {
+		// esp and ebp		寄存器在中间代码被使用到
+		if (X86Regs[i] == NULL || (1 << i & UsedRegs))
+			continue;
+		p = X86Regs[i]->link;
+		ref = 0;
+		// only loop once
+		while (p) {
+			if (p->needwb && p->ref > 0) {
+				ref += p->ref;
+			}
+			p = p->link;
+		}
+		if (ref < mref) {
+			mref = ref;
+			reg = i;
+		}
+	}
+	assert(reg != NO_REG);
+	return reg;
+}
 static Symbol GetRegInternal(int width)
 {
 	int endr, i;
@@ -97,7 +125,7 @@ static Symbol GetRegInternal(int width)
 	}
 	i = FindEmptyRegs(endr);
 	if (i == NO_REG) {
-		i = 0;
+		i = SeclecSpillReg(endr);
 		SpillReg(X86Regs[i]);
 	}
 	UsedRegs |= 1 << i;

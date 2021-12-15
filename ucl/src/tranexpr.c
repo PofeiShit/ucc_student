@@ -12,7 +12,7 @@ static Symbol TranslatePrimaryExpression(AstExpression expr)
 		return AddConstant(expr->ty, expr->val);
 	/// if the expression is adjusted from an array or a function,
 	/// returns the address of the symbol for this identifier
-	if (expr->op == OP_STR || expr->isarray) {
+	if (expr->op == OP_STR || expr->isarray || expr->isfunc) {
 		//#if  1	// added
 		//assert(expr->op != OP_STR);
 		//#endif
@@ -40,7 +40,7 @@ static Symbol TranslateFunctionCall(AstExpression expr)
 		Function name can be used as function address,
 			see TranslatePrimaryExpression(AstExpression expr).
 	 */
-	// expr->kids[0]->isfunc = 0;
+	expr->kids[0]->isfunc = 0;
 	faddr = TranslateExpression(expr->kids[0]);
 	arg = expr->kids[1];
 	
@@ -138,7 +138,6 @@ static Symbol TranslateArrayIndex(AstExpression expr)
 		p = p->kids[0];
 
 	} while (p->op == OP_INDEX);
-	// printf("coff:%d-%d-%d\n", coff, p->ty->categ, p->isarray);
 	if (!p->isarray) {
 		/*
 			int arr[3][4];
