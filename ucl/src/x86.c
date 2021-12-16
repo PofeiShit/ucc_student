@@ -338,7 +338,7 @@ static void EmitMove(IRInst inst)
          	ModifyVar(DST);
 			break;
 		default:
-			;
+			assert(0);
 	}
 }
 static void EmitAssign(IRInst inst)
@@ -351,21 +351,32 @@ static void EmitAssign(IRInst inst)
 	{
 	case X86_DIVI4:
 	case X86_MODI4:
+	case X86_DIVU4:
+	case X86_MODU4:
+	case X86_MULU4:
+		// *和/ SRC1必须分配加载到寄存器%eax中，所以如果SRC1已经分配%eax了，需要把原先%eax的值回写。如果没有则也需要回写，然后再把SRC1的值mov到%eax中
 		if (SRC1->reg == X86Regs[EAX]) {
-			// TODO;
+			SRC1->needwb = 0;
+			SpillReg(X86Regs[EAX]);
 		} else {
 			SpillReg(X86Regs[EAX]);
 			Move(X86_MOVI4, X86Regs[EAX], SRC1);
 		}
+		// edx符号扩展为，必须先把edx原先的内容回写
 		SpillReg(X86Regs[EDX]);
 		UsedRegs = 1 << EAX | 1 << EDX;
 		if (SRC2->kind == SK_Constant) {
+			// idivl $10 illegal
 			Symbol reg = GetReg();
 			Move(X86_MOVI4, reg, SRC2);
 			SRC2 = reg;
+		} else {
+			// AllocateReg只给临时变量分配寄存器，常量就用GetReg，然后Move
+			AllocateReg(inst, 2);
 		}
 		PutASMCode(code, inst->opds);
-		if (code == X86_MODI4)
+		// 余数放在%edx中，将%edx长期分配给dst，之后回写或者其他用到dst的时候，对应寄存器edx
+		if (code == X86_MODI4 || code == X86_MODU4)
 			AddVarToReg(X86Regs[EDX], DST);
 		else
 			AddVarToReg(X86Regs[EAX], DST);
@@ -374,14 +385,24 @@ static void EmitAssign(IRInst inst)
 	case X86_LSHU4:
 	case X86_RSHI4:
 	case X86_RSHU4:
+		AllocateReg(inst, 1);
+		if (SRC2->kind != SK_Constant) {
+			if (SRC2->reg != X86Regs[ECX]) {
+				SpillReg(X86Regs[ECX]);
+				Move(X86_MOVI4, X86Regs[ECX], SRC2);
+			}
+			SRC2 = X86ByteRegs[ECX];
+			UsedRegs = 1 << ECX;
+		}
 		goto put_code;
+
 	case X86_NEGI4:
 	case X86_COMPI4:
 		AllocateReg(inst, 1);
 		goto put_code;
 	default:
-		// AllocateReg(inst, 1);
-		// AllocateReg(inst, 2);
+		AllocateReg(inst, 1);
+		AllocateReg(inst, 2);
 put_code:
 		AllocateReg(inst, 0);
 		if (DST->reg != SRC1->reg)
@@ -391,6 +412,7 @@ put_code:
 		PutASMCode(code, inst->opds);
 		break;
 	}
+	ModifyVar(DST);
 }
 static void EmitCast(IRInst inst)
 {
@@ -659,6 +681,5 @@ void EmitFunction(FunctionSymbol fsym)
 
 void StoreVar(Symbol reg, Symbol v)
 {
-	printf("StoreVar\n");
 	Move(X86_MOVI4, v, reg);
 }
