@@ -648,6 +648,8 @@ static AstExpression CheckSubOP(AstExpression expr)
 		expr->ty = ty1;
 		return expr;
 	}
+	// int arr[10];
+	// int len = &arr[9] - &arr[1];
 	if (IsCompatiblePtr(ty1, ty2)) {
 		expr->ty = T(INT);
 		expr = PointerDifference(expr, ty1->bty->size);

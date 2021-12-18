@@ -282,7 +282,7 @@ static void EmitCall(IRInst inst)
 
 static void EmitAddress(IRInst inst)
 {
-	//assert(DST->kind == SK_Temp && SRC1->kind != SK_Temp);
+	assert(DST->kind == SK_Temp && SRC1->kind != SK_Temp);
 	AllocateReg(inst, 0);
 	PutASMCode(X86_ADDR, inst->opds);
 	ModifyVar(DST);
@@ -583,7 +583,9 @@ static void EmitClear(IRInst inst)
 	case 1:
 		Move(X86_MOVI1, DST, p);
 		break;
-
+	case 2:
+		Move(X86_MOVI2, DST, p);
+		break;
 	case 4:
 		Move(X86_MOVI4, DST, p);
 		break;

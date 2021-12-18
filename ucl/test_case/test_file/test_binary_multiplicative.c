@@ -11,4 +11,8 @@ void main()
     a = c / d;
     a = c * d;
     a = c % d;
+    a = c * 1;
+    a = c / 1;
+    a = c * 4;
+    a = c / 4;
 }
