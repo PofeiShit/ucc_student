@@ -105,7 +105,9 @@ TEMPLATE(X86_JLEF4,    "flds %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
 TEMPLATE(X86_JLEF8,    "fldl %2;fucompp;fnstsw %%ax;test $0x5, %%ah;jp %0")
 
 TEMPLATE(X86_EXTI1,     "movsbl %1, %0")
+TEMPLATE(X86_EXTU1,     "movzbl %1, %0")
 TEMPLATE(X86_EXTI2,     "movswl %1, %0")
+TEMPLATE(X86_EXTU2,     "movzwl %1, %0")
 TEMPLATE(X86_TRUI1,    "movb %%al, %0")
 TEMPLATE(X86_TRUI2,    "movw %%ax, %0")
 

@@ -447,7 +447,10 @@ static void EmitCast(IRInst inst)
 	switch(code) 
 	{
 	case X86_EXTI1:
+	case X86_EXTU1:
 	case X86_EXTI2:
+	case X86_EXTU2:
+		// I1, I2, U1, U2 => I4
 		AllocateReg(inst, 0);
 		if (DST->reg == NULL) {
 			DST = GetReg();

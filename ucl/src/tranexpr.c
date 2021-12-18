@@ -229,16 +229,22 @@ static Symbol TranslateCast(Type ty, Type sty, Symbol src)
 	if (scode == dcode) {
 		return src;
 	}
+	if (dcode == V)
+		return NULL;
 	switch(scode) 
 	{
 	case I1:
 		opcode = EXTI1; break;
 	case I2:
 		opcode = EXTI2; break;
+	case U1:
+		opcode = EXTU1; break;
+	case U2:
+		opcode = EXTU2; break;
 	case I4:
-		if (dcode <= I1) 
+		if (dcode <= U1) 
 			opcode = TRUI1;
-		else if (dcode <= I2)
+		else if (dcode <= U2)
 			opcode = TRUI2;
 		else {
 			Symbol temp = CreateTemp(ty);

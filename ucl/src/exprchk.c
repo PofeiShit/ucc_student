@@ -46,7 +46,7 @@ AstExpression Cast(Type ty, AstExpression expr)
 {
 	int scode = TypeCode(expr->ty);
 	int dcode = TypeCode(ty);
-	if (dcode == VOID)
+	if (dcode == V)
 		return CastExpression(ty, expr);
 	// 两个类型是否都是占用相同大小内存的整型
 	if (scode / 2 == dcode / 2) {
