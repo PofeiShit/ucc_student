@@ -1,3 +1,4 @@
+unsigned int c, d;
 void main()
 {
     int a;
@@ -7,4 +8,7 @@ void main()
     a = 3 * 3;
     a = 3 / 4;
     a = 3 % 4;
+    a = c / d;
+    a = c * d;
+    a = c % d;
 }

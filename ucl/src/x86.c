@@ -156,7 +156,20 @@ static void EmitEpilogue(int stksize)
 static void PushArgument(Symbol p, Type ty)
 {
 	int tcode = TypeCode(ty);
-	PutASMCode(X86_PUSH, &p);
+	if (tcode == B)
+	{
+		Symbol opds[3];
+
+		SpillReg(X86Regs[ESI]);
+		SpillReg(X86Regs[EDI]);
+		SpillReg(X86Regs[ECX]);
+		opds[0] = p;
+		opds[1] = IntConstant(ty->size);
+		opds[2] = IntConstant(ALIGN(ty->size, STACK_ALIGN_SIZE));
+		PutASMCode(X86_PUSHB, opds);
+	} else {
+		PutASMCode(X86_PUSH, &p);
+	}
 }
 /**
  * When a variable is modified, if it is not in a register, do nothing;
@@ -219,12 +232,13 @@ static void EmitCall(IRInst inst)
 	SpillReg(X86Regs[EAX]);
 	SpillReg(X86Regs[ECX]);
 	SpillReg(X86Regs[EDX]);
+	// IsNormalRecord: size of record must > 8
 	if (IsRecordType(rty) && IsNormalRecord(rty)) {
 		Symbol opds[2];
 		opds[0] = GetReg();
 		opds[1] = DST;
-		PutASMCode(X86_ADDR, opds);
-		PutASMCode(X86_PUSH, opds);
+		PutASMCode(X86_ADDR, opds); // DST = recv(返回值)，取返回值地址
+		PutASMCode(X86_PUSH, opds); // 返回值地址入栈
 		stksize += 4;
 		DST = NULL;
 	}
@@ -236,6 +250,7 @@ static void EmitCall(IRInst inst)
 		PutASMCode(X86_REDUCEF, &p);
 	}
 	if (DST != NULL) DST->ref--;
+	if (SRC1->kind != SK_Function) SRC1->ref--;
 	if(DST == NULL){
 		/**
 			We have set X87Top to NULL in EmitReturn()
@@ -246,6 +261,9 @@ static void EmitCall(IRInst inst)
 	case 1:
 		Move(X86_MOVI1, DST, X86ByteRegs[EAX]);
 		break;
+	case 2:
+		Move(X86_MOVI2, DST, X86WordRegs[EAX]);
+		break;
 	case 4:
 		AllocateReg(inst, 0);
 		if (DST->reg != X86Regs[EAX]) {
@@ -253,8 +271,12 @@ static void EmitCall(IRInst inst)
 		}
 		ModifyVar(DST);
 		break;
+	case 8:
+		Move(X86_MOVI4, DST, X86Regs[EAX]);
+        Move(X86_MOVI4, CreateOffset(T(INT), DST, 4), X86Regs[EDX]);
+		break;
 	default:
-		;
+		assert(0);
 	}
 }
 
@@ -332,7 +354,8 @@ static void EmitMove(IRInst inst)
 				}
 				else
 				{
-					Move(X86_MOVI4, DST, SRC1);
+					if (SRC1->reg != DST->reg)
+						Move(X86_MOVI4, DST, SRC1);
 				}
 			}
          	ModifyVar(DST);
@@ -510,8 +533,8 @@ static void EmitReturn(IRInst inst)
 	Type ty = inst->ty;
 	if (IsRecordType(ty) && IsNormalRecord(ty)) {
 		inst->opcode = IMOV;
-		SRC1 = DST;
-		DST = FSYM->params;
+		SRC1 = DST; // return dt2; SRC1=DST=dt2
+		DST = FSYM->params; // real return address is in fsym params.
 		EmitIndirectMove(inst);
 		return ;
 	}
@@ -520,13 +543,20 @@ static void EmitReturn(IRInst inst)
 	case 1:
 		Move(X86_MOVI1, X86ByteRegs[EAX], DST);
 		break;
+	case 2: // "movw %1, %0"
+    	Move(X86_MOVI2, X86WordRegs[EAX], DST);
+    	break;
 	case 4:
 		if (DST->reg != X86Regs[EAX]) {
 			Move(X86_MOVI4, X86Regs[EAX], DST);	
 		}
 		break;
+	case 8:
+		Move(X86_MOVI4, X86Regs[EAX], DST);
+    	Move(X86_MOVI4, X86Regs[EDX], CreateOffset(T(INT), DST, 4));
+    	break;
 	default:
-		;
+		assert(0);
 	}
 }
 
